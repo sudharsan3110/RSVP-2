@@ -1,8 +1,10 @@
+import config from "@/config/config";
+import logger from "@/utils/logger";
 import { createServer } from "./server";
 
-const port = process.env.PORT || 5000;
+const port = config.PORT;
 const server = createServer();
 
 server.listen(port, () => {
-  console.log(`api running on ${port}`);
+  logger.info(`Api server running on ${port}`);
 });
