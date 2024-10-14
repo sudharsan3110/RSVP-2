@@ -1,12 +1,12 @@
-import Image from "next/image";
-import Logo from "./Logo";
-import { cn } from "@/lib/utils";
-import Container from "./Container";
-import { buttonVariants } from "../ui/button";
+import Image from 'next/image';
+import Logo from './Logo';
+import { cn } from '@/lib/utils';
+import Container from './Container';
+import { buttonVariants } from '../ui/button';
 
 const Footer = ({ className }: PropsWithClassName) => {
   return (
-    <footer data-testid="footer" className={cn("footer border-t", className)}>
+    <footer data-testid="footer" className={cn('footer border-t', className)}>
       <div className="bg-black py-6">
         <Container className="flex flex-col justify-between sm:flex-row">
           <div>
@@ -15,7 +15,7 @@ const Footer = ({ className }: PropsWithClassName) => {
               <p className="font-semibold leading-none">
                 Powered By
                 <a href="https://team.shiksha" className="hover:underline">
-                  {" "}
+                  {' '}
                   Team.Shiksha
                 </a>
               </p>
@@ -36,18 +36,13 @@ const Footer = ({ className }: PropsWithClassName) => {
                 <a
                   href="https://github.com/TeamShiksha"
                   target="_blank"
-                  className={cn(
-                    buttonVariants({ variant: "link", size: "sm" }),
-                    "px-0",
-                  )}
+                  className={cn(buttonVariants({ variant: 'link', size: 'sm' }), 'px-0')}
                   data-testid="github-link"
                 >
                   Github
                 </a>
               </li>
-              <li className="text-sm">
-                © 2023 Team Shiksha. All rights reserved.
-              </li>
+              <li className="text-sm">© 2023 Team Shiksha. All rights reserved.</li>
             </ul>
           </div>
         </Container>

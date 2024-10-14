@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,12 +6,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "../ui/button";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '../ui/button';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import {
   Form,
   FormControl,
@@ -19,10 +19,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import Image from "next/image";
-import { Icons } from "../common/Icon";
-import { useSignInMutation } from "@/lib/react-query/auth";
+} from '@/components/ui/form';
+import Image from 'next/image';
+import { Icons } from '../common/Icon';
+import { useSignInMutation } from '@/lib/react-query/auth';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -30,13 +30,11 @@ const formSchema = z.object({
 
 interface SigninDialogProps {
   children: React.ReactNode;
-  variant: "signin" | "signup";
+  variant: 'signin' | 'signup';
 }
 
 const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
-  const [isEmailSent, setIsEmailSent] = useState<null | { email: string }>(
-    null,
-  );
+  const [isEmailSent, setIsEmailSent] = useState<null | { email: string }>(null);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { mutate } = useSignInMutation();
@@ -44,14 +42,14 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      email: '',
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === "email") {
+      if (name === 'email') {
         setIsEmailValid(!formSchema.safeParse({ email: value.email }).success);
       }
     });
@@ -62,12 +60,11 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
     mutate(values.email);
   }
 
-  const title =
-    variant === "signin" ? "Sign In to Your Account" : "Sign Up for an Account";
+  const title = variant === 'signin' ? 'Sign In to Your Account' : 'Sign Up for an Account';
   const description =
-    variant === "signin"
-      ? "Please provide the email so we can send the magic link"
-      : "Create an account to get started";
+    variant === 'signin'
+      ? 'Please provide the email so we can send the magic link'
+      : 'Create an account to get started';
 
   return (
     <Dialog
@@ -83,18 +80,13 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
         {!isEmailSent && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-start text-2xl font-semibold">
-                {title}
-              </DialogTitle>
+              <DialogTitle className="text-start text-2xl font-semibold">{title}</DialogTitle>
               <DialogDescription className="text-start text-sm font-medium">
                 {description}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="email"
@@ -104,11 +96,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
                         Email Address
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          className="rounded-[6px] bg-[#262729]"
-                          id="email"
-                        />
+                        <Input {...field} className="rounded-[6px] bg-[#262729]" id="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -139,7 +127,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
               priority
               height={186}
               width={216}
-              src={"/images/verify-email.svg"}
+              src={'/images/verify-email.svg'}
               alt="verify-email icon"
             />
             <p className="mt-6 text-3xl font-semibold">Check your email!</p>

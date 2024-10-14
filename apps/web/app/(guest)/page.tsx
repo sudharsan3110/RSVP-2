@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import Container from "@/components/common/Container";
-import PopularSection from "@/components/home/PopularSection";
-import { Button } from "@/components/ui/button";
-import { useVerifySignin } from "@/lib/react-query/auth";
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import Container from '@/components/common/Container';
+import PopularSection from '@/components/home/PopularSection';
+import { Button } from '@/components/ui/button';
+import { useVerifySignin } from '@/lib/react-query/auth';
+import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 function Home() {
   const searchParams = useSearchParams();
   const { mutate } = useVerifySignin();
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const token = searchParams.get('token');
     if (token) {
       mutate(token);
     }
@@ -29,9 +29,9 @@ function Home() {
           and Sell Tickets Easily.
         </h1>
         <Button
-          variant={"gradient"}
+          variant={'gradient'}
           className="text-md relative z-10 h-auto py-3 md:px-9 md:py-4 md:text-lg"
-          size={"lg"}
+          size={'lg'}
         >
           Host a Event
         </Button>

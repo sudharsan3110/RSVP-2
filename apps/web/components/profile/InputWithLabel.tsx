@@ -1,6 +1,6 @@
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { ChangeEventHandler } from "react";
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { ChangeEventHandler } from 'react';
 
 interface InputWithLabelProps {
   label: string;
@@ -10,13 +10,7 @@ interface InputWithLabelProps {
   onChange?: ChangeEventHandler<HTMLInputElement>;
 }
 
-const InputWithLabel = ({
-  label,
-  id,
-  type,
-  value,
-  onChange,
-}: InputWithLabelProps) => (
+const InputWithLabel = ({ label, id, type, value, onChange }: InputWithLabelProps) => (
   <div className="flex flex-col gap-1.5">
     <Label htmlFor={id} className="text-sm text-white">
       {label}

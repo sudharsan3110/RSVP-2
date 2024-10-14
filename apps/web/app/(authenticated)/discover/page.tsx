@@ -1,28 +1,24 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Container from "@/components/common/Container";
+import React, { useState } from 'react';
+import Container from '@/components/common/Container';
 import {
   MagnifyingGlassIcon,
   ChevronDownIcon,
   CheckIcon,
   FunnelIcon,
   XMarkIcon,
-} from "@heroicons/react/24/outline";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+} from '@heroicons/react/24/outline';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from '@/components/ui/command';
 import {
   Select,
   SelectContent,
@@ -30,14 +26,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import Tags from "@/components/tags/Tags";
-import NoSearchResults from "@/components/noSearchResults/NoSearchResults ";
-import { locationName } from "@/utils/constants";
+} from '@/components/ui/select';
+import Tags from '@/components/tags/Tags';
+import NoSearchResults from '@/components/noSearchResults/NoSearchResults ';
+import { locationName } from '@/utils/constants';
 
 const DiscoverEvents = () => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(true);
 
   return (
@@ -62,11 +58,7 @@ const DiscoverEvents = () => {
               </div>
 
               <div className="md:hidden">
-                <Button
-                  size="icon"
-                  variant={!isFilterOpen ? "destructive" : "ghost"}
-                  asChild
-                >
+                <Button size="icon" variant={!isFilterOpen ? 'destructive' : 'ghost'} asChild>
                   {!isFilterOpen ? (
                     <XMarkIcon
                       data-testid="close"
@@ -86,10 +78,10 @@ const DiscoverEvents = () => {
 
             <div
               className={cn(
-                "mt-6 md:mt-0",
+                'mt-6 md:mt-0',
                 isFilterOpen
-                  ? "hidden gap-6 sm:flex-row md:flex md:flex-row"
-                  : "flex flex-col items-center justify-center gap-6 md:hidden",
+                  ? 'hidden gap-6 sm:flex-row md:flex md:flex-row'
+                  : 'flex flex-col items-center justify-center gap-6 md:hidden'
               )}
             >
               <Popover open={open} onOpenChange={setOpen}>
@@ -102,10 +94,8 @@ const DiscoverEvents = () => {
                     data-testid="locationButton"
                   >
                     {value
-                      ? locationName.find(
-                          (location) => location.value === value,
-                        )?.label
-                      : "Location"}
+                      ? locationName.find((location) => location.value === value)?.label
+                      : 'Location'}
                     <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -129,19 +119,15 @@ const DiscoverEvents = () => {
                             key={location.value}
                             value={location.value}
                             onSelect={(currentValue) => {
-                              setValue(
-                                currentValue === value ? "" : currentValue,
-                              );
+                              setValue(currentValue === value ? '' : currentValue);
                               setOpen(false);
                             }}
                             className="cursor-pointer"
                           >
                             <CheckIcon
                               className={cn(
-                                "mr-2 h-4 w-4",
-                                value === location.value
-                                  ? "opacity-100"
-                                  : "opacity-0",
+                                'mr-2 h-4 w-4',
+                                value === location.value ? 'opacity-100' : 'opacity-0'
                               )}
                             />
                             {location.label}
@@ -162,22 +148,13 @@ const DiscoverEvents = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem
-                      className="cursor-pointer hover:rounded-[8px]"
-                      value="date"
-                    >
+                    <SelectItem className="cursor-pointer hover:rounded-[8px]" value="date">
                       Date
                     </SelectItem>
-                    <SelectItem
-                      className="cursor-pointer hover:rounded-[8px]"
-                      value="attendees"
-                    >
+                    <SelectItem className="cursor-pointer hover:rounded-[8px]" value="attendees">
                       Attendees
                     </SelectItem>
-                    <SelectItem
-                      className="cursor-pointer hover:rounded-[8px]"
-                      value="price"
-                    >
+                    <SelectItem className="cursor-pointer hover:rounded-[8px]" value="price">
                       Price
                     </SelectItem>
                   </SelectGroup>

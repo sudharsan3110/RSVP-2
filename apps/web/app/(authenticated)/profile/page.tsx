@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Download, Plus } from "lucide-react";
-import InputWithLabel from "@/components/profile/InputWithLabel";
-import ProfileSection from "@/components/profile/ProfileSection";
-import SocialMediaInput from "@/components/profile/SocialMediaInput";
-import { ChangeEvent, useState } from "react";
-import ProfilePictureEditPopover from "@/components/profile/ProfilePictureEditPopover";
-import Container from "@/components/common/Container";
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Download, Plus } from 'lucide-react';
+import InputWithLabel from '@/components/profile/InputWithLabel';
+import ProfileSection from '@/components/profile/ProfileSection';
+import SocialMediaInput from '@/components/profile/SocialMediaInput';
+import { ChangeEvent, useState } from 'react';
+import ProfilePictureEditPopover from '@/components/profile/ProfilePictureEditPopover';
+import Container from '@/components/common/Container';
 
 const ProfilePage = () => {
-  const [emails, setEmails] = useState<string[]>([""]);
-  const [bio, setBio] = useState<string>("");
+  const [emails, setEmails] = useState<string[]>(['']);
+  const [bio, setBio] = useState<string>('');
   const bioCharactersLimit = 100;
   const [profilePictureUrl, setProfilePictureUrl] = useState(
-    "/images/user-avatar-short-hair-beard.svg",
+    '/images/user-avatar-short-hair-beard.svg'
   );
   // const { data } = useMe();
 
@@ -28,7 +28,7 @@ const ProfilePage = () => {
   };
 
   const addSecondEmail = () => {
-    setEmails([...emails, ""]);
+    setEmails([...emails, '']);
   };
 
   const updateEmail = (index: number, value: string) => {
@@ -41,15 +41,10 @@ const ProfilePage = () => {
     <Container className="container-main py-8">
       <section className="flex flex-col gap-1">
         <h1 className="text-2xl/[36px] font-semibold">Profile</h1>
-        <p className="font-medium text-secondary">
-          Manage your profile settings
-        </p>
+        <p className="font-medium text-secondary">Manage your profile settings</p>
       </section>
       <Separator className="my-[42px] bg-separator" />
-      <ProfileSection
-        title="Public profile"
-        description="This will be displayed on your profile."
-      >
+      <ProfileSection title="Public profile" description="This will be displayed on your profile.">
         <div className="flex items-end">
           <Image
             width={80}
@@ -116,7 +111,7 @@ const ProfilePage = () => {
         {emails.map((email, index) => (
           <InputWithLabel
             key={index}
-            label={index === 0 ? "Primary email" : "Secondary email"}
+            label={index === 0 ? 'Primary email' : 'Secondary email'}
             id={`email-${index}`}
             type="email"
             value={email}
@@ -142,10 +137,7 @@ const ProfilePage = () => {
         )}
       </ProfileSection>
       <Separator className="my-[42px] bg-separator" />
-      <ProfileSection
-        title="Phone number"
-        description="To stay in touch with our team."
-      >
+      <ProfileSection title="Phone number" description="To stay in touch with our team.">
         <InputWithLabel label="Phone number" id="phone-number" type="text" />
         <Button
           data-testid="phone-save-button"
@@ -160,9 +152,8 @@ const ProfilePage = () => {
           Download your personal data
         </h2>
         <p className="mb-6 mt-1 text-sm text-secondary">
-          We believe in transparency and giving you full control over your
-          personal information. That&apos;s why we offer the option to download
-          your data directly from our app.
+          We believe in transparency and giving you full control over your personal information.
+          That&apos;s why we offer the option to download your data directly from our app.
         </p>
         <Button className="w-fit whitespace-nowrap rounded-[6px] text-sm/[24px]">
           <Download className="mr-2.5" size={20} /> Download
@@ -174,8 +165,7 @@ const ProfilePage = () => {
           Delete my account
         </h2>
         <p className="mb-6 mt-1 text-sm text-secondary">
-          If you no longer wish to use RSVP, you can permanently delete your
-          account.
+          If you no longer wish to use RSVP, you can permanently delete your account.
         </p>
         <Button
           variant="destructive"

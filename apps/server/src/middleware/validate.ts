@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { z, ZodSchema } from "zod";
+import { Request, Response, NextFunction } from 'express';
+import { z, ZodSchema } from 'zod';
 
 export const validate = (schema: {
   body?: ZodSchema<any>;
@@ -13,7 +13,7 @@ export const validate = (schema: {
     if (!result.success) {
       const formattedErrors = result.error.errors.map((err) => ({
         message: err.message,
-        path: err.path.join("."),
+        path: err.path.join('.'),
       }));
 
       return res.status(400).json({

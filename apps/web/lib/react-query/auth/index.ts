@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { IUser } from "@/types/user";
-import { useMutation, useQuery, UseQueryResult } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { IUser } from '@/types/user';
+import { useMutation, useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface VerifySignInResponse {
   success: boolean;
@@ -17,8 +17,8 @@ export const useSignInMutation = () => {
       toast(data);
     },
     onError: (error) => {
-      toast("Something went wrong");
-      console.error("Login verification error:", error);
+      toast('Something went wrong');
+      console.error('Login verification error:', error);
     },
   });
 };
@@ -29,9 +29,9 @@ export const useVerifySignin = () => {
     mutationFn: verifySignIn,
     onSuccess: (data) => {
       if (data.user.isCompleted) {
-        router.push("/events");
+        router.push('/events');
       } else {
-        router.push("/profile");
+        router.push('/profile');
       }
     },
     onError: ({ message }) => {
@@ -42,51 +42,51 @@ export const useVerifySignin = () => {
 
 export const useMe = (): UseQueryResult<IUser, any> => {
   return useQuery({
-    queryKey: ["me"],
+    queryKey: ['me'],
     queryFn: fetchMe,
     retry: 0,
   });
 };
 
 const verifySignIn = async (token: string) => {
-  const response = await fetch("/api/auth/verify-signin", {
-    method: "POST",
+  const response = await fetch('/api/auth/verify-signin', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ token }),
   });
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || "Login request failed");
+    throw new Error(data.message || 'Login request failed');
   }
 
   return data;
 };
 
 const signInRequest = async (email: string) => {
-  const response = await fetch("/api/auth/signin", {
-    method: "POST",
+  const response = await fetch('/api/auth/signin', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email }),
   });
 
   if (!response.ok) {
-    throw new Error("Login request failed");
+    throw new Error('Login request failed');
   }
 
   return response.json();
 };
 
 async function fetchMe(): Promise<IUser> {
-  const response = await fetch("/api/auth/me", {
-    method: "GET",
+  const response = await fetch('/api/auth/me', {
+    method: 'GET',
   });
 
   if (!response.ok) {
-    throw new Error("Network response was not ok");
+    throw new Error('Network response was not ok');
   }
 
   return response.json();

@@ -1,10 +1,10 @@
-import dotenv from "dotenv";
-import { z } from "zod";
+import dotenv from 'dotenv';
+import { z } from 'zod';
 
 dotenv.config();
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["production", "development", "test"]),
+  NODE_ENV: z.enum(['production', 'development', 'test']),
   DATABASE_URL: z.string().url(),
   EMAIL_FROM: z.string().email(),
   EMAIL_PASSWORD: z.string(),
@@ -16,8 +16,8 @@ const envSchema = z.object({
 const envVars = envSchema.safeParse(process.env);
 
 if (!envVars.success) {
-  console.error("Config validation error", envVars.error.format());
-  throw new Error("Invalid environment variables");
+  console.error('Config validation error', envVars.error.format());
+  throw new Error('Invalid environment variables');
 }
 
 const config = {

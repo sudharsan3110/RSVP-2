@@ -1,21 +1,15 @@
-"use client";
+'use client';
 
-import { Control, FieldPath, FieldValues } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Control, FieldPath, FieldValues } from 'react-hook-form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 function FormGroupSelect<
   TFieldValues extends FieldValues = FieldValues,
@@ -55,20 +49,17 @@ function FormGroupSelect<
           >
             <FormControl>
               <SelectTrigger
-                className={cn("rounded-[6px] bg-dark-900", className)}
+                className={cn('rounded-[6px] bg-dark-900', className)}
                 iconClassName="opacity-100"
               >
-                {options.find((option) => option.value == field.value)
-                  ?.label ?? <SelectValue placeholder={placeholder} />}
+                {options.find((option) => option.value == field.value)?.label ?? (
+                  <SelectValue placeholder={placeholder} />
+                )}
               </SelectTrigger>
             </FormControl>
             <SelectContent className="rounded-[6px] bg-dark-900">
               {options.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className="rounded-[6px]"
-                >
+                <SelectItem key={option.value} value={option.value} className="rounded-[6px]">
                   {option.label}
                 </SelectItem>
               ))}

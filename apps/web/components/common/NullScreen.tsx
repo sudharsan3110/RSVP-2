@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import Container from "@/components/common/Container";
-import Link from "next/link";
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import Container from '@/components/common/Container';
+import Link from 'next/link';
 
 const NullScreen = () => {
   return (

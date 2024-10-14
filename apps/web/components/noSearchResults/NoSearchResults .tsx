@@ -1,15 +1,11 @@
-import React from "react";
-import { Button } from "../ui/button";
-import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
+import React from 'react';
+import { Button } from '../ui/button';
+import { MagnifyingGlassIcon } from '@heroicons/react/16/solid';
 
 const NoSearchResults = () => {
   return (
     <>
-      <Button
-        className="mb-3 rounded-[15px] border-2 hover:bg-none"
-        variant={"ghost"}
-        asChild
-      >
+      <Button className="mb-3 rounded-[15px] border-2 hover:bg-none" variant={'ghost'} asChild>
         <MagnifyingGlassIcon />
       </Button>
       <h1 className="font-semibold text-white">No Events found</h1>

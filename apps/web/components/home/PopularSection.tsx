@@ -1,13 +1,10 @@
-import Container from "@/components/common/Container";
-import EventCard from "@/components/common/EventCard";
-import { Button } from "@/components/ui/button";
+import Container from '@/components/common/Container';
+import EventCard from '@/components/common/EventCard';
+import { Button } from '@/components/ui/button';
 
 const PopularSection = () => {
   return (
-    <Container
-      className="relative z-10 space-y-6 md:space-y-12"
-      data-testid="popular-section"
-    >
+    <Container className="relative z-10 space-y-6 md:space-y-12" data-testid="popular-section">
       <header className="flex items-center justify-between">
         <h2
           className="text-xl font-bold tracking-wide md:text-[28px]"
@@ -15,11 +12,7 @@ const PopularSection = () => {
         >
           Popular Events
         </h2>
-        <Button
-          variant="link"
-          className="mt hidden md:block"
-          data-testid="see-all-events-desktop"
-        >
+        <Button variant="link" className="mt hidden md:block" data-testid="see-all-events-desktop">
           See all events
         </Button>
       </header>

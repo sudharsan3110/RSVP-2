@@ -1,4 +1,4 @@
-import NullScreen from "@/components/common/NullScreen";
+import NullScreen from '@/components/common/NullScreen';
 
 const Events = () => {
   return <NullScreen />;

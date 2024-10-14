@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Dialog,
@@ -7,12 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import React, { Dispatch, SetStateAction, useState } from "react";
-import Image from "next/image";
-import { userAvatarOptions } from "@/utils/constants";
-import { Pencil } from "lucide-react";
-import { Button } from "../ui/button";
+} from '@/components/ui/dialog';
+import React, { Dispatch, SetStateAction, useState } from 'react';
+import Image from 'next/image';
+import { userAvatarOptions } from '@/utils/constants';
+import { Pencil } from 'lucide-react';
+import { Button } from '../ui/button';
 
 const ProfilePictureEditPopover = ({
   profilePictureUrl,
@@ -33,9 +33,7 @@ const ProfilePictureEditPopover = ({
       </DialogTrigger>
       <DialogContent className="w-11/12 rounded-[12px]">
         <DialogHeader>
-          <DialogTitle className="mt-4 text-start text-2xl font-semibold">
-            Edit Profile
-          </DialogTitle>
+          <DialogTitle className="mt-4 text-start text-2xl font-semibold">Edit Profile</DialogTitle>
         </DialogHeader>
         <DialogDescription>Choose a profile icon</DialogDescription>
         <div className="my-4 grid grid-cols-3 gap-x-4 gap-y-6 md:grid-cols-4 md:gap-x-10">
@@ -46,7 +44,7 @@ const ProfilePictureEditPopover = ({
               width={120}
               height={120}
               onClick={() => setSelectedPicture(src)}
-              className={`cursor-pointer rounded-full bg-white ${selectedPicture === src ? "border-[4px] border-primary" : ""}`}
+              className={`cursor-pointer rounded-full bg-white ${selectedPicture === src ? 'border-[4px] border-primary' : ''}`}
               src={src}
               alt="Profile picture option"
               data-testid={`profile-picture-option${index}`}

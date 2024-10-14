@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Control, FieldPath, FieldValues } from "react-hook-form";
+import { Control, FieldPath, FieldValues } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -8,14 +8,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Popover } from "@radix-ui/react-popover";
-import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import dayjs from "dayjs";
+} from '@/components/ui/form';
+import { Popover } from '@radix-ui/react-popover';
+import { PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import dayjs from 'dayjs';
 
 function FormDatePicker<
   TFieldValues extends FieldValues = FieldValues,
@@ -48,21 +48,15 @@ function FormDatePicker<
             <PopoverTrigger asChild>
               <FormControl>
                 <Button
-                  variant={"outline"}
+                  variant={'outline'}
                   className={cn(
-                    "focus:ring-offset-0.5 rounded-[6px] border-dark-500 bg-dark-900 pl-3 text-left font-normal focus:outline-none focus:ring-2 focus:ring-primary/80",
-                    !field.value && "text-white",
-                    className,
+                    'focus:ring-offset-0.5 rounded-[6px] border-dark-500 bg-dark-900 pl-3 text-left font-normal focus:outline-none focus:ring-2 focus:ring-primary/80',
+                    !field.value && 'text-white',
+                    className
                   )}
                 >
-                  {field.value ? (
-                    dayjs(field.value).format("DD MMM YYYY")
-                  ) : (
-                    <span>Date</span>
-                  )}
-                  <CalendarIcon
-                    className={cn("ml-auto h-4 w-4 opacity-50", iconClassName)}
-                  />
+                  {field.value ? dayjs(field.value).format('DD MMM YYYY') : <span>Date</span>}
+                  <CalendarIcon className={cn('ml-auto h-4 w-4 opacity-50', iconClassName)} />
                 </Button>
               </FormControl>
             </PopoverTrigger>

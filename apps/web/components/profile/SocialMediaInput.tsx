@@ -1,6 +1,6 @@
-import React from "react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import React from 'react';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 
 interface SocialMediaInputProps {
   platform: string;
@@ -13,9 +13,7 @@ const SocialMediaInput = ({ platform, prefix }: SocialMediaInputProps) => (
       {platform}
     </Label>
     <div className="flex">
-      <span className="block rounded-l-[6px] bg-dark-500 px-[9px] py-2">
-        {prefix}
-      </span>
+      <span className="block rounded-l-[6px] bg-dark-500 px-[9px] py-2">{prefix}</span>
       <Input className="rounded-l-none rounded-r-[6px] border border-solid border-dark-500 bg-dark-900" />
     </div>
   </div>

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React from "react";
-import Link from "next/link";
+import React from 'react';
+import Link from 'next/link';
 import {
   TicketIcon,
   CalendarDateRangeIcon,
   UserIcon,
   ArrowRightEndOnRectangleIcon,
-} from "@heroicons/react/24/solid";
-import { Button } from "../../ui/button";
-import Logo from "../Logo";
+} from '@heroicons/react/24/solid';
+import { Button } from '../../ui/button';
+import Logo from '../Logo';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { Avatar, AvatarImage } from "../../ui/avatar";
-import { AvatarFallback } from "@radix-ui/react-avatar";
-import Container from "../Container";
-import { Icons } from "../Icon";
-import useScroll from "@/hooks/useScroll";
+} from '../../ui/dropdown-menu';
+import { Avatar, AvatarImage } from '../../ui/avatar';
+import { AvatarFallback } from '@radix-ui/react-avatar';
+import Container from '../Container';
+import { Icons } from '../Icon';
+import useScroll from '@/hooks/useScroll';
 
 const Autheticated = () => {
   const isScrolled = useScroll();
@@ -30,26 +30,26 @@ const Autheticated = () => {
   return (
     <>
       <nav
-        className={`sticky top-0 z-30 h-20 w-full py-5 ${isScrolled ? "border-b bg-background" : ""}`}
+        className={`sticky top-0 z-30 h-20 w-full py-5 ${isScrolled ? 'border-b bg-background' : ''}`}
       >
         <Container className="mx-auto flex justify-between gap-8 lg:gap-12">
           <Logo />
           <div className="flex flex-1">
             <div className="hidden gap-3 md:flex">
               <Link href="/events">
-                <Button className="text-md text-white" variant={"ghost"}>
+                <Button className="text-md text-white" variant={'ghost'}>
                   <TicketIcon className="mr-2 h-5 w-5 text-white" />
                   Events
                 </Button>
               </Link>
               <Link href="/planned">
-                <Button className="text-md text-white" variant={"ghost"}>
+                <Button className="text-md text-white" variant={'ghost'}>
                   <CalendarDateRangeIcon className="mr-2 h-5 w-5 text-white" />
                   Planned
                 </Button>
               </Link>
               <Link href="/discover">
-                <Button className="text-md text-white" variant={"ghost"}>
+                <Button className="text-md text-white" variant={'ghost'}>
                   <Icons.discover />
                   Discover
                 </Button>
@@ -60,10 +60,7 @@ const Autheticated = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger data-testid="profile-dropdown-button">
                   <Avatar>
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="profile image"
-                    />
+                    <AvatarImage src="https://github.com/shadcn.png" alt="profile image" />
                     <AvatarFallback>P</AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
@@ -73,9 +70,7 @@ const Autheticated = () => {
                   alignOffset={-5}
                   sideOffset={5}
                 >
-                  <DropdownMenuLabel className="text-base">
-                    My Account
-                  </DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-base">My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="cursor-pointer rounded-xl">
                     <UserIcon className="mr-3 h-6 w-6" />
@@ -97,34 +92,28 @@ const Autheticated = () => {
         <Link href="/events">
           <Button
             className="text-md group text-white hover:bg-primary active:bg-primary"
-            variant={"ghost"}
+            variant={'ghost'}
           >
             <TicketIcon className="mr-2 h-5 w-5 text-white" />
-            <span className="w-0 overflow-hidden group-hover:w-fit">
-              Events
-            </span>
+            <span className="w-0 overflow-hidden group-hover:w-fit">Events</span>
           </Button>
         </Link>
         <Link href="/planned">
           <Button
             className="text-md group text-white hover:bg-primary active:bg-primary"
-            variant={"ghost"}
+            variant={'ghost'}
           >
             <CalendarDateRangeIcon className="mr-2 h-5 w-5 text-white" />
-            <span className="w-0 overflow-hidden group-hover:w-fit">
-              Planned
-            </span>
+            <span className="w-0 overflow-hidden group-hover:w-fit">Planned</span>
           </Button>
         </Link>
         <Link href="">
           <Button
             className="text-md group text-white hover:bg-primary active:bg-primary"
-            variant={"ghost"}
+            variant={'ghost'}
           >
             <Icons.discover />
-            <span className="w-0 overflow-hidden group-hover:w-fit">
-              Discover
-            </span>
+            <span className="w-0 overflow-hidden group-hover:w-fit">Discover</span>
           </Button>
         </Link>
       </div>

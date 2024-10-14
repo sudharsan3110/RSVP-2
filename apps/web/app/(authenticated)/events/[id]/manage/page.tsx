@@ -1,9 +1,9 @@
-import Container from "@/components/common/Container";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRightIcon } from "@heroicons/react/24/solid";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import OverviewSection from "@/components/manage-event/overview-section";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Container from '@/components/common/Container';
+import { Button } from '@/components/ui/button';
+import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import OverviewSection from '@/components/manage-event/overview-section';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const ManageEventPage = () => {
   return (

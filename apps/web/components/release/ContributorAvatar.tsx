@@ -1,12 +1,7 @@
-"use client";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+'use client';
+import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Props = {
   githubUsername: string;
@@ -23,9 +18,7 @@ const ContributorAvatar = ({ githubUsername }: Props) => {
                 src={`https://github.com/${githubUsername}.png`}
                 alt="contributor-avatar"
               />
-              <AvatarFallback>
-                {githubUsername.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback>{githubUsername.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </Link>
         </TooltipTrigger>

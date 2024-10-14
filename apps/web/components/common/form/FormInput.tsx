@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import { Control, FieldPath, FieldValues } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Control, FieldPath, FieldValues } from 'react-hook-form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 function FormInput<
   TFieldValues extends FieldValues = FieldValues,
@@ -36,17 +30,10 @@ function FormInput<
       name={name}
       render={({ field }) => (
         <FormItem className={className}>
-          {label && (
-            <FormLabel className={cn("text-white", lableClassName)}>
-              {label}
-            </FormLabel>
-          )}
+          {label && <FormLabel className={cn('text-white', lableClassName)}>{label}</FormLabel>}
           <FormControl>
             <Input
-              className={cn(
-                "rounded-[6px] bg-dark-900 text-white",
-                inputClassName,
-              )}
+              className={cn('rounded-[6px] bg-dark-900 text-white', inputClassName)}
               {...props}
               {...field}
             />

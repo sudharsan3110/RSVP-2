@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
-import { Bars2Icon } from "@heroicons/react/24/solid";
-import { Button } from "../../ui/button";
-import Logo from "../Logo";
-import Container from "../Container";
-import useScroll from "@/hooks/useScroll";
-import SigninDialog from "@/components/auth/SigninDialog";
+import Link from 'next/link';
+import { useState } from 'react';
+import { Bars2Icon } from '@heroicons/react/24/solid';
+import { Button } from '../../ui/button';
+import Logo from '../Logo';
+import Container from '../Container';
+import useScroll from '@/hooks/useScroll';
+import SigninDialog from '@/components/auth/SigninDialog';
 
 const navItemsWithoutSignup = [
-  { name: "Find Events", href: "/search" },
-  { name: "Help Center", href: "/help" },
+  { name: 'Find Events', href: '/search' },
+  { name: 'Help Center', href: '/help' },
 ];
 
 const Guest = () => {
@@ -20,30 +20,25 @@ const Guest = () => {
 
   return (
     <>
-      <nav
-        className={`fixed z-30 h-20 w-full py-5 ${isScrolled ? "border-b bg-background" : ""}`}
-      >
+      <nav className={`fixed z-30 h-20 w-full py-5 ${isScrolled ? 'border-b bg-background' : ''}`}>
         <Container className="mx-auto flex justify-between">
           <Logo />
           <div className="hidden gap-14 md:flex">
             {navItemsWithoutSignup.map((item) => (
               <Link href={item.href} key={item.name}>
-                <Button className="text-md text-white" variant={"link"}>
+                <Button className="text-md text-white" variant={'link'}>
                   {item.name}
                 </Button>
               </Link>
             ))}
             <div className="space-x-3">
               <SigninDialog variant="signin">
-                <Button
-                  variant={"outline"}
-                  className="text-md border-[#AC6AFF]"
-                >
+                <Button variant={'outline'} className="text-md border-[#AC6AFF]">
                   Sign In
                 </Button>
               </SigninDialog>
               <SigninDialog variant="signup">
-                <Button variant={"secondary"} className="text-md text-black">
+                <Button variant={'secondary'} className="text-md text-black">
                   Sign up
                 </Button>
               </SigninDialog>
@@ -68,7 +63,7 @@ const Guest = () => {
                     <Link href={item.href} key={item.name}>
                       <Button
                         className="text-md text-white"
-                        variant={"link"}
+                        variant={'link'}
                         data-testid={`${item.name} hamburgerIcon`}
                       >
                         {item.name}
@@ -78,7 +73,7 @@ const Guest = () => {
 
                   <SigninDialog variant="signin">
                     <Button
-                      variant={"outline"}
+                      variant={'outline'}
                       className="text-md"
                       data-testid={`Sign In hamburgerIcon`}
                     >
@@ -87,7 +82,7 @@ const Guest = () => {
                   </SigninDialog>
                   <SigninDialog variant="signup">
                     <Button
-                      variant={"secondary"}
+                      variant={'secondary'}
                       className="text-md text-black"
                       data-testid={`Sign up hamburgerIcon`}
                     >

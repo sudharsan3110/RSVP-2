@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { transporter } from "@/services/email";
-import { render } from "@react-email/components";
-import { ReactElement } from "react";
-import { EMAIL_IMAGE_FILES } from "@/utils/constants";
+import { transporter } from '@/services/email';
+import { render } from '@react-email/components';
+import { ReactElement } from 'react';
+import { EMAIL_IMAGE_FILES } from '@/utils/constants';
 
 export async function sendEmail({
   html,

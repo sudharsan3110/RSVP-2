@@ -1,6 +1,6 @@
-import Footer from "@/components/common/Footer";
-import Autheticated from "@/components/common/header/Autheticated";
-import React from "react";
+import Footer from '@/components/common/Footer';
+import Autheticated from '@/components/common/header/Autheticated';
+import React from 'react';
 
 const AuthenticatedLayout = ({
   children,

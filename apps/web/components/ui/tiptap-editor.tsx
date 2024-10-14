@@ -1,7 +1,7 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { type Editor as EditorType } from "@tiptap/react";
-import { Toggle } from "@/components/ui/toggle";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { type Editor as EditorType } from '@tiptap/react';
+import { Toggle } from '@/components/ui/toggle';
 import {
   Bold,
   Strikethrough,
@@ -15,11 +15,11 @@ import {
   Minus,
   Image as ImageIcon,
   Youtube as YoutubeIcon,
-} from "lucide-react";
-import clsx from "clsx";
+} from 'lucide-react';
+import clsx from 'clsx';
 
 const Editor = ({ editor }: { editor: EditorType | null }) => {
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState('');
 
   if (!editor) return null;
 
@@ -28,10 +28,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Bold */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("bold")}
+        pressed={editor.isActive('bold')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("bold") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('bold') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.chain().focus().toggleBold().run()}
       >
@@ -41,10 +41,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Italic */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("italic")}
+        pressed={editor.isActive('italic')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("italic") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('italic') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.chain().focus().toggleItalic().run()}
       >
@@ -54,12 +54,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Strikethrough */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("strike")}
+        pressed={editor.isActive('strike')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("strikethrough")
-            ? "bg-primary text-primary-foreground"
-            : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('strikethrough') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.chain().focus().toggleStrike().run()}
       >
@@ -69,14 +67,12 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Heading 2 */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("heading", { level: 2 })}
+        pressed={editor.isActive('heading', { level: 2 })}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("h2") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('h2') ? 'bg-primary text-primary-foreground' : ''
         )}
-        onPressedChange={() =>
-          editor.chain().focus().toggleHeading({ level: 2 }).run()
-        }
+        onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
       >
         <Heading1 className="h-4 w-4" />
       </Toggle>
@@ -84,14 +80,12 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Heading 3 */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("heading", { level: 3 })}
+        pressed={editor.isActive('heading', { level: 3 })}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("h3") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('h3') ? 'bg-primary text-primary-foreground' : ''
         )}
-        onPressedChange={() =>
-          editor.chain().focus().toggleHeading({ level: 3 }).run()
-        }
+        onPressedChange={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
       >
         <Heading2 className="h-4 w-4" />
       </Toggle>
@@ -99,10 +93,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Unordered List */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("bulletList")}
+        pressed={editor.isActive('bulletList')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("ul") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('ul') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
       >
@@ -112,10 +106,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Ordered List */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("orderedList")}
+        pressed={editor.isActive('orderedList')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("ol") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('ol') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
       >
@@ -125,12 +119,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Blockquote */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("blockquote")}
+        pressed={editor.isActive('blockquote')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("blockquote")
-            ? "bg-primary text-primary-foreground"
-            : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('blockquote') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
       >
@@ -140,12 +132,10 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Horizontal Rule */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("horizontalRule")}
+        pressed={editor.isActive('horizontalRule')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("horizontalRule")
-            ? "bg-primary text-primary-foreground"
-            : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('horizontalRule') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() => editor.commands.setHorizontalRule()}
       >
@@ -155,13 +145,13 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Link */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("link")}
+        pressed={editor.isActive('link')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("link") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('link') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() =>
-          editor.commands.setLink({ href: prompt("Enter the URL", url) || "" })
+          editor.commands.setLink({ href: prompt('Enter the URL', url) || '' })
         }
       >
         <LinkIcon className="h-4 w-4" />
@@ -170,13 +160,13 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Image */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("image")}
+        pressed={editor.isActive('image')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("image") ? "bg-primary text-primary-foreground" : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('image') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() =>
-          editor.commands.setImage({ src: prompt("Enter the URL", url) || "" })
+          editor.commands.setImage({ src: prompt('Enter the URL', url) || '' })
         }
       >
         <ImageIcon className="h-4 w-4" />
@@ -185,16 +175,14 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
       {/* Youtube */}
       <Toggle
         size="sm"
-        pressed={editor.isActive("youtube")}
+        pressed={editor.isActive('youtube')}
         className={clsx(
-          "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-          editor.isActive("youtube")
-            ? "bg-primary text-primary-foreground"
-            : "",
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('youtube') ? 'bg-primary text-primary-foreground' : ''
         )}
         onPressedChange={() =>
           editor.commands.setYoutubeVideo({
-            src: prompt("Enter the URL", url) || "",
+            src: prompt('Enter the URL', url) || '',
           })
         }
       >

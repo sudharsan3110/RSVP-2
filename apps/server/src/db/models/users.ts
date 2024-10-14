@@ -1,5 +1,5 @@
-import { generateJwtToken } from "@/utils/jwt";
-import { prisma } from "../connection";
+import { generateJwtToken } from '@/utils/jwt';
+import { prisma } from '../connection';
 
 export class Users {
   static async findById(id: number) {
@@ -19,13 +19,13 @@ export class Users {
   static async createUser(email: string) {
     const userExists = await this.userExists(email);
     if (userExists) {
-      throw new Error("User already exists");
+      throw new Error('User already exists');
     }
 
     const newUser = await prisma.users.create({
       data: {
         primary_email: email,
-        full_name: "",
+        full_name: '',
       },
     });
 
@@ -34,7 +34,7 @@ export class Users {
 
   static async createMagicLink(userId: number): Promise<string> {
     const tokenId = crypto.randomUUID();
-    const token = generateJwtToken({ userId, tokenId }, "10m");
+    const token = generateJwtToken({ userId, tokenId }, '10m');
 
     await prisma.users.update({
       where: { id: userId },
@@ -55,7 +55,7 @@ export class Users {
 
     await prisma.users.update({
       where: { id: user.id },
-      data: { magicToken: "" },
+      data: { magicToken: '' },
     });
 
     return user;

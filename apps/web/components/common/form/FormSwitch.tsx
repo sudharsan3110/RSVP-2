@@ -1,14 +1,8 @@
-"use client";
-import { Control, FieldPath, FieldValues } from "react-hook-form";
+'use client';
+import { Control, FieldPath, FieldValues } from 'react-hook-form';
 
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
 
 function FormSwitch<
   TFieldValues extends FieldValues = FieldValues,
@@ -37,11 +31,7 @@ function FormSwitch<
       render={({ field }) => (
         <FormItem className={containerClassName}>
           <div className="space-y-0.5">
-            {label && (
-              <FormLabel className="font-semibold text-white">
-                {label}
-              </FormLabel>
-            )}
+            {label && <FormLabel className="font-semibold text-white">{label}</FormLabel>}
             {description && <FormDescription>{description}</FormDescription>}
           </div>
           <FormControl>

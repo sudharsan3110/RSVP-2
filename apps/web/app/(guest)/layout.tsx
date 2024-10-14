@@ -1,6 +1,6 @@
-import Guest from "@/components/common/header/Guest";
-import Footer from "@/components/common/Footer";
-import React, { Suspense } from "react";
+import Guest from '@/components/common/header/Guest';
+import Footer from '@/components/common/Footer';
+import React, { Suspense } from 'react';
 
 const GuestLayout = ({
   children,

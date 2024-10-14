@@ -1,10 +1,7 @@
-import config from "@/config/config";
-import { JwtPayload, sign, verify } from "jsonwebtoken";
+import config from '@/config/config';
+import { JwtPayload, sign, verify } from 'jsonwebtoken';
 
-export function generateJwtToken(
-  payload: Record<string, any>,
-  expiresIn: string = "1h",
-): string {
+export function generateJwtToken(payload: Record<string, any>, expiresIn: string = '1h'): string {
   return sign(payload, config.JWT_SECRET_KEY, { expiresIn });
 }
 

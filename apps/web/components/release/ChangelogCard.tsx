@@ -1,7 +1,7 @@
-import dayjs from "dayjs";
-import Image from "next/image";
-import ContributorAvatar from "./ContributorAvatar";
-import Changelog from "@/model/changelog";
+import dayjs from 'dayjs';
+import Image from 'next/image';
+import ContributorAvatar from './ContributorAvatar';
+import Changelog from '@/model/changelog';
 
 type Props = {
   changelog: Changelog;
@@ -11,7 +11,7 @@ const ChangelogCard = ({ changelog }: Props) => {
   return (
     <div className="group flex sm:space-x-8">
       <span className="relative -top-2 hidden whitespace-nowrap sm:block">
-        {dayjs(changelog.releaseDate).format("MMM D, YYYY")}
+        {dayjs(changelog.releaseDate).format('MMM D, YYYY')}
       </span>
       <div className="flex space-x-4 sm:space-x-8">
         <div className="relative h-full">
@@ -21,7 +21,7 @@ const ChangelogCard = ({ changelog }: Props) => {
         </div>
         <div className="pb-16 group-last:pb-0">
           <span className="relative -top-2 mb-4 block whitespace-nowrap sm:hidden">
-            {dayjs(changelog.releaseDate).format("MMM D, YYYY")}
+            {dayjs(changelog.releaseDate).format('MMM D, YYYY')}
           </span>
           <Image
             src={changelog.bannerImageUrl}

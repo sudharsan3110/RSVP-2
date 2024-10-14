@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Control, FieldPath, FieldValues } from "react-hook-form";
+import { Control, FieldPath, FieldValues } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -8,8 +8,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
 
 function FormTextArea<
   TFieldValues extends FieldValues = FieldValues,
@@ -39,9 +39,7 @@ function FormTextArea<
             <Textarea {...props} {...field} />
           </FormControl>
           {description && (
-            <FormDescription className={descriptionClassName}>
-              {description}
-            </FormDescription>
+            <FormDescription className={descriptionClassName}>{description}</FormDescription>
           )}
           <FormMessage />
         </FormItem>

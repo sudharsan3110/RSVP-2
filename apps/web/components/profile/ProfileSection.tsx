@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface ProfileSectionProps {
   title: string;
@@ -6,11 +6,7 @@ interface ProfileSectionProps {
   children: React.ReactNode;
 }
 
-const ProfileSection = ({
-  title,
-  description,
-  children,
-}: ProfileSectionProps) => (
+const ProfileSection = ({ title, description, children }: ProfileSectionProps) => (
   <section className="flex flex-wrap gap-8">
     <div className="w-full max-w-[312px]">
       <h2 className="font-semibold text-white">{title}</h2>

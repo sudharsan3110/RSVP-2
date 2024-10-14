@@ -1,16 +1,16 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from 'react';
 
 const tags = [
-  { text: "Music Concert", color: "purple" },
-  { text: "Exhibition", color: "gray" },
-  { text: "Stand Up Show", color: "pink" },
-  { text: "Theater", color: "green" },
+  { text: 'Music Concert', color: 'purple' },
+  { text: 'Exhibition', color: 'gray' },
+  { text: 'Stand Up Show', color: 'pink' },
+  { text: 'Theater', color: 'green' },
 ];
 const colorClasses = {
-  purple: "bg-[#EDE9FF]",
-  gray: "bg-[#FFF5D7]",
-  pink: "bg-[#FFECEC]",
-  green: "bg-[#E4FFEA]",
+  purple: 'bg-[#EDE9FF]',
+  gray: 'bg-[#FFF5D7]',
+  pink: 'bg-[#FFECEC]',
+  green: 'bg-[#E4FFEA]',
 };
 
 const Tags = () => {
@@ -26,14 +26,14 @@ const Tags = () => {
 
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
-      scrollContainer.addEventListener("wheel", handleWheel, {
+      scrollContainer.addEventListener('wheel', handleWheel, {
         passive: false,
       });
     }
 
     return () => {
       if (scrollContainer) {
-        scrollContainer.removeEventListener("wheel", handleWheel);
+        scrollContainer.removeEventListener('wheel', handleWheel);
       }
     };
   }, []);
