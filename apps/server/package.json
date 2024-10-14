@@ -11,6 +11,7 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
+    "format": "prettier --write .",
     "test": "jest --detectOpenHandles"
   },
   "jest": {
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/body-parser": "^1.19.5",
     "@types/cookie-parser": "^1.4.7",

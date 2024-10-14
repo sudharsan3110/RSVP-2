@@ -1,16 +1,23 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
-  extends: "next/core-web-vitals",
-  plugins: ["testing-library", "jest-dom"],
+  extends: ['next/core-web-vitals', '@repo/eslint-config/next.js'],
   rules: {
-    "react-hooks/exhaustive-deps": "off",
-    "no-unused-vars": "warn",
+    'react-hooks/exhaustive-deps': 'off',
+    'no-unused-vars': 'warn',
   },
+  ignorePatterns: ['components/ui/*'],
   overrides: [
     {
-      files: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
-      extends: ["plugin:testing-library/react", "plugin:jest-dom/recommended"],
+      files: ['*.tsx', '*.ts'],
+      rules: {
+        'no-undef': 'off',
+      },
+    },
+    {
+      files: ['*.d.ts'],
+      rules: {
+        'no-unused-vars': 'off',
+      },
     },
   ],
-  ignorePatterns: ["components/ui/*"],
 };
