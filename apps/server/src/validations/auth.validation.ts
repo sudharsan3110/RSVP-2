@@ -5,5 +5,5 @@ export const SigninSchema = z.object({
 });
 
 export const verifySigninSchema = z.object({
-  token: z.string().min(1, { message: "token is required" }),
+  token: z.string().min(1, { message: 'token is required' }),
 });

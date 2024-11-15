@@ -14,6 +14,7 @@ function FormInput<
   lableClassName,
   inputClassName,
   label,
+  children,
   className,
   ...props
 }: {
@@ -21,6 +22,7 @@ function FormInput<
   control: Control<TFieldValues>;
   className?: string;
   lableClassName?: string;
+  children?: React.ReactNode;
   inputClassName?: string;
   name: TName;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
@@ -31,12 +33,15 @@ function FormInput<
       render={({ field }) => (
         <FormItem className={className}>
           {label && <FormLabel className={cn('text-white', lableClassName)}>{label}</FormLabel>}
-          <FormControl>
-            <Input
-              className={cn('rounded-[6px] bg-dark-900 text-white', inputClassName)}
-              {...props}
-              {...field}
-            />
+          <FormControl className="flex">
+            <div>
+              {children}
+              <Input
+                className={cn('rounded-[6px] bg-dark-900 text-white', inputClassName)}
+                {...props}
+                {...field}
+              />
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>

@@ -2,8 +2,10 @@ export interface IUser {
   id: number;
   primary_email: string;
   secondary_email?: string;
-  full_name: string;
-  isCompleted: boolean;
+  contact?: string;
+  full_name?: string;
+  magicToken?: string;
+  is_completed?: boolean;
   location?: string;
   bio?: string;
   twitter?: string;

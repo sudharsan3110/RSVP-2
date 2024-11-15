@@ -46,6 +46,7 @@
     "@tiptap/react": "^2.7.2",
     "@tiptap/starter-kit": "^2.7.2",
     "@types/nodemailer": "^6.4.15",
+    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",

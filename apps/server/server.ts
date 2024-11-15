@@ -2,16 +2,22 @@ import config from '@/config/config';
 import { errorHandler, successHandler } from '@/config/morgan';
 import { router } from '@/routes/v1/routes';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import express, { json, urlencoded, type Express } from 'express';
 
 export const createServer = (): Express => {
   const app = express();
+
+  const corsOptions: CorsOptions = {
+    origin: [config.CLIENT_URL],
+    credentials: true,
+  };
+
   app
     .disable('x-powered-by')
     .use(urlencoded({ extended: true }))
     .use(json({ limit: '1mb' }))
-    .use(cors())
+    .use(cors(corsOptions))
     .use(successHandler)
     .use(errorHandler)
     .use(cookieParser())

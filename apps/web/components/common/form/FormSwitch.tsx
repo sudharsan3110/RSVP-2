@@ -3,6 +3,7 @@ import { Control, FieldPath, FieldValues } from 'react-hook-form';
 
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 function FormSwitch<
   TFieldValues extends FieldValues = FieldValues,
@@ -29,9 +30,14 @@ function FormSwitch<
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={containerClassName}>
-          <div className="space-y-0.5">
-            {label && <FormLabel className="font-semibold text-white">{label}</FormLabel>}
+        <FormItem
+          className={cn(
+            'space-y-3 rounded-md border border-dark-500 bg-dark-900 p-3',
+            containerClassName
+          )}
+        >
+          <div className="space-y-1">
+            {label && <FormLabel className="text-base font-semibold text-white">{label}</FormLabel>}
             {description && <FormDescription>{description}</FormDescription>}
           </div>
           <FormControl>

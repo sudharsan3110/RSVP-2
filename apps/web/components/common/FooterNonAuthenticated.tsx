@@ -35,7 +35,9 @@ const FooterNonAuthenticated = ({ className }: PropsWithClassName) => {
           </div>
           <div className="mt-16 flex flex-col gap-x-28 gap-y-9 md:flex-row lg:mt-auto">
             <div className="flex flex-col gap-y-4 text-sm font-medium">
-              <SigninDialog children={<span>Sign In</span>} variant="signin" />
+              <SigninDialog variant="signin">
+                <span>Sign In</span>
+              </SigninDialog>
               <Link href="/release">Help</Link>
             </div>
             <div className="flex flex-col gap-y-4 text-sm font-medium">

@@ -1,8 +1,8 @@
-import z from "zod";
+import z from 'zod';
 
 const secondaryEmailSchema = z
   .object({
-    secondary_email: z.string().email(),
+    secondary_email: z.string().email().or(z.null()),
   })
   .strict();
 
@@ -17,10 +17,9 @@ const fullProfileSchema = z
     full_name: z.string().min(1),
     location: z.string(),
     bio: z.string(),
-    isProfilePublic: z.boolean(),
     profile_icon: z.string(),
     twitter: z.string().optional(),
-    github: z.string().optional(),
+    instagram: z.string().optional(),
     website: z.string().optional(),
   })
   .strict();

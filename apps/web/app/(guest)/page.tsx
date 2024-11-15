@@ -15,7 +15,7 @@ function Home() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
-      mutate(token);
+      mutate({ token });
     }
   }, []);
 

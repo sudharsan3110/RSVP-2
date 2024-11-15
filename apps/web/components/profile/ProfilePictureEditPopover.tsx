@@ -8,19 +8,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import React, { Dispatch, SetStateAction, useState } from 'react';
-import Image from 'next/image';
 import { userAvatarOptions } from '@/utils/constants';
 import { Pencil } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 
-const ProfilePictureEditPopover = ({
-  profilePictureUrl,
-  setProfilePictureState,
-}: {
+type Props = {
   profilePictureUrl: string;
-  setProfilePictureState: Dispatch<SetStateAction<string>>;
-}) => {
+  // eslint-disable-next-line
+  setProfilePictureState: (url: string) => void;
+};
+const ProfilePictureEditPopover = ({ profilePictureUrl, setProfilePictureState }: Props) => {
   const [selectedPicture, setSelectedPicture] = useState(profilePictureUrl);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -37,15 +36,15 @@ const ProfilePictureEditPopover = ({
         </DialogHeader>
         <DialogDescription>Choose a profile icon</DialogDescription>
         <div className="my-4 grid grid-cols-3 gap-x-4 gap-y-6 md:grid-cols-4 md:gap-x-10">
-          {userAvatarOptions.map((src, index) => (
+          {userAvatarOptions.map((avatar, index) => (
             <Image
               priority
-              key={src}
+              key={index}
               width={120}
               height={120}
-              onClick={() => setSelectedPicture(src)}
-              className={`cursor-pointer rounded-full bg-white ${selectedPicture === src ? 'border-[4px] border-primary' : ''}`}
-              src={src}
+              onClick={() => setSelectedPicture(avatar.id)}
+              className={`cursor-pointer rounded-full bg-white ${selectedPicture === avatar.id ? 'border-[4px] border-primary' : ''}`}
+              src={avatar.src}
               alt="Profile picture option"
               data-testid={`profile-picture-option${index}`}
             />

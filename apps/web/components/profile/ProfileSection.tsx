@@ -8,7 +8,7 @@ interface ProfileSectionProps {
 
 const ProfileSection = ({ title, description, children }: ProfileSectionProps) => (
   <section className="flex flex-wrap gap-8">
-    <div className="w-full max-w-[312px]">
+    <div className="w-full max-w-sm">
       <h2 className="font-semibold text-white">{title}</h2>
       <p className="text-sm text-secondary">{description}</p>
     </div>

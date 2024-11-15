@@ -1,4 +1,3 @@
-import Footer from '@/components/common/FooterNonAuthenticated';
 import Autheticated from '@/components/common/header/Autheticated';
 import LegalStrip from '@/components/common/LegalStrip';
 import React from 'react';
