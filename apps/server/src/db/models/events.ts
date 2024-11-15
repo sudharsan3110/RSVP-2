@@ -25,4 +25,11 @@ export class Events {
     });
     return newEvent;
   }
+
+  static async findById(eventId: string) {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+    return event;
+  }
 }

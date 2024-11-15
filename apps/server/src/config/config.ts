@@ -11,6 +11,7 @@ const envSchema = z.object({
   JWT_SECRET_KEY: z.string(),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   PORT: z.coerce.number().default(8000),
+  QR_SECRET_KEY: z.string(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -30,6 +31,7 @@ const config = {
   JWT_SECRET_KEY: envVars.data.JWT_SECRET_KEY,
   CLIENT_URL: envVars.data.NEXT_PUBLIC_APP_URL,
   PORT: envVars.data.PORT,
+  QR_SECRET_KEY: envVars.data.QR_SECRET_KEY,
 };
 
 console.log(config.env);
