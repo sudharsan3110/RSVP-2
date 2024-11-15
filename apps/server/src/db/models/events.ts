@@ -1,3 +1,4 @@
+import { VenueType } from '@prisma/client';
 import { prisma } from '../connection';
 
 interface Event {
@@ -9,7 +10,7 @@ interface Event {
   eventDate: string;
   description: string;
   eventImageId: string;
-  venueType: string;
+  venueType: VenueType;
   venueAddress?: string;
   venueUrl?: string;
   hostPermissionRequired: boolean;
@@ -20,8 +21,6 @@ export class Events {
     const newEvent = await prisma.event.create({
       data: {
         ...eventDetails,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
     });
     return newEvent;
