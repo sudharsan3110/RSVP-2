@@ -24,6 +24,12 @@ const config = {
           900: 'hsl(var(--dark-900))',
           800: 'hsl(var(--dark-800))',
         },
+        green: {
+          500: 'hsl(var(--green-500))',
+          900: 'hsl(var(--green))',
+        },
+        blue: 'hsl(var(--blue))',
+        orange: 'hsl(var(--orange))',
         separator: 'hsl(var(--separator))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
