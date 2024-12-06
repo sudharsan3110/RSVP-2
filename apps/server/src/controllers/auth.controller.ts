@@ -11,6 +11,7 @@ import {
   verifyAccessToken,
   verifyRefreshToken,
 } from '@/utils/jwt';
+import EmailService from '@/utils/sendEmail';
 
 type SigninRequestBody = z.infer<typeof SigninSchema>;
 export const signin = catchAsync(async (req: Request<{}, {}, SigninRequestBody>, res, next) => {
@@ -27,7 +28,16 @@ export const signin = catchAsync(async (req: Request<{}, {}, SigninRequestBody>,
 
   const token = await Users.createMagicLink(user.id);
   console.log(`${config.CLIENT_URL}?token=${token}`);
-  // Todo: send email
+
+  await EmailService.send({
+    id: 4,
+    subject: 'Sign in to your account',
+    recipient: email,
+    body: {
+      email,
+      magicLink: `${config.CLIENT_URL}/signin?token=${token}`,
+    },
+  });
 
   return res.status(200).json({ message: 'success' });
 });

@@ -13,6 +13,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   PORT: z.coerce.number().default(8000),
   QR_SECRET_KEY: z.string(),
+  EMAIL_TOKEN: z.string(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -34,6 +35,7 @@ const config = {
   CLIENT_URL: envVars.data.NEXT_PUBLIC_APP_URL,
   PORT: envVars.data.PORT,
   QR_SECRET_KEY: envVars.data.QR_SECRET_KEY,
+  EMAIL_TOKEN: envVars.data.EMAIL_TOKEN,
 };
 
 console.log(config.env);
