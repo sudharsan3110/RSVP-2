@@ -27,6 +27,7 @@ model Users {
   updated_at                  DateTime   @default(now()) @updatedAt
   Event                       Event[]
   Attendee                    Attendee[]
+  Cohost                      Cohost[]
 
   @@map("users")
 }
@@ -49,6 +50,20 @@ enum VenueType {
   virtual
 }
 
+enum Status {
+  Going @map("1")
+  NotGoing @map("2")
+  Waiting @map("3")
+  Pending @map("4")
+  Invited @map("5")
+}
+
+enum Role {
+  Manager @map("1")
+  ReadOnly @map("2")
+  Celebrity @map("3")
+}
+
 model Event {
   id                     String     @id @default(uuid()) @db.VarChar(36)
   creatorId              Int        @map("creator_id")
@@ -69,6 +84,7 @@ model Event {
   creator                Users      @relation(fields: [creatorId], references: [id])
   updates                Update[]
   Attendee               Attendee[]
+  Cohost                 Cohost[]
 
   @@map("events")
 }
@@ -82,9 +98,20 @@ model Attendee {
   checkInTime      DateTime? @map("check_in_time")
   feedback         String?   @db.VarChar(512)
   qrToken          String    @unique @db.VarChar(512)
-  isAdmin          Boolean   @default(false)
+  status           Status    @default(Waiting)
   user             Users     @relation(fields: [userId], references: [id])
   event            Event     @relation(fields: [eventId], references: [id])
 
   @@map("attendees")
+}
+
+model Cohost {
+  id               String    @id @default(uuid()) @db.VarChar(36)
+  userId           Int       @map("user_id")
+  eventId          String    @map("event_id") @db.VarChar(36)
+  role             Role      @default(ReadOnly)
+  user             Users     @relation(fields: [userId], references: [id])
+  event            Event     @relation(fields: [eventId], references: [id])
+
+  @@map("cohosts")
 }
