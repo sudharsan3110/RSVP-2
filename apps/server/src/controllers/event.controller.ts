@@ -41,6 +41,34 @@ export const createEvent = catchAsync(
   }
 );
 
+export const updateEvent = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, createEventBody>, res) => {
+    const eventId = req.params.eventId;
+    const data = req.body;
+
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const updatedEvent = await Events.update(eventId, data);
+
+    return res.status(200).json({ message: 'success', event: updatedEvent });
+  }
+);
+
+export const deleteEvent = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
+    const eventId = req.params.eventId;
+
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const event = await Events.findById(eventId);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    await Events.delete(eventId);
+
+    return res.status(200).json({ message: 'success' });
+  }
+);
+
 export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {}, {}>, res) => {
   const { email, type, fromDate, toDate, search, page, limit, sortBy, sortOrder } =
     eventsPlannedByUserReqSchema.parse(req.query);
@@ -70,7 +98,7 @@ export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {},
 });
 
 export const createAttendee = catchAsync(
-  async (req: AuthenticatedRequest<{ eventId: string }, {}, CreateAttendeeBody>, res, next) => {
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, CreateAttendeeBody>, res) => {
     try {
       if (!req.userId) {
         return res.status(401).json({ message: 'Invalid or expired token' });

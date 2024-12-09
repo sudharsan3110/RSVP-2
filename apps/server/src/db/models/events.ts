@@ -70,4 +70,18 @@ export class Events {
     });
     return event;
   }
+
+  static async update(eventId: string, data: Partial<IEvent>) {
+    const updatedEvent = await prisma.event.update({
+      where: { id: eventId },
+      data,
+    });
+    return updatedEvent;
+  }
+
+  static async delete(eventId: string) {
+    await prisma.event.delete({
+      where: { id: eventId },
+    });
+  }
 }

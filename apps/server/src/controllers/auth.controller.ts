@@ -1,10 +1,7 @@
-import catchAsync from '@/utils/catchAsync';
-import { Request } from 'express';
-import { SigninSchema, verifySigninSchema } from '@/validations/auth.validation';
-import z from 'zod';
-import { Users } from '@/db/models/users';
 import config from '@/config/config';
+import { Users } from '@/db/models/users';
 import { AuthenticatedRequest } from '@/middleware/authMiddleware';
+import catchAsync from '@/utils/catchAsync';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -12,6 +9,9 @@ import {
   verifyRefreshToken,
 } from '@/utils/jwt';
 import EmailService from '@/utils/sendEmail';
+import { SigninSchema, verifySigninSchema } from '@/validations/auth.validation';
+import { Request } from 'express';
+import z from 'zod';
 
 type SigninRequestBody = z.infer<typeof SigninSchema>;
 export const signin = catchAsync(async (req: Request<{}, {}, SigninRequestBody>, res, next) => {
