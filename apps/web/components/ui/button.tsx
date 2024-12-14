@@ -17,6 +17,7 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'dark:text-foreground text-foreground underline-offset-4 hover:underline',
         tertiary: 'bg-dark-900 text-sm font-medium hover:bg-dark-900/80 border-dark-500 border',
+        subtle: 'bg-dark-500 hover:bg-dark-500/80',
       },
       radius: {
         default: 'rounded-full',

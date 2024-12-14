@@ -28,8 +28,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Tags from '@/components/tags/Tags';
-import NoSearchResults from '@/components/noSearchResults/NoSearchResults ';
 import { locationName } from '@/utils/constants';
+import NoResults from '@/components/common/NoResults';
 
 const DiscoverEvents = () => {
   const [open, setOpen] = useState(false);
@@ -169,7 +169,10 @@ const DiscoverEvents = () => {
         </section>
 
         <section className="mx-auto my-28 w-full max-w-[352px] text-center">
-          <NoSearchResults />
+          <NoResults
+            title="No Events found"
+            message="Your search “Comic” did not match any events. Please try again."
+          />
         </section>
       </main>
     </Container>
