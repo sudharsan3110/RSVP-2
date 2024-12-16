@@ -6,8 +6,6 @@ dotenv.config();
 const envSchema = z.object({
   NODE_ENV: z.enum(['production', 'development', 'test']),
   DATABASE_URL: z.string().url(),
-  EMAIL_FROM: z.string().email(),
-  EMAIL_PASSWORD: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
   NEXT_PUBLIC_APP_URL: z.string().url(),
@@ -26,10 +24,6 @@ if (!envVars.success) {
 const config = {
   env: envVars.data.NODE_ENV,
   DB_URL: envVars.data.DATABASE_URL,
-  EMAIL: {
-    from: envVars.data.EMAIL_FROM,
-    password: envVars.data.EMAIL_PASSWORD,
-  },
   ACCESS_TOKEN_SECRET: envVars.data.ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET: envVars.data.REFRESH_TOKEN_SECRET,
   CLIENT_URL: envVars.data.NEXT_PUBLIC_APP_URL,

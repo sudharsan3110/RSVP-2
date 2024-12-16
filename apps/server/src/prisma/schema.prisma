@@ -68,6 +68,7 @@ model Event {
   id                     String     @id @default(uuid()) @db.VarChar(36)
   creatorId              Int        @map("creator_id")
   name                   String     @db.VarChar(256)
+  slug                   String     @unique @db.VarChar(256)
   category               String?    @db.VarChar(256)
   startTime              DateTime   @map("start_time")
   endTime                DateTime   @map("end_time")

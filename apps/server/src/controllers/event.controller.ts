@@ -1,19 +1,17 @@
+import config from '@/config/config';
+import { Attendees } from '@/db/models/attendees';
 import { Events } from '@/db/models/events';
 import { Users } from '@/db/models/users';
-import { Attendees } from '@/db/models/attendees';
 import { AuthenticatedRequest } from '@/middleware/authMiddleware';
-import { eventsPlannedByUserReqSchema } from '@/validations/event.validation';
 import catchAsync from '@/utils/catchAsync';
-import config from '@/config/config';
-import { CreateEventSchema } from '@/validations/event.validation';
+import { sluggify } from '@/utils/function';
+import EmailService from '@/utils/sendEmail';
 import {
   attendeePayloadSchema,
   verifyQrTokenPayloadSchema,
 } from '@/validations/attendee.validation';
-
-import { randomUUID } from 'crypto';
-import { createHash } from 'crypto';
-import EmailService from '@/utils/sendEmail';
+import { CreateEventSchema, eventsPlannedByUserReqSchema } from '@/validations/event.validation';
+import { createHash, randomUUID } from 'crypto';
 import z from 'zod';
 
 type createEventBody = z.infer<typeof CreateEventSchema>;
@@ -24,27 +22,28 @@ export const createEvent = catchAsync(
   async (req: AuthenticatedRequest<{}, {}, createEventBody>, res) => {
     const data = req.body;
 
-    const userId = req.userId;
+    const userId = req.userId || 1;
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
     const getUserData = await Users.findById(userId);
 
-    if (getUserData?.is_completed) {
-      const formattedData = {
-        ...data,
-        creatorId: userId,
-      };
-
-      console.log(formattedData);
-
-      const newEvent = await Events.create(formattedData);
-
-      return res.status(201).json({ message: 'success', event: newEvent });
-    } else {
+    if (!getUserData) return res.status(404).json({ message: 'User not found' });
+    if (!getUserData.is_completed)
       return res
         .status(400)
         .json({ message: 'Please complete your profile before creating event' });
-    }
+
+    const formattedData = {
+      ...data,
+      creatorId: userId,
+      slug: sluggify(data.name),
+    };
+
+    console.log(formattedData);
+
+    const newEvent = await Events.create(formattedData);
+
+    return res.status(201).json({ message: 'success', event: newEvent });
   }
 );
 
@@ -117,6 +116,8 @@ export const createAttendee = catchAsync(
       }
 
       const eventId = req.params.eventId;
+      if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
       const event = await Events.findById(eventId as string);
       if (!event) {
         return res.status(404).json({ message: 'Event not found' });
@@ -170,9 +171,10 @@ export const createAttendee = catchAsync(
 );
 
 export const getAttendeeDetails = catchAsync(
-  async (req: AuthenticatedRequest<{ attendeeId: string }, {}, {}>, res, next) => {
+  async (req: AuthenticatedRequest<{ attendeeId?: string }, {}, {}>, res, next) => {
     try {
       const attendeeId = req.params.attendeeId;
+      if (!attendeeId) return res.status(400).json({ message: 'Attendee ID is required' });
       const attendee = await Attendees.findById(attendeeId);
       if (!attendee) {
         return res.status(404).json({ message: 'Attendee not found' });
@@ -187,10 +189,10 @@ export const getAttendeeDetails = catchAsync(
 );
 
 export const getAttendeeByQrToken = catchAsync(
-  async (req: AuthenticatedRequest<{ qrToken: string }, {}, {}>, res, next) => {
+  async (req: AuthenticatedRequest<{ qrToken?: string }, {}, {}>, res, next) => {
     try {
       const { qrToken } = req.params;
-
+      if (!qrToken) return res.status(400).json({ message: 'QR Token is required' });
       const attendee = await Attendees.findByQrToken(qrToken);
       if (!attendee) {
         return res.status(404).json({ message: 'Attendee not found' });

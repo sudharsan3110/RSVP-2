@@ -1,15 +1,14 @@
 import { prisma } from '../connection';
 import { Paginator } from '@/utils/pagination';
-import { IEvent, IEventFilters } from '@/interface/event';
+import { CreateEventDto, IEventFilters } from '@/interface/event';
 import { IPaginationParams } from '@/interface/pagination';
+import { Event } from '@prisma/client';
+
 export class Events {
-  static async create(eventDetails: IEvent) {
-    const newEvent = await prisma.event.create({
-      data: {
-        ...eventDetails,
-      },
+  static async create(eventDetails: CreateEventDto) {
+    return await prisma.event.create({
+      data: eventDetails,
     });
-    return newEvent;
   }
 
   static async plannedEvents({
@@ -71,7 +70,7 @@ export class Events {
     return event;
   }
 
-  static async update(eventId: string, data: Partial<IEvent>) {
+  static async update(eventId: string, data: Partial<Event>) {
     const updatedEvent = await prisma.event.update({
       where: { id: eventId },
       data,
