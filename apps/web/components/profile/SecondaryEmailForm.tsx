@@ -2,7 +2,7 @@ import { useProfileUpdate } from '@/lib/react-query/user';
 import { secondaryEmailFormSchema, SecondaryEmailFormType } from '@/lib/zod/profile';
 import { IUser } from '@/types/user';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
@@ -23,14 +23,18 @@ const SecondaryEmailForm = ({ user }: Props) => {
     },
   });
 
-  const secondaryEmail = form.watch('secondary_email');
+  const hasSecondaryEmail = form.watch('secondary_email');
 
   const resetForm = () => {
     form.reset();
   };
 
   const addSecondaryEmail = () => {
-    form.setValue('secondary_email', ' ');
+    form.setValue('secondary_email', ' ', { shouldDirty: true });
+  };
+
+  const removeSecondaryEmail = () => {
+    form.setValue('secondary_email', null, { shouldDirty: true });
   };
 
   const onSubmit = async (data: SecondaryEmailFormType) => {
@@ -46,7 +50,7 @@ const SecondaryEmailForm = ({ user }: Props) => {
       >
         <FormInput control={form.control} disabled name="email" label="Email" type="email" />
 
-        {secondaryEmail != '' && (
+        {hasSecondaryEmail && (
           <FormInput
             control={form.control}
             name="secondary_email"
@@ -55,23 +59,42 @@ const SecondaryEmailForm = ({ user }: Props) => {
           />
         )}
 
-        <Button
-          onClick={addSecondaryEmail}
-          type="button"
-          className="mr-auto w-fit"
-          variant="ghost"
-          size="sm"
-          disabled={!!secondaryEmail}
-        >
-          <Plus className="mr-2 size-4" />
-          Add Another
-        </Button>
+        {!hasSecondaryEmail ? (
+          <Button
+            onClick={addSecondaryEmail}
+            type="button"
+            className="mr-auto w-fit"
+            variant="ghost"
+            size="sm"
+          >
+            <Plus className="mr-2 size-4" />
+            Add Another
+          </Button>
+        ) : (
+          <Button
+            onClick={removeSecondaryEmail}
+            type="button"
+            className="mr-auto w-fit"
+            variant="destructive"
+            size="sm"
+            radius="sm"
+          >
+            <Trash2 className="mr-2 size-4" />
+            Remove Secondary Email
+          </Button>
+        )}
 
         <div className="ml-auto flex items-center gap-2">
-          <Button type="reset" onClick={resetForm} variant="tertiary" radius="sm">
+          <Button
+            type="reset"
+            onClick={resetForm}
+            variant="tertiary"
+            radius="sm"
+            disabled={!form.formState.isDirty}
+          >
             Reset
           </Button>
-          <Button type="submit" radius="sm">
+          <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
             Save
           </Button>
         </div>

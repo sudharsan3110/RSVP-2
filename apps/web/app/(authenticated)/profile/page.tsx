@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download } from 'lucide-react';
+import { Download, TriangleAlert } from 'lucide-react';
 import Container from '@/components/common/Container';
 import ProfileForm from '@/components/profile/ProfileForm';
 import SecondaryEmailForm from '@/components/profile/SecondaryEmailForm';
@@ -11,6 +11,8 @@ import { useCurrentUser } from '@/lib/react-query/auth';
 import { useMemo } from 'react';
 import { IUser } from '@/types/user';
 import ProfileFormSkeleton from '@/components/profile/ProfileFormLoading';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { UserCircle2 } from 'lucide-react';
 
 const ProfilePage = () => {
   const { data, isSuccess, isLoading } = useCurrentUser();
@@ -26,6 +28,20 @@ const ProfilePage = () => {
         <h1 className="text-2xl/[36px] font-semibold">Profile</h1>
         <p className="font-medium text-secondary">Manage your profile settings</p>
       </section>
+
+      {user && !user.is_completed && (
+        <Alert className="mt-6 w-fit" variant="warning">
+          <TriangleAlert
+            className="-mt-[3px] me-3 inline-flex !text-amber-600 opacity-70"
+            size={16}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          <AlertTitle>
+            Please complete your profile information to get the most out of your experience.
+          </AlertTitle>
+        </Alert>
+      )}
 
       <Separator className="my-11 bg-separator" />
 
@@ -49,7 +65,7 @@ const ProfilePage = () => {
           We believe in transparency and giving you full control over your personal information.
           That&apos;s why we offer the option to download your data directly from our app.
         </p>
-        <Button className="w-fit whitespace-nowrap rounded-[6px] text-sm/[24px]">
+        <Button className="w-fit whitespace-nowrap rounded-[6px] text-sm/[24px]" disabled>
           <Download className="mr-2.5" size={20} /> Download
         </Button>
       </section>

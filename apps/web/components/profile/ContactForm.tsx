@@ -36,10 +36,16 @@ const PhoneNumberForm = ({ user }: Props) => {
         <FormInput control={form.control} name="contact" label="Phone Number" />
 
         <div className="ml-auto flex items-center gap-2">
-          <Button type="reset" onClick={resetForm} variant="tertiary" radius="sm">
+          <Button
+            type="reset"
+            onClick={resetForm}
+            variant="tertiary"
+            radius="sm"
+            disabled={!form.formState.isDirty}
+          >
             Reset
           </Button>
-          <Button type="submit" radius="sm">
+          <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
             Save
           </Button>
         </div>

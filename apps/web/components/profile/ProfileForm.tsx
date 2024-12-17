@@ -97,7 +97,7 @@ const ProfileForm = ({ user }: Props) => {
             inputClassName="rounded-l-none"
           >
             <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">
-              https://instagram.com
+              https://instagram.com/
             </span>
           </FormInput>
           <FormInput
@@ -110,10 +110,16 @@ const ProfileForm = ({ user }: Props) => {
             <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://</span>
           </FormInput>
           <div className="ml-auto flex items-center gap-2">
-            <Button onClick={resetForm} type="reset" variant="tertiary" radius="sm">
+            <Button
+              onClick={resetForm}
+              type="reset"
+              variant="tertiary"
+              radius="sm"
+              disabled={!form.formState.isDirty}
+            >
               Reset
             </Button>
-            <Button type="submit" radius="sm">
+            <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
               Save
             </Button>
           </div>

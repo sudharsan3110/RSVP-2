@@ -5,8 +5,9 @@ export const secondaryEmailFormSchema = z.object({
   secondary_email: z
     .string()
     .email()
-    .or(z.string().default(''))
-    .transform((val) => (val.length > 0 ? val : null)),
+    .nullable()
+    .optional()
+    .transform((val) => (val === '' ? null : val)),
 });
 
 export type SecondaryEmailFormType = z.infer<typeof secondaryEmailFormSchema>;

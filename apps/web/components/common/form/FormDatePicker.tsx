@@ -13,7 +13,7 @@ import { Popover } from '@radix-ui/react-popover';
 import { PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar, CalendarProps } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
 
@@ -28,6 +28,7 @@ function FormDatePicker<
   className,
   iconClassName,
   initialFocus,
+  ...calendarProps
 }: {
   label?: string;
   control: Control<TFieldValues>;
@@ -36,7 +37,7 @@ function FormDatePicker<
   name: TName;
   description?: string;
   initialFocus?: boolean;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & Omit<CalendarProps, 'selected' | 'onSelect'>) {
   return (
     <FormField
       control={control}
@@ -66,6 +67,7 @@ function FormDatePicker<
                 selected={field.value}
                 onSelect={field.onChange}
                 initialFocus={initialFocus}
+                {...calendarProps}
               />
             </PopoverContent>
           </Popover>

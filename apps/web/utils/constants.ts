@@ -72,6 +72,21 @@ export const evenTimeOptions: FormSelectOption[] = [
 export const eventCategoryOptions: FormSelectOption[] = [
   { value: 'meetup', label: 'Meetup' },
   { value: 'hangout', label: 'Hangout' },
+  { value: 'birthday', label: 'Birthday' },
+  { value: 'concert', label: 'Concert' },
+  { value: 'conference', label: 'Conference' },
+  { value: 'workshop', label: 'Workshop' },
+  { value: 'party', label: 'Party' },
+  { value: 'sports', label: 'Sports' },
+  { value: 'networking', label: 'Networking' },
+  { value: 'exhibition', label: 'Exhibition' },
+  { value: 'festival', label: 'Festival' },
+  { value: 'charity', label: 'Charity' },
+  { value: 'food', label: 'Food & Dining' },
+  { value: 'art', label: 'Art & Culture' },
+  { value: 'education', label: 'Education' },
+  { value: 'gaming', label: 'Gaming' },
+  { value: 'others', label: 'Others...' },
 ];
 
 export const eventCapacityOptions: FormSelectOption[] = [

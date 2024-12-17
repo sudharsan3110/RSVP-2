@@ -3,7 +3,6 @@
 import FormInput from '../common/form/FormInput';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
@@ -23,46 +22,25 @@ import EventPreview from './EventPreview';
 import { BuildingOfficeIcon, LinkIcon } from '@heroicons/react/16/solid';
 import FormSwitch from '../common/form/FormSwitch';
 import Tiptap from '../ui/tiptap';
-
-const formSchema = z.object({
-  eventname: z.string().min(2, {
-    message: 'Event Name must be at least 2 characters.',
-  }),
-  category: z.string({
-    required_error: 'Please select a category.',
-  }),
-  fromtime: z.string(),
-  fromdate: z.date(),
-  totime: z.string(),
-  todate: z.date(),
-  description: z.string(),
-  locationType: z.enum(['venue', 'online'] as const),
-  location: z.string().min(2, {
-    message: 'Location must be at least 2 characters.',
-  }),
-  requiresApproval: z.boolean(),
-  capacity: z.string(),
-});
-
-type LocationType = 'venue' | 'online';
-export type EventFormValue = z.infer<typeof formSchema>;
+import FormCombobox from '../common/form/FormCombobox';
+import { createEventFormSchema, CreateEventFormType } from '@/lib/zod/event';
 
 const BasicDetailsForm = () => {
-  const form = useForm<EventFormValue>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<CreateEventFormType>({
+    resolver: zodResolver(createEventFormSchema),
     defaultValues: {
       eventname: '',
       location: '',
       locationType: 'venue',
       requiresApproval: false,
-      fromtime: '17:00',
-      fromdate: new Date(),
-      totime: '20:00',
-      todate: new Date(),
+      fromTime: '17:00',
+      fromDate: new Date(),
+      toTime: '20:00',
+      toDate: new Date(),
     },
   });
 
-  function onSubmit(values: EventFormValue) {
+  function onSubmit(values: CreateEventFormType) {
     console.log(values);
   }
 
@@ -80,38 +58,54 @@ const BasicDetailsForm = () => {
             className="flex max-w-[585px] grow flex-col gap-[1.125rem]"
           >
             <FormInput label="Event Name" name="eventname" control={form.control} />
-            <FormGroupSelect
+            <FormCombobox
               control={form.control}
               label="Category"
               name="category"
-              placeholder="Select an option"
+              placeholder="Select a category"
               options={eventCategoryOptions}
             />
             <div className="flex max-w-96 items-end gap-3.5">
               <FormGroupSelect
                 control={form.control}
                 label="From"
-                name="fromtime"
+                name="fromTime"
                 defaultValue="17:00"
                 options={evenTimeOptions}
               />
-              <FormDatePicker control={form.control} name="fromdate" iconClassName="opacity-100" />
+              <FormDatePicker
+                control={form.control}
+                name="fromDate"
+                iconClassName="opacity-100"
+                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              />
             </div>
+            {form.formState.errors.fromDateTime && (
+              <p className="text-sm font-medium text-destructive">
+                {form.formState.errors.fromDateTime.message}
+              </p>
+            )}
             <div className="flex max-w-96 items-end gap-3.5">
               <FormGroupSelect
                 control={form.control}
                 label="To"
-                name="totime"
+                name="toTime"
                 defaultValue="20:00"
                 options={evenTimeOptions}
               />
               <FormDatePicker
                 control={form.control}
-                name="todate"
+                name="toDate"
                 iconClassName="opacity-100"
                 initialFocus={true}
+                disabled={(date) => date < form.getValues('fromDate')}
               />
             </div>
+            {form.formState.errors.toDateTime && (
+              <p className="text-sm font-medium text-destructive">
+                {form.formState.errors.toDateTime.message}
+              </p>
+            )}
             <FormField
               control={form.control}
               name="description"
@@ -135,7 +129,7 @@ const BasicDetailsForm = () => {
                       defaultValue="venue"
                       value={field.value}
                       onValueChange={(value) => {
-                        if (value) field.onChange(value as LocationType);
+                        if (value) field.onChange(value);
                       }}
                       className="justify-start gap-3 py-2"
                     >
@@ -179,12 +173,12 @@ const BasicDetailsForm = () => {
                 description="Needs host permission to join event"
               />
             </section>
-            <FormGroupSelect
+            <FormInput
               control={form.control}
               label="Capacity"
               name="capacity"
-              placeholder="Select an option"
-              options={eventCapacityOptions}
+              type="number"
+              inputClassName={`[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
             />
             <Drawer>
               <DrawerTrigger asChild className="lg:hidden">
@@ -208,7 +202,7 @@ const BasicDetailsForm = () => {
           </form>
           <EventPreview
             watch={form.watch}
-            className="hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 pb-[28px] pt-8 lg:block"
+            className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 pb-[28px] pt-8 lg:block"
           >
             <h2 className="mb-[86px] line-clamp-2 text-left text-4xl font-semibold text-white">
               {form.watch('eventname') || '-'}

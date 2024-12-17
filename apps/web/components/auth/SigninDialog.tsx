@@ -36,7 +36,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
     defaultValues: {
       email: '',
     },
-    mode: 'onChange',
+    mode: 'onSubmit',
   });
 
   async function onSubmit(values: SignInFormType) {

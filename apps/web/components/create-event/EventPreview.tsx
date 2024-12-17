@@ -1,11 +1,11 @@
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import dayjs from 'dayjs';
-import { EventFormValue } from './BasicDetailsForm';
 import { UseFormWatch } from 'react-hook-form';
 import { ReactNode } from 'react';
+import { CreateEventFormType } from '@/lib/zod/event';
 
 type EventPreviewProps = {
-  watch: UseFormWatch<EventFormValue>;
+  watch: UseFormWatch<CreateEventFormType>;
   className?: string;
   children?: ReactNode;
 };
@@ -25,14 +25,14 @@ const EventPreview = ({ watch, className, children }: EventPreviewProps) => {
         <div className="text-white">
           <p className="text-sm font-semibold">From</p>
           <span className="font-medium">
-            {watch('fromdate') ? dayjs(watch('fromdate')).format('DD MMM YYYY') : '-'},
+            {watch('fromDate') ? dayjs(watch('fromDate')).format('DD MMM YYYY') : '-'},
           </span>
-          <span className="ml-1 font-medium">{watch('fromtime') || '-'}</span>
+          <span className="ml-1 font-medium">{watch('fromTime') || '-'}</span>
           <p className="mt-3 text-sm font-semibold">To</p>
           <span className="font-medium">
-            {watch('fromdate') ? dayjs(watch('todate')).format('DD MMM YYYY') : '-'},
+            {watch('toDate') ? dayjs(watch('toDate')).format('DD MMM YYYY') : '-'},
           </span>
-          <span className="ml-1 font-medium">{watch('totime') || '-'}</span>
+          <span className="ml-1 font-medium">{watch('toTime') || '-'}</span>
         </div>
       </section>
     </section>
