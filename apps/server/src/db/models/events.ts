@@ -89,4 +89,63 @@ export class Events {
       where: { id: eventId },
     });
   }
+
+  static async findAllEvents() {
+    const events = await prisma.event.findMany({
+      orderBy: {
+        Attendee: {
+          _count: 'desc',
+        },
+      },
+    });
+    return events;
+  }
+
+  static async filterByCategory(category: string) {
+    const events = await prisma.event.findMany({
+      where: {
+        category: category,
+      },
+    });
+
+    return events;
+  }
+
+  static async filterByDate(startDate: string, endDate: string) {
+    const events = await prisma.event.findMany({
+      where: {
+        eventDate: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+      orderBy: {
+        eventDate: 'desc',
+      },
+    });
+
+    return events;
+  }
+
+  static async filterByAttendes() {
+    const events = await prisma.event.findMany({
+      orderBy: {
+        Attendee: {
+          _count: 'desc',
+        },
+      },
+    });
+
+    return events;
+  }
+
+  static async filterByLocation(venueAddress: string) {
+    const events = await prisma.event.findMany({
+      where: {
+        venueAddress: venueAddress,
+      },
+    });
+
+    return events;
+  }
 }

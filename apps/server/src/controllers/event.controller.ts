@@ -29,6 +29,46 @@ export const getEventBySlug = catchAsync(
     return res.status(200).json(event);
   }
 );
+export const allPlannedEvents = catchAsync(async (req, res) => {
+  const getEventsData = await Events.findAllEvents();
+  if (getEventsData.length != 0) {
+    return res.status(200).json({ message: 'All Events Data', data: getEventsData });
+  } else {
+    return res.status(200).json({ data: [] });
+  }
+});
+
+export const filterEvents = catchAsync(async (req, res) => {
+  try {
+    const { category, startDate, endDate, location, attendees } = req.query;
+
+    if (!category && !startDate && !endDate && !location && !attendees) {
+      return res
+        .status(400)
+        .json({ message: 'Please provide at least one query parameter to filter events.' });
+    }
+
+    const filters: any = {};
+    let getEventsData: any = [];
+
+    if (category) {
+      getEventsData = await Events.filterByCategory(category as string);
+    } else if (startDate && endDate) {
+      getEventsData = await Events.filterByDate(startDate as string, endDate as string);
+    } else if (location) {
+      getEventsData = await Events.filterByLocation(location as string);
+    } else if (attendees) {
+      getEventsData = await Events.filterByAttendes();
+    }
+
+    return res.status(200).json({ message: 'All Events Data', data: getEventsData });
+  } catch (e: any) {
+    return res.status(502).json({
+      message: 'There was an error processing your request.',
+      reason: e.message || e,
+    });
+  }
+});
 
 export const createEvent = catchAsync(
   async (req: AuthenticatedRequest<{}, {}, createEventBody>, res) => {

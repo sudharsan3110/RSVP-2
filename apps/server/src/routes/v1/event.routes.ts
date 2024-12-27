@@ -2,13 +2,15 @@ import { Router } from 'express';
 import {
   createEvent,
   createAttendee,
-  updateEvent,
   deleteEvent,
   plannedByUser,
   getAttendeeDetails,
   verifyQrToken,
   getAttendeeByQrToken,
   getEventBySlug,
+  updateEvent,
+  allPlannedEvents,
+  filterEvents,
 } from '@/controllers/event.controller';
 import {
   CreateEventSchema,
@@ -59,6 +61,9 @@ eventRouter.delete(
   eventManageMiddleware(['Admin']),
   deleteEvent
 );
+eventRouter.get('/', allPlannedEvents);
+
+eventRouter.get('/filter', authMiddleware, filterEvents);
 
 eventRouter.get(
   '/user',
