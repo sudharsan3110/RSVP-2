@@ -73,5 +73,5 @@ export const userUpdateSchema = z.object({
 });
 
 export const eventParamsSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.string(),
 });

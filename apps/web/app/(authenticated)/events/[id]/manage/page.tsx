@@ -1,3 +1,5 @@
+'use client';
+
 import Container from '@/components/common/Container';
 import { Button } from '@/components/ui/button';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
@@ -6,8 +8,12 @@ import OverviewSection from '@/components/manage-event/overview-section';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import GuestManageSection from '@/components/manage-event/guest-manage-section';
 import MoreSection from '@/components/manage-event/more-section';
+import Communication from '@/components/manage-event/Communication';
+import { useParams } from 'next/navigation';
 
 const ManageEventPage = () => {
+  const params = useParams();
+  console.log('params', params);
   return (
     <Container className="min-h-screen space-y-8 py-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row">
@@ -43,6 +49,9 @@ const ManageEventPage = () => {
           </TabsContent>
           <TabsContent className="mt-6" value="guests">
             <GuestManageSection />
+          </TabsContent>
+          <TabsContent className="mt-6" value="communication">
+            <Communication eventId={params.id} />
           </TabsContent>
           <TabsContent className="mt-6" value="more">
             <MoreSection />

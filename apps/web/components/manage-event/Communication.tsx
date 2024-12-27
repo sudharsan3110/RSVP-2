@@ -1,0 +1,107 @@
+'use client';
+
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Card, CardContent } from '../ui/card';
+import { ScrollArea } from '../ui/scroll-area';
+import ChatMessage from './ChatMessage';
+import { FormField, FormItem } from '../ui/form';
+import Tiptap from '../ui/tiptap';
+import { communication, CommunicationForm } from '@/lib/zod/communication';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '../ui/button';
+import {
+  useCreateEventCommunication,
+  useEventCommunications,
+} from '@/lib/react-query/communication';
+import FormProvider from '../ui/form-provider';
+
+interface CommunicationProps {
+  eventId: string;
+  updatedAt: string;
+}
+
+interface CommunicationMessage {
+  user: {
+    name: string;
+  };
+  content: string;
+  time: string;
+  updatedAt: string;
+}
+
+interface CommunicationsData {
+  data: CommunicationMessage[];
+}
+
+const Communication = ({ eventId }: CommunicationProps) => {
+  const form = useForm<CommunicationForm>({
+    resolver: zodResolver(communication),
+    defaultValues: {
+      content: '',
+    },
+  });
+
+  const { mutate: createCommunication } = useCreateEventCommunication(eventId);
+  const { data: communicationsData } = useEventCommunications(eventId);
+  console.log('communicationsData', communicationsData);
+
+  const onSubmit = (data: CommunicationForm) => {
+    createCommunication(data, {
+      onSuccess: () => {
+        form.reset(); // Reset form after successful submission
+      },
+    });
+  };
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
+  };
+
+  return (
+    <section className="flex w-full flex-col space-y-8">
+      <h3>Communicate with your Attendees</h3>
+      <section>
+        <section>
+          <Card className="w-full border-none bg-transparent lg:w-1/2">
+            <CardContent>
+              <ScrollArea className="h-96 p-4">
+                {(communicationsData as CommunicationsData)?.data?.map(
+                  (msg: CommunicationMessage, index: number) => (
+                    <ChatMessage
+                      key={index}
+                      sender={msg.user.name}
+                      message={msg.content}
+                      time={formatTime(msg.updatedAt)}
+                    />
+                  )
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </section>
+        <FormProvider methods={form} onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <Tiptap description={field.value} limit={300} onChange={field.onChange} />
+              </FormItem>
+            )}
+          />
+          <Button className="float-end mt-2 rounded-[6px]" disabled={form.formState.isSubmitting}>
+            Send
+          </Button>
+        </FormProvider>
+      </section>
+    </section>
+  );
+};
+
+export default Communication;
