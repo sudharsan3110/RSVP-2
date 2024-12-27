@@ -5,6 +5,16 @@ export enum PAGINATION_ORDER {
   DESC = 'desc',
 }
 
+export enum VENUE_TYPE {
+  PHYSICAL = 'physical',
+  VIRTUAL = 'virtual',
+}
+
+export const DATE_RANGE = {
+  LOW: new Date('1970-01-01T00:00:00.000Z'),
+  HIGH: new Date('9999-12-31T23:59:59.999Z'),
+} as const;
+
 export const getEventBySlugSchema = z.object({
   slug: z.string(),
 });
@@ -44,11 +54,11 @@ export const CreateEventSchema = EventSchema.strict().refine(
 export const UpdateEventSchema = EventSchema.partial();
 
 export const eventsPlannedByUserReqSchema = z.object({
-  email: z.string().min(1, { message: 'email is required' }).email(),
-  type: z.string().min(1, { message: 'type is required' }),
-  fromDate: z.coerce.date().default(() => new Date(new Date().setDate(new Date().getDate() - 1))),
-  toDate: z.coerce.date().default(() => new Date()),
-  search: z.string().max(256).optional(),
+  search: z.string().min(1).max(256).optional(),
+  category: z.string().min(1).max(256).optional(),
+  fromDate: z.coerce.date().default(() => DATE_RANGE.LOW),
+  toDate: z.coerce.date().default(() => DATE_RANGE.HIGH),
+  venueType: z.enum([VENUE_TYPE.PHYSICAL, VENUE_TYPE.VIRTUAL]).optional(),
   page: z.coerce.number().positive().default(1).optional(),
   limit: z.coerce.number().positive().default(10).optional(),
   sortBy: z.string().max(256).optional(),

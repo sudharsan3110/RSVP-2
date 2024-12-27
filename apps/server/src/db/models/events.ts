@@ -24,33 +24,28 @@ export class Events {
     filters: IEventFilters;
     pagination: IPaginationParams;
   }) {
-    const { email, type, fromDate, toDate, search } = filters;
+    const { userId, search, category, fromDate, toDate, venueType } = filters;
     const eventsPaginator = new Paginator('Event');
-    const { page = 1, limit = 10, sortBy = 'eventDate', sortOrder = 'asc' } = pagination;
+    const { page = 1, limit = 10, sortBy = 'startTime', sortOrder = 'desc' } = pagination;
 
     const where = {
-      ...(type && { category: type }),
+      ...(userId && { creatorId: userId }),
+      ...(category && { category: category }),
       ...(fromDate &&
         toDate && {
-          eventDate: {
-            gte: fromDate,
-            lte: toDate,
-          },
+          AND: [
+            { startTime: { gte: fromDate, lte: toDate } },
+            { endTime: { gte: fromDate, lte: toDate } },
+          ],
         }),
       ...(search && {
         OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-          { category: { contains: search, mode: 'insensitive' } },
+          { name: { contains: search } },
+          { description: { contains: search } },
+          { category: { contains: search } },
         ],
       }),
-      Attendee: {
-        some: {
-          user: {
-            primary_email: email,
-          },
-        },
-      },
+      ...(venueType && { venueType: venueType})
     };
 
     const { data, metadata } = await eventsPaginator.paginate(

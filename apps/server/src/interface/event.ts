@@ -19,9 +19,10 @@ export interface CreateEventDto {
 }
 
 export interface IEventFilters {
-  email: string;
-  type: string;
+  userId?: number,
+  search?: string;
+  category?: string;
   fromDate: Date;
   toDate: Date;
-  search?: string;
+  venueType?: string;
 }

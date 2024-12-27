@@ -128,19 +128,21 @@ export const deleteEvent = catchAsync(
 );
 
 export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {}, {}>, res) => {
-  const { email, type, fromDate, toDate, search, page, limit, sortBy, sortOrder } =
+  const { search, category, fromDate, toDate, venueType, page, limit, sortBy, sortOrder } =
     eventsPlannedByUserReqSchema.parse(req.query);
 
-  const existingUser = await Users.userExists(email);
+  const userId = req.userId;
+  const existingUser = await Users.findById(userId as number);
 
   if (existingUser) {
     const plannedEvents = await Events.plannedEvents({
       filters: {
-        email,
-        type,
+        userId,
+        search,
+        category,
         fromDate,
         toDate,
-        search,
+        venueType,
       },
       pagination: {
         page,
