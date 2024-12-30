@@ -14,6 +14,18 @@ export class Events {
   static async findUnique(where: Prisma.EventWhereUniqueInput) {
     return await prisma.event.findUnique({
       where,
+      include: {
+        Cohost: {
+          select: {
+            user: {
+              select: {
+                profile_icon: true,
+                full_name: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 

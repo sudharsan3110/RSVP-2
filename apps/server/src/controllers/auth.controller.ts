@@ -43,44 +43,43 @@ export const signin = catchAsync(async (req: Request<{}, {}, SigninRequestBody>,
 });
 
 type VerifySigninBody = z.infer<typeof verifySigninSchema>;
-export const verifySignin = catchAsync(
-  async (req: Request<{}, {}, VerifySigninBody>, res, next) => {
-    const { token } = req.body;
-    const decodedToken = verifyAccessToken(token);
-    if (!decodedToken) {
-      return res.status(401).json({ message: 'Token expired or invalid' });
-    }
+export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninBody>, res) => {
+  const { token } = req.body;
+  const decodedToken = verifyAccessToken(token);
 
-    const user = await Users.checkMagicLink(decodedToken.tokenId);
-
-    if (!user) {
-      return res.status(401).json({ message: 'Token expired or invalid' });
-    }
-
-    const accessToken = generateAccessToken({ userId: user.id });
-    const refreshToken = generateRefreshToken({ userId: user.id });
-
-    await Users.updateRefreshToken(user.id, refreshToken);
-
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: config.env === 'production',
-      sameSite: 'strict',
-      maxAge: 15 * 60 * 1000,
-      path: '/',
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: config.env === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
-
-    return res.status(200).json({ accessToken, refreshToken });
+  if (!decodedToken) {
+    return res.status(401).json({ message: 'Token expired or invalid' });
   }
-);
+
+  const user = await Users.checkMagicLink(decodedToken.tokenId);
+
+  if (!user) {
+    return res.status(401).json({ message: 'Token expired or invalid' });
+  }
+
+  const accessToken = generateAccessToken({ userId: user.id });
+  const refreshToken = generateRefreshToken({ userId: user.id });
+
+  await Users.updateRefreshToken(user.id, refreshToken);
+
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: 'strict',
+    maxAge: 15 * 60 * 1000,
+    path: '/',
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+
+  return res.status(200).json({ accessToken, refreshToken });
+});
 
 export const refreshToken = catchAsync(async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken || req.body.refreshToken;

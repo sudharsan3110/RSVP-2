@@ -1,16 +1,10 @@
 import z from 'zod';
 
 const secondaryEmailSchema = z
-  .object({
-    secondary_email: z.string().email().or(z.null()),
-  })
+  .object({ secondary_email: z.string().email().or(z.null()) })
   .strict();
 
-const contactNumberSchema = z
-  .object({
-    contact: z.string(),
-  })
-  .strict();
+const contactNumberSchema = z.object({ contact: z.string() }).strict();
 
 const fullProfileSchema = z
   .object({

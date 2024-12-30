@@ -27,7 +27,7 @@ importers:
   apps/server:
     dependencies:
       '@prisma/client':
-        specifier: ^5.20.0
+        specifier: ^5.22.0
         version: 5.22.0(prisma@5.22.0)
       '@react-email/components':
         specifier: ^0.0.25

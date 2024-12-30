@@ -27,7 +27,9 @@ export const getEventBySlug = catchAsync(
 
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    return res.status(200).json(event);
+    const totalAttendees = await Attendees.countAttendees(event.id);
+
+    return res.status(200).json({ event, totalAttendees });
   }
 );
 export const allPlannedEvents = catchAsync(async (req, res) => {
