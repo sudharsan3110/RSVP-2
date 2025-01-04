@@ -13,6 +13,7 @@ model Users {
   secondary_email             String?    @db.VarChar(256)
   contact                     String?    @db.VarChar(20)
   full_name                   String     @db.VarChar(256)
+  username                    String?     @unique @db.VarChar(256)
   magicToken                  String?    @unique @db.VarChar(256)
   refreshToken                String?    @unique @db.VarChar(256)
   is_completed                Boolean    @default(false)
