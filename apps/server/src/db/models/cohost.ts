@@ -38,4 +38,15 @@ export class CohostRepository {
     });
     return cohost !== null;
   }
+
+  static async checkCreatorForEvent(userId: number, eventId: string): Promise<boolean> {
+    const creator = await prisma.cohost.findFirst({
+      where: {
+        userId,
+        eventId,
+        role: Role.Creator,
+      },
+    });
+    return creator !== null;
+  }
 }

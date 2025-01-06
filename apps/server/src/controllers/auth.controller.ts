@@ -81,42 +81,6 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
   return res.status(200).json({ accessToken, refreshToken });
 });
 
-export const refreshToken = catchAsync(async (req, res, next) => {
-  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
-
-  if (!refreshToken) {
-    return res.status(401).json({ message: 'Refresh token is required' });
-  }
-
-  const decoded = verifyRefreshToken(refreshToken);
-  if (!decoded) {
-    return res.status(403).json({ message: 'Invalid refresh token' });
-  }
-
-  try {
-    const user = await Users.findById(decoded.userId);
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ message: 'Invalid refresh token' });
-    }
-
-    const accessToken = generateAccessToken({ userId: user.id });
-
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: config.env === 'production',
-      sameSite: 'strict',
-      maxAge: 15 * 60 * 1000,
-      path: '/',
-    });
-
-    return res.json({
-      accessToken,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
 export const logout = catchAsync(async (req, res, next) => {
   const { userId } = req.body;
 

@@ -11,6 +11,7 @@ import {
   updateEvent,
   allPlannedEvents,
   filterEvents,
+  softDeleteAttendee,
 } from '@/controllers/event.controller';
 import {
   CreateEventSchema,
@@ -106,5 +107,12 @@ eventRouter.get(
   validate({ params: qrTokenSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
   getAttendeeByQrToken
+);
+
+eventRouter.delete(
+  '/:eventId/attendee',
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  softDeleteAttendee
 );
 export { eventRouter };

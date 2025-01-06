@@ -164,11 +164,12 @@ export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {},
 
 export const createAttendee = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, CreateAttendeeBody>, res) => {
-    if (!req.userId) {
+    const userId = req.userId;
+    if (!userId) {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    const user = await Users.findById(req.userId);
+    const user = await Users.findById(userId);
     if (!user || !user.is_completed) {
       return res.status(400).json({ message: 'User profile is not completed' });
     }
@@ -190,8 +191,13 @@ export const createAttendee = catchAsync(
       return res.status(400).json({ message: 'Event has expired' });
     }
 
-    const existingAttendee = await Attendees.findByUserIdAndEventId(req.userId, eventId);
+    const existingAttendee = await Attendees.findByUserIdAndEventId(userId, eventId);
     if (existingAttendee) {
+      const deleted_user = existingAttendee.deleted;
+      if (deleted_user) {
+        await Attendees.restoreAttendee(existingAttendee.id);
+        return res.status(200).json({ message: 'Attendee restored successfully' });
+      }
       return res.status(400).json({ message: 'User already registered for this event' });
     }
 
@@ -236,13 +242,14 @@ export const getAttendeeDetails = catchAsync(
       return res.status(404).json({ message: 'Attendee not found' });
     }
 
-    // Case 1: User is the attendee
-    if (attendee.userId === userId) {
+    if (attendee.userId.toString() === userId?.toString()) {
+      const deleted_user = attendee.deleted;
+      if (deleted_user) {
+        return res.status(400).json({ message: 'Attendee has been deleted' });
+      }
       return res.status(200).json(attendee);
     }
 
-    // Case 2: Check if user is cohost
-    if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
     const hasAccess = await CohostRepository.checkHostForEvent(userId, attendee.eventId);
     if (hasAccess) {
       return res.status(200).json(attendee);
@@ -282,6 +289,11 @@ export const verifyQrToken = catchAsync(
       return res.status(404).json({ message: 'Attendee not found' });
     }
 
+    const deleted_user = attendee.deleted;
+    if (deleted_user) {
+      return res.status(400).json({ message: 'Attendee has been deleted' });
+    }
+
     if (attendee.eventId !== eventId) {
       return res.status(400).json({ message: 'Not verified (wrong event)' });
     }
@@ -311,5 +323,38 @@ export const verifyQrToken = catchAsync(
     });
 
     return res.status(200).json({ message: 'Ticket is valid' });
+  }
+);
+
+export const softDeleteAttendee = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
+    const { eventId } = req.params;
+    const userId = req.userId;
+
+    const attendee = await Attendees.findByUserIdAndEventId(userId, eventId);
+    if (!attendee) {
+      return res.status(404).json({ message: 'Attendee record not found' });
+    }
+
+    if (attendee.deleted) {
+      return res.status(400).json({ message: 'Attendee already deleted' });
+    }
+
+    if (attendee.userId.toString() === userId?.toString()) {
+      await Attendees.softDelete(attendee.id);
+      return res.status(200).json({
+        message: 'Attendee removed successfully',
+      });
+    }
+
+    const isCreator = await CohostRepository.checkCreatorForEvent(userId, attendee.eventId);
+    if (isCreator) {
+      await Attendees.softDelete(attendee.id);
+      return res.status(200).json({
+        message: 'Attendee removed successfully',
+      });
+    }
+
+    return res.status(403).json({ message: 'Unauthorized access' });
   }
 );

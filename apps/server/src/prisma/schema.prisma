@@ -107,6 +107,8 @@ model Attendee {
   qrToken          String    @unique @db.VarChar(512)
   status           Status    @default(Waiting)
   allowedStatus    Boolean   @default(false)
+  deleted          Boolean   @default(false) @map("deleted")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
   user             Users     @relation(fields: [userId], references: [id])
   event            Event     @relation(fields: [eventId], references: [id])
 

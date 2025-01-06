@@ -19,6 +19,24 @@ export class Attendees {
     });
   }
 
+  static async softDelete(id: string) {
+    return await prisma.attendee.update({
+      where: { id },
+      data: {
+        deleted: true,
+      },
+    });
+  }
+
+  static async restoreAttendee(id: string) {
+    return await prisma.attendee.update({
+      where: { id },
+      data: {
+        deleted: false,
+      },
+    });
+  }
+
   static async update(id: string, data: any) {
     return await prisma.attendee.update({
       where: { id },

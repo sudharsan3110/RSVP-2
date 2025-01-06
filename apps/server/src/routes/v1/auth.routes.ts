@@ -1,4 +1,4 @@
-import { me, refreshToken, signin, verifySignin, logout } from '@/controllers/auth.controller';
+import { me, signin, verifySignin, logout } from '@/controllers/auth.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { validate } from '@/middleware/validate';
 import { SigninSchema, verifySigninSchema } from '@/validations/auth.validation';
@@ -9,10 +9,6 @@ const authRouter: Router = Router();
 authRouter.post('/signin', validate({ body: SigninSchema }), signin);
 
 authRouter.post('/verify-signin', validate({ body: verifySigninSchema }), verifySignin);
-
-authRouter.post('/token', refreshToken);
-
-authRouter.post('/token', refreshToken);
 
 authRouter.post('/logout', authMiddleware, logout);
 
