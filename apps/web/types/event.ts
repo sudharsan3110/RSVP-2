@@ -17,6 +17,19 @@ export interface IEvent {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  Cohost: ICohost[];
 }
 
-export type VenueType = 'physical' | 'virtual';
+export interface ICohost {
+  user: {
+    profile_icon: string;
+    full_name: string;
+  };
+}
+
+export interface IEventResponse {
+  event: IEvent;
+  totalAttendees: number;
+}
+
+export type VenueType = 'physical' | 'virtual' | 'later';

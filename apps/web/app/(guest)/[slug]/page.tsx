@@ -8,13 +8,13 @@ const EventDetailPage = async ({ params }: { params: { slug: string } }) => {
   const slug = params.slug;
 
   try {
-    const event = await eventAPI.getEventBySlug(slug);
-    if (!event) {
+    const eventData = await eventAPI.getEventBySlug(slug);
+    if (!eventData) {
       notFound();
     }
     return (
       <Container className="container-main pt-8">
-        <EventDetail event={event} />
+        <EventDetail eventData={eventData} />
       </Container>
     );
   } catch (error) {

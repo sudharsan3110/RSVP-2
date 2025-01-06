@@ -44,7 +44,6 @@ const Communication = ({ eventId }: CommunicationProps) => {
 
   const { mutate: createCommunication } = useCreateEventCommunication(eventId);
   const { data: communicationsData } = useEventCommunications(eventId);
-  console.log('communicationsData', communicationsData);
 
   const onSubmit = (data: CommunicationForm) => {
     createCommunication(data, {

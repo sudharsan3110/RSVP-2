@@ -49,83 +49,78 @@ const ProfileForm = ({ user }: Props) => {
   }, [profileIcon]);
 
   return (
-    <>
-      <FormProvider
-        methods={form}
-        onSubmit={form.handleSubmit(onSubmit, (error) => {
-          console.log(error);
-        })}
-      >
-        <ProfileSection
-          title="Public profile"
-          description="This will be displayed on your profile."
+    <FormProvider
+      methods={form}
+      onSubmit={form.handleSubmit(onSubmit, (error) => {
+        console.log(error);
+      })}
+    >
+      <ProfileSection title="Public profile" description="This will be displayed on your profile.">
+        <div className="flex items-end">
+          <Image
+            width={80}
+            height={80}
+            priority
+            src={profilePictureUrl}
+            alt="Profile picture"
+            className="rounded-full border-2 border-solid border-purple-500 bg-white"
+          />
+          <ProfilePictureEditPopover
+            profilePictureUrl={profilePictureUrl}
+            setProfilePictureState={(value) => form.setValue('profile_icon', value)}
+          />
+        </div>
+        <FormInput control={form.control} name="full_name" label="Full name" type="text" />
+        <FormInput control={form.control} name="location" label="Location" type="text" />
+        <div className="space-y-1.5">
+          <FormTextArea control={form.control} name="bio" label="Bio" />
+          <p className="text-sm text-secondary">{500 - bio?.length} characters left</p>
+        </div>
+        <FormInput
+          control={form.control}
+          name="twitter"
+          label="Twitter/X"
+          type="text"
+          inputClassName="rounded-l-none"
         >
-          <div className="flex items-end">
-            <Image
-              width={80}
-              height={80}
-              priority
-              src={profilePictureUrl}
-              alt="Profile picture"
-              className="rounded-full border-2 border-solid border-purple-500 bg-white"
-            />
-            <ProfilePictureEditPopover
-              profilePictureUrl={profilePictureUrl}
-              setProfilePictureState={(value) => form.setValue('profile_icon', value)}
-            />
-          </div>
-          <FormInput control={form.control} name="full_name" label="Full name" type="text" />
-          <FormInput control={form.control} name="location" label="Location" type="text" />
-          <div className="space-y-1.5">
-            <FormTextArea control={form.control} name="bio" label="Bio" />
-            <p className="text-sm text-secondary">{500 - bio?.length} characters left</p>
-          </div>
-          <FormInput
-            control={form.control}
-            name="twitter"
-            label="Twitter/X"
-            type="text"
-            inputClassName="rounded-l-none"
+          <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://x.com/</span>
+        </FormInput>
+        <FormInput
+          control={form.control}
+          name="instagram"
+          label="Instagram"
+          type="text"
+          inputClassName="rounded-l-none"
+        >
+          <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">
+            https://instagram.com/
+          </span>
+        </FormInput>
+        <FormInput
+          control={form.control}
+          name="website"
+          label="Website"
+          type="text"
+          inputClassName="rounded-l-none"
+        >
+          <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://</span>
+        </FormInput>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            onClick={resetForm}
+            type="reset"
+            variant="tertiary"
+            radius="sm"
+            disabled={!form.formState.isDirty}
           >
-            <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://x.com/</span>
-          </FormInput>
-          <FormInput
-            control={form.control}
-            name="instagram"
-            label="Instagram"
-            type="text"
-            inputClassName="rounded-l-none"
-          >
-            <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">
-              https://instagram.com/
-            </span>
-          </FormInput>
-          <FormInput
-            control={form.control}
-            name="website"
-            label="Website"
-            type="text"
-            inputClassName="rounded-l-none"
-          >
-            <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://</span>
-          </FormInput>
-          <div className="ml-auto flex items-center gap-2">
-            <Button
-              onClick={resetForm}
-              type="reset"
-              variant="tertiary"
-              radius="sm"
-              disabled={!form.formState.isDirty}
-            >
-              Reset
-            </Button>
-            <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
-              Save
-            </Button>
-          </div>
-        </ProfileSection>
-      </FormProvider>
-    </>
+            Reset
+          </Button>
+          <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
+            Save
+          </Button>
+        </div>
+      </ProfileSection>
+    </FormProvider>
   );
 };
 

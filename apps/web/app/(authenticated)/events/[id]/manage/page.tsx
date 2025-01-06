@@ -13,7 +13,6 @@ import { useParams } from 'next/navigation';
 
 const ManageEventPage = () => {
   const params = useParams();
-  console.log('params', params);
   return (
     <Container className="min-h-screen space-y-8 py-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row">

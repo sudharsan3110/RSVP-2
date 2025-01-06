@@ -5,11 +5,21 @@ import { IEvent } from '@/types/event';
 import dayjs from 'dayjs';
 import GetTicketsButton from './GetTicketsButton';
 import AvatarGroup from './AvatarGroup';
+import { userAvatarOptions } from '@/utils/constants';
+import { ClockIcon, LinkIcon } from 'lucide-react';
 
-const EventDetail = ({ event }: { event: IEvent }) => {
+const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees: number } }) => {
+  const { event, totalAttendees } = eventData;
   const formattedStartDate = dayjs(event.startTime).format('dddd, MMMM D');
   const formattedStartTime = dayjs(event.startTime).format('h:mm A');
   const formattedEndTime = dayjs(event.endTime).format('h:mm A');
+  const additionalCount = totalAttendees > 4 ? totalAttendees - 4 : 0;
+  const userAvatarLimit = totalAttendees > 4 ? 4 : totalAttendees;
+
+  const getProfilePictureUrl = (profileIConId: number | string) => {
+    const profileUrl = userAvatarOptions.find((option) => option.id === profileIConId);
+    return profileUrl?.src ?? userAvatarOptions[0]?.src!;
+  };
 
   return (
     <main>
@@ -34,7 +44,7 @@ const EventDetail = ({ event }: { event: IEvent }) => {
       </div>
       <article className="my-6 flex flex-col items-start md:my-12">
         <p className="mb-4 inline-block rounded-full bg-primary px-4 py-2 text-sm capitalize text-white">
-          {event?.category} Event
+          {event?.category}
         </p>
         <p className="text-2xl font-bold md:text-4xl">{event?.name}</p>
       </article>
@@ -53,29 +63,42 @@ const EventDetail = ({ event }: { event: IEvent }) => {
           </section>
           <section className="flex items-center">
             <div className="mr-[20px] rounded-[8px] bg-dark-500 p-3">
-              <MapPinIcon className="h-[24px] w-[24px]" />
+              {event?.venueType === 'physical' && <MapPinIcon className="h-[24px] w-[24px]" />}
+              {event?.venueType === 'virtual' && <LinkIcon className="h-[24px] w-[24px]" />}
+              {event?.venueType === 'later' && <ClockIcon className="h-[24px] w-[24px]" />}
             </div>
             <article className="font-bold">
-              <p>Location</p>
+              <p>
+                {event?.venueType === 'physical' && 'Location'}
+                {event?.venueType === 'virtual' && 'Event Link'}
+                {event?.venueType === 'later' && 'To be announced'}
+              </p>
               <p className="text-sm text-secondary">
-                {event?.venueType === 'physical'
-                  ? event?.venueAddress || 'Location not specified'
-                  : event?.venueUrl || 'URL not specified'}
+                {event?.venueType === 'physical' &&
+                  (event?.venueAddress ?? 'Location not specified')}
+                {event?.venueType === 'virtual' && (event?.venueUrl ?? 'URL not specified')}
+                {event?.venueType === 'later' &&
+                  'You will be notified once host updates the details'}
               </p>
             </article>
           </section>
           <section className="mt-6 p-3 pl-0">
-            <p className="font-semibold">Hosted By</p>
-            <div className="mt-3 flex items-center">
-              <Image
-                src="/images/user-avatar-bald-beard.svg"
-                alt="Host Avatar"
-                width={48}
-                height={48}
-                className="rounded-full"
-              />
-              <p className="ml-3 text-sm font-medium text-secondary">Quireverse, Anime Community</p>
-            </div>
+            <p className="font-semibold">Hosted {event?.Cohost.length > 1 && '& Cohosted'} By</p>
+            {event?.Cohost.length > 0 &&
+              event?.Cohost?.map((cohost, index) => (
+                <div className="mt-3 flex items-center" key={index}>
+                  <Image
+                    src={getProfilePictureUrl(cohost.user.profile_icon)}
+                    alt="Host Avatar"
+                    width={48}
+                    height={48}
+                    className="rounded-full"
+                  />
+                  <p className="ml-3 text-sm font-medium capitalize text-secondary">
+                    {cohost.user.full_name}
+                  </p>
+                </div>
+              ))}
           </section>
           <article className="mt-12">
             <h2 className="text-2xl font-bold">About Event</h2>
@@ -90,11 +113,15 @@ const EventDetail = ({ event }: { event: IEvent }) => {
         <section className="w-full md:w-[481px]">
           <section className="w-full rounded-lg bg-dark-900 p-6 shadow-lg md:w-[481px]">
             <h2 className="text-xl font-bold">Registration</h2>
-            <p className="mt-2 font-semibold">20 Seats are Remaining.</p>
-            <div className="flex items-center pb-2 pt-4">
-              <AvatarGroup />
-              <p className="ml-3 text-sm font-semibold">402 going</p>
-            </div>
+            <p className="mt-2 font-semibold">
+              {event?.capacity - totalAttendees} Seats are Remaining.
+            </p>
+            {totalAttendees > 0 && (
+              <div className="flex items-center pb-2 pt-4">
+                <AvatarGroup additionalCount={additionalCount} limit={userAvatarLimit} />
+                <p className="ml-3 text-sm font-semibold">{totalAttendees} going</p>
+              </div>
+            )}
             {event?.hostPermissionRequired && (
               <section className="mt-4 flex items-center">
                 <CheckBadgeIcon className="mr-2.5 size-6 text-green-500" />

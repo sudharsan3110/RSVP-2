@@ -21,7 +21,7 @@ export const useCreateEvent = () => {
 };
 
 export const useCreateAttendee = () => {
-  return useMutation({
+  return useMutation<AxiosResponse, AxiosError<ErrorResponse>, string>({
     mutationFn: eventAPI.createAttendee,
     onSuccess: () => {
       toast.success('Attendee created successfully!');

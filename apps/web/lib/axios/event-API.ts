@@ -1,4 +1,4 @@
-import { IEvent } from '@/types/event';
+import { IEventResponse } from '@/types/event';
 import { CreateEventSubmissionType } from '../zod/event';
 import { CommunicationForm } from '../zod/communication';
 import api from './instance';
@@ -20,7 +20,7 @@ export const eventAPI = {
     return api.post(`event/${eventId}/attendees`);
   },
 
-  getEventBySlug: async (slug: string): Promise<IEvent> => {
+  getEventBySlug: async (slug: string): Promise<IEventResponse> => {
     const response = await api.get(`/event/slug/${slug}`);
     return response.data;
   },
