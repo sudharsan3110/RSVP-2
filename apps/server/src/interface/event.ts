@@ -19,7 +19,7 @@ export interface CreateEventDto {
 }
 
 export interface IEventFilters {
-  userId?: number,
+  userId?: number;
   search?: string;
   category?: string;
   fromDate: Date;

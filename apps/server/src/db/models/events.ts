@@ -57,7 +57,7 @@ export class Events {
           { category: { contains: search } },
         ],
       }),
-      ...(venueType && { venueType: venueType})
+      ...(venueType && { venueType: venueType }),
     };
 
     const { data, metadata } = await eventsPaginator.paginate(
