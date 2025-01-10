@@ -23,3 +23,7 @@ export const profilePayloadSchema = z.union([
   contactNumberSchema,
   fullProfileSchema,
 ]);
+
+export const usernameSchema = z.object({
+  username: z.string(),
+});

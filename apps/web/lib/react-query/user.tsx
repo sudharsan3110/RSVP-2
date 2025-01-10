@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 import { userAPI } from '../axios/user-API';
@@ -15,5 +15,12 @@ export const useProfileUpdate = () => {
     onError: ({ message }) => {
       toast(message);
     },
+  });
+};
+
+export const useUserDetailsByUsername = (username: string) => {
+  return useQuery({
+    queryKey: ['username', username],
+    queryFn: () => userAPI.getUserByUsername(username),
   });
 };

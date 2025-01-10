@@ -12,23 +12,31 @@ import { IEvent } from '@/types/event';
 
 const PlannedEvents = () => {
   const searchParams = useSearchParams();
-  const params: Record<string, string | undefined> = Object.fromEntries(
-    searchParams.entries()
-  );
+  const params: Record<string, string | undefined> = Object.fromEntries(searchParams.entries());
 
   const today = new Date();
-  const { data: events, isLoading, isError } = useQuery<IEvent[] | null>({
+  const {
+    data: events,
+    isLoading,
+    isError,
+  } = useQuery<IEvent[] | null>({
     queryKey: ['events', params],
     queryFn: () => eventAPI.getEventsBySearchParams(params),
   });
 
   const upcomingEvents = events
     ?.filter((event) => new Date(event.endTime) >= today)
-    .sort((event1, event2) => new Date(event1.startTime).getTime() - new Date(event2.startTime).getTime());
+    .sort(
+      (event1, event2) =>
+        new Date(event1.startTime).getTime() - new Date(event2.startTime).getTime()
+    );
 
   const pastEvents = events
     ?.filter((event) => new Date(event.endTime) < today)
-    .sort((event1, event2) => new Date(event2.startTime).getTime() - new Date(event1.startTime).getTime());
+    .sort(
+      (event1, event2) =>
+        new Date(event2.startTime).getTime() - new Date(event1.startTime).getTime()
+    );
 
   if (isLoading) {
     return (

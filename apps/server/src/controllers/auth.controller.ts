@@ -2,12 +2,7 @@ import config from '@/config/config';
 import { Users } from '@/db/models/users';
 import { AuthenticatedRequest } from '@/middleware/authMiddleware';
 import catchAsync from '@/utils/catchAsync';
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyAccessToken,
-  verifyRefreshToken,
-} from '@/utils/jwt';
+import { generateAccessToken, generateRefreshToken, verifyAccessToken } from '@/utils/jwt';
 import EmailService from '@/utils/sendEmail';
 import { SigninSchema, verifySigninSchema } from '@/validations/auth.validation';
 import { Request } from 'express';
@@ -95,7 +90,7 @@ export const me = catchAsync(async (req: AuthenticatedRequest, res, next) => {
   const userId = req.userId;
   if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
-  const user = await Users.findById(userId);
+  const user = await Users.findById(userId.toString());
 
   if (!user) return res.status(401).json({ message: 'Invalid or expired token' });
 

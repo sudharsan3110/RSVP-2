@@ -12,7 +12,7 @@ interface Event {
   location: string;
   attendees: string;
   isFree: boolean;
-  slug:string;
+  slug: string;
 }
 
 interface DateGroup {
@@ -38,7 +38,10 @@ const transformEventsToTimelineData = (events: IEvent[]) => {
           day: 'numeric',
           year: 'numeric',
         })}`,
-      location: event.venueType === 'physical' ? event.venueAddress || 'Location TBD' : event.venueUrl || 'Virtual Event',
+      location:
+        event.venueType === 'physical'
+          ? event.venueAddress || 'Location TBD'
+          : event.venueUrl || 'Virtual Event',
       attendees: `${event.capacity} going`,
       isFree: !event.hostPermissionRequired,
     };
@@ -58,23 +61,20 @@ const transformEventsToTimelineData = (events: IEvent[]) => {
 };
 
 const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
-
-  if(events===null || events.length===0) {
+  if (events === null || events.length === 0) {
     return (
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-semibold text-gray-600">
-          No Events Found
-        </h2>
+      <div className="py-8 text-center">
+        <h2 className="text-2xl font-semibold text-gray-600">No Events Found</h2>
         <p className="mt-4 text-gray-600">
-          It seems like there are no events matching your search criteria at the moment. 
-          Please try adjusting your filters or check back later for more updates.
+          It seems like there are no events matching your search criteria at the moment. Please try
+          adjusting your filters or check back later for more updates.
         </p>
       </div>
     );
   }
 
   const timelineData = events ? transformEventsToTimelineData(events) : [];
-  
+
   return (
     <div className="bg-dark mx-auto max-w-[70rem] text-white md:w-[90%]">
       <div className="relative md:pl-24">
@@ -103,7 +103,7 @@ const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
                   {/* Container for each day */}
                   <Card
                     key={eventIndex}
-                    className="mb-4 flex flex-col-reverse justify-between gap-3 rounded-lg border border-dark-500 bg-dark-900 p-3 text-card-foreground shadow-sm md:h-auto md:min-h-[190px] md:flex-row hover:border-r-4 hover:border-b-4 hover:border-purple-500 transition-all duration-200 cursor-pointer"
+                    className="mb-4 flex cursor-pointer flex-col-reverse justify-between gap-3 rounded-lg border border-dark-500 bg-dark-900 p-3 text-card-foreground shadow-sm transition-all duration-200 hover:border-b-4 hover:border-r-4 hover:border-purple-500 md:h-auto md:min-h-[190px] md:flex-row"
                   >
                     <div className="flex h-auto w-full flex-col justify-between gap-4 md:w-3/4">
                       <div className="flex flex-col gap-2">
@@ -111,7 +111,9 @@ const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
                           <CardTitle className="text-xl font-bold leading-[25.2px] tracking-tight">
                             {event.title}
                           </CardTitle>
-                          <p className="text-base font-semibold leading-[19.6px]">{event.category}</p>
+                          <p className="text-base font-semibold leading-[19.6px]">
+                            {event.category}
+                          </p>
                         </CardHeader>
 
                         <CardContent className="flex flex-col gap-1 p-0 pt-2">
@@ -157,6 +159,6 @@ const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
       </div>
     </div>
   );
-}
+};
 
 export default ComicConTimeline;

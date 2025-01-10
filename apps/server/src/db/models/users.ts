@@ -82,4 +82,11 @@ export class Users {
       data: { refreshToken },
     });
   }
+
+  static async findByUserName(username: string) {
+    const user = await prisma.users.findUnique({
+      where: { username },
+    });
+    return user;
+  }
 }

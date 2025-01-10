@@ -25,10 +25,12 @@ export const eventAPI = {
     return response.data;
   },
 
-  getEventsBySearchParams: async (searchParams: Record<string, string | undefined>): Promise<IEvent[]> => {
+  getEventsBySearchParams: async (
+    searchParams: Record<string, string | undefined>
+  ): Promise<IEvent[]> => {
     const queryString = new URLSearchParams(searchParams as Record<string, string>).toString();
     const url = queryString ? `/event/user?${queryString}` : `/event/user`;
     const response = await api.get(url);
     return response.data.data.events;
-  },  
+  },
 };
