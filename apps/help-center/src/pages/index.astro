@@ -1,0 +1,49 @@
+---
+import Layout from "../layouts/Layout.astro";
+const posts = await Astro.glob("./blog/*.mdx");
+---
+
+<Layout title="Help Center">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center">
+      <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">
+        Welcome. How can we help?
+      </h1>
+      <div class="mt-8 max-w-3xl mx-auto">
+        <div class="relative">
+          <input
+            type="text"
+            id="search"
+            class="block w-full rounded-lg border-gray-300 pl-4 pr-12 focus:border-indigo-500 focus:ring-indigo-500 text-lg py-4"
+            placeholder="Search help docs, tutorials and more..."
+          />
+          <div class="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
+            <kbd
+              class="inline-flex items-center rounded border border-gray-200 px-2 font-sans text-sm text-gray-400"
+              >⌘K</kbd
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Popular Articles</h2>
+      <div class="grid gap-6 lg:grid-cols-2">
+        {
+          posts.map((post) => (
+            <a
+              href={post.url}
+              class="block p-6 bg-white rounded-lg border hover:shadow-lg transition"
+            >
+              <h2 class="text-xl font-semibold text-gray-900">
+                {post.frontmatter.title}
+              </h2>
+              <p class="mt-2 text-gray-600">{post.frontmatter.description}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </main>
+</Layout>

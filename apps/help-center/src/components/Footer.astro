@@ -1,0 +1,78 @@
+---
+const footerConfig = {
+  sections: [
+    {
+      title: "Resources",
+      links: [
+        { label: "Blog", url: "/blog" },
+        { label: "API Docs", url: "/api-docs" },
+        { label: "Pricing", url: "/pricing" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { label: "Terms", url: "/terms" },
+        { label: "Privacy Policy", url: "/privacy" },
+        { label: "Security", url: "/security" },
+      ],
+    },
+    {
+      title: "Connect",
+      socialLinks: [
+        {
+          platform: "Email",
+          url: "mailto:support@example.com",
+          icon: "envelope",
+        },
+        {
+          platform: "Twitter",
+          url: "https://twitter.com/example",
+          icon: "twitter",
+        },
+      ],
+    },
+  ],
+};
+---
+
+<footer class="py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div>
+        <a href="/" class="text-xl font-bold">Help Center</a>
+      </div>
+      {
+        footerConfig.sections.map((section) => (
+          <div>
+            <h3 class="font-semibold mb-4">{section.title}</h3>
+            {section.links && (
+              <ul class="space-y-2">
+                {section.links.map((link) => (
+                  <li>
+                    <a href={link.url}>{link.label}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {section.socialLinks && (
+              <div class="flex flex-col space-y-2 ">
+                {section.socialLinks.map((social) => (
+                  <a href={social.url} aria-label={social.platform}>
+                    {/* <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <!-- Replace this with a real icon system if needed -->
+                    <title>{social.platform}</title>
+                    <path d="M0 0h24v24H0z" fill="none"></path>
+                    <path d={social.icon}></path>
+                  </svg> */}
+                    <span>{social.platform}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</footer>
