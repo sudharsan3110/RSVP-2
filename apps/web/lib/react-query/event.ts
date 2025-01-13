@@ -31,3 +31,17 @@ export const useCreateAttendee = () => {
     },
   });
 };
+
+export const useGetEventDetails = () => {
+  return useMutation<AxiosResponse, AxiosError<ErrorResponse>, string>({
+    mutationFn: eventAPI.getEventById,
+  });
+};
+
+export const useGetAttendeeDetails = () => {
+  return useMutation<AxiosResponse, AxiosError<ErrorResponse>, { eventId: string; userId: string }>(
+    {
+      mutationFn: eventAPI.getAttendee,
+    }
+  );
+};

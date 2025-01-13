@@ -13,7 +13,6 @@ interface Event {
   attendees: string;
   isFree: boolean;
   slug: string;
-
 }
 
 interface DateGroup {
@@ -99,7 +98,7 @@ const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
                 {dateGroup.date}
               </div>
 
-              {dateGroup.events.map((event, eventIndex) => (
+              {dateGroup?.events?.map((event, eventIndex) => (
                 <Link key={eventIndex} href={`/${event.slug}`}>
                   {/* Container for each day */}
                   <Card
@@ -122,6 +121,15 @@ const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
                           <p className="text-sm font-medium leading-[19.6px]">{event.location}</p>
                         </CardContent>
                       </div>
+                    </div>
+                    <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
+                      <div className="flex flex-row items-center justify-between gap-1 border-r-2 pr-3">
+                        {/* Tick */}
+                        <Icons.tick />
+                        <span className="text-[14px] font-semibold leading-[16.8px]">
+                          {event.attendees}
+                        </span>
+                      </div>
 
                       <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
                         <div className="flex flex-row items-center justify-between gap-1 border-r-2 pr-3">
@@ -132,37 +140,28 @@ const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
                           </span>
                         </div>
 
-                        <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
-                          <div className="flex flex-row items-center justify-between gap-1 border-r-2 pr-3">
-                            {/* Tick */}
-                            <Icons.tick />
-                            <span className="text-[14px] font-semibold leading-[16.8px]">
-                              {event.attendees}
-                            </span>
-                          </div>
-
-                          <div className="flex flex-row items-center justify-between gap-1">
-                            {/* Ticket Icon */}
-                            <Icons.ticket />
-                            <span className="text-[14px] font-semibold leading-[18px]">Free</span>
-                          </div>
+                        <div className="flex flex-row items-center justify-between gap-1">
+                          {/* Ticket Icon */}
+                          <Icons.ticket />
+                          <span className="text-[14px] font-semibold leading-[18px]">Free</span>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="relative min-h-[350px] w-full rounded-md md:h-auto md:min-h-[160px] md:min-w-[160px] md:max-w-[160px]">
-                        <div className="w-full overflow-hidden rounded-md">
-                          <Image
-                            src={eventImageSrc}
-                            alt={event.title}
-                            fill
-                            style={{ objectFit: 'cover' }}
-                            className="rounded-md"
-                          />
-                        </div>
+                    <div className="relative min-h-[350px] w-full rounded-md md:h-auto md:min-h-[160px] md:min-w-[160px] md:max-w-[160px]">
+                      <div className="w-full overflow-hidden rounded-md">
+                        <Image
+                          src={eventImageSrc}
+                          alt={event.title}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          className="rounded-md"
+                        />
                       </div>
-                    </Card>
-                  </Link>
-                ))}
+                    </div>
+                  </Card>
+                </Link>
+              ))}
             </div>
           </div>
         ))}

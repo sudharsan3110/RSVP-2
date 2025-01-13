@@ -12,6 +12,7 @@ import {
   allPlannedEvents,
   filterEvents,
   softDeleteAttendee,
+  getEventById,
 } from '@/controllers/event.controller';
 import {
   CreateEventSchema,
@@ -40,7 +41,6 @@ import {
   uploadEventImage,
 } from '@/controllers/update.controller';
 import upload from '@/middleware/multerUploadMiddleware';
-import { createNotification, getNotification } from '@/controllers/update.controller';
 import { Role } from '@prisma/client';
 
 const eventRouter: Router = Router();
@@ -48,6 +48,8 @@ const eventRouter: Router = Router();
 eventRouter.get('/slug/:slug', validate({ params: getEventBySlugSchema }), getEventBySlug);
 
 eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEvent);
+
+eventRouter.get('/:eventId', authMiddleware, getEventById);
 
 eventRouter.patch(
   '/:eventId',
@@ -97,9 +99,9 @@ eventRouter.get(
   getNotification
 );
 eventRouter.get(
-  '/attendee/:attendeeId',
+  '/:eventId/attendees/:userId',
   authMiddleware,
-  validate({ params: attendeeIdSchema }),
+  validate({ params: attendeeParamsSchema }),
   getAttendeeDetails
 );
 eventRouter.post(

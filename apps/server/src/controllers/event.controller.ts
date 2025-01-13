@@ -32,6 +32,23 @@ export const getEventBySlug = catchAsync(
     return res.status(200).json({ event, totalAttendees });
   }
 );
+
+export const getEventById = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
+    const { eventId } = req.params;
+
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const event = await Events.findById(eventId);
+
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    const totalAttendees = await Attendees.countAttendees(event.id);
+
+    return res.status(200).json({ event, totalAttendees });
+  }
+);
+
 export const allPlannedEvents = catchAsync(async (req, res) => {
   const getEventsData = await Events.findAllEvents();
   if (getEventsData.length != 0) {
@@ -214,7 +231,7 @@ export const createAttendee = catchAsync(
     };
 
     const newAttendee = await Attendees.create(attendeeData);
-    const url = `${config.CLIENT_URL}/generateQr/${newAttendee.id}`;
+    const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
     console.log('URL to be sent via email:', url);
 
     await EmailService.send({
@@ -232,15 +249,15 @@ export const createAttendee = catchAsync(
 );
 
 export const getAttendeeDetails = catchAsync(
-  async (req: AuthenticatedRequest<{ attendeeId?: string }, {}, {}>, res) => {
-    const userId = req.userId;
+  async (req: AuthenticatedRequest<{ eventId?: string; userId?: string }, {}, {}>, res) => {
+    const userId = req.params.userId;
+    const eventId = req.params.eventId;
+
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
-    const attendeeId = req.params.attendeeId;
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
-    if (!attendeeId) return res.status(400).json({ message: 'Attendee ID is required' });
-
-    const attendee = await Attendees.findById(attendeeId);
+    const attendee = await Attendees.findByUserIdAndEventId(userId, eventId);
     if (!attendee) {
       return res.status(404).json({ message: 'Attendee not found' });
     }
