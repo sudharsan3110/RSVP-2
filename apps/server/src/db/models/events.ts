@@ -15,12 +15,21 @@ export class Events {
     return await prisma.event.findUnique({
       where,
       include: {
+        creator: {
+          select: {
+            profile_icon: true,
+            full_name: true,
+            username: true,
+          },
+        },
         Cohost: {
           select: {
+            role: true,
             user: {
               select: {
                 profile_icon: true,
                 full_name: true,
+                username: true,
               },
             },
           },
