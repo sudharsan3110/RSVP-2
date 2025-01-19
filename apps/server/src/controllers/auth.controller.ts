@@ -72,8 +72,8 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   });
-
-  return res.status(200).json({ accessToken, refreshToken });
+  const { is_completed } = user;
+  return res.status(200).json({ data: { user: { is_completed } } });
 });
 
 export const logout = catchAsync(async (req, res, next) => {

@@ -7,6 +7,7 @@ import GetTicketsButton from './GetTicketsButton';
 import AvatarGroup from './AvatarGroup';
 import { userAvatarOptions } from '@/utils/constants';
 import { ClockIcon, LinkIcon } from 'lucide-react';
+import { Badge } from '../ui/badge';
 
 const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees: number } }) => {
   const { event, totalAttendees } = eventData;
@@ -43,9 +44,9 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
         </div>
       </div>
       <article className="my-6 flex flex-col items-start md:my-12">
-        <p className="mb-4 inline-block rounded-full bg-primary px-4 py-2 text-sm capitalize text-white">
-          {event?.category}
-        </p>
+        {event.category ? (
+          <Badge className="px-4 py-2 text-sm font-normal text-white">{event?.category}</Badge>
+        ) : null}
         <p className="text-2xl font-bold md:text-4xl">{event?.name}</p>
       </article>
       <section className="flex flex-col-reverse items-start justify-between gap-8 md:flex-row">

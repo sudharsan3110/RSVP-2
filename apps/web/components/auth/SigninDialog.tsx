@@ -29,7 +29,7 @@ interface SigninDialogProps {
 
 const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
   const [isEmailSent, setIsEmailSent] = useState(false);
-  const { mutate } = useSignInMutation();
+  const { mutate, isPending } = useSignInMutation();
 
   const form = useForm<SignInFormType>({
     resolver: zodResolver(signInFormSchema),
@@ -81,6 +81,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
                 type="submit"
                 name="send-magic-link"
                 className="mt-5 flex w-full items-center gap-2.5 px-4 py-[10px] text-sm font-medium text-white"
+                disabled={isPending}
               >
                 <Icons.lock />
                 Send magic link

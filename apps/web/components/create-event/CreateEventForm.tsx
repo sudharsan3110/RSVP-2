@@ -45,7 +45,7 @@ const CreateEventForm = () => {
       toDate: new Date(),
       capacity: 20,
       eventImageId: {
-        url: '',
+        url: 'https://www.angroos.com/wp-content/uploads/2024/01/Birthday-cake-with-lit-candles.jpg',
         file: '',
       },
     },
@@ -66,6 +66,7 @@ const CreateEventForm = () => {
       toTime,
       toDate,
     } = data;
+    console.log('data');
 
     const submissionData: CreateEventSubmissionType = {
       name,
@@ -87,8 +88,14 @@ const CreateEventForm = () => {
       await axios.put(eventImageId.url, imageFile);
       mutate(submissionData);
     }
+    // remove this later
+    mutate(submissionData);
   }
   const venueType = form.watch('venueType');
+  const {
+    formState: { errors },
+  } = form;
+  console.log('errors', errors);
 
   console.log('form', form.formState.errors);
 
@@ -255,7 +262,10 @@ const CreateEventForm = () => {
                 {form.formState.errors.eventImageId.message}
               </p>
             )}
-            <Button className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white">
+            <Button
+              type="submit"
+              className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
+            >
               Create Event
             </Button>
           </form>

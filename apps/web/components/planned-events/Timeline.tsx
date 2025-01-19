@@ -60,8 +60,8 @@ const transformEventsToTimelineData = (events: IEvent[]) => {
   return timelineData;
 };
 
-const ComicConTimeline = ({ events }: { events: IEvent[] | null }) => {
-  if (events === null || events.length === 0) {
+const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
+  if (!events || events.length === 0) {
     return (
       <div className="py-8 text-center">
         <h2 className="text-2xl font-semibold text-gray-600">No Events Found</h2>

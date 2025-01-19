@@ -6,8 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { eventAPI } from '@/lib/axios/event-API';
 import { IEvent } from '@/types/event';
 import { useQuery } from '@tanstack/react-query';
-import { use } from 'react';
-
+import { useSearchParams } from 'next/navigation';
 
 const PlannedEvents = () => {
   const searchParams = useSearchParams();
@@ -22,7 +21,6 @@ const PlannedEvents = () => {
     queryKey: ['events', params],
     queryFn: () => eventAPI.getEventsBySearchParams(params),
   });
-
 
   const upcomingEvents = events
     ?.filter((event) => new Date(event.endTime) >= today)

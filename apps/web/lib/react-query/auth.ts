@@ -9,7 +9,7 @@ import { AxiosResponse } from 'axios';
 
 interface VerifySignInResponse {
   success: boolean;
-  user: IUser;
+  data: { user: IUser };
 }
 
 export const useSignInMutation = () => {
@@ -28,7 +28,8 @@ export const useVerifySignin = () => {
   const router = useRouter();
   return useMutation<AxiosResponse<VerifySignInResponse>, Error, VerifySigninPayload>({
     mutationFn: authAPI.verifySignin,
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
+      console.log(data);
       if (data.data.user.is_completed) {
         router.push('/events');
       } else {

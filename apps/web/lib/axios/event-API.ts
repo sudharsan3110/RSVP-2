@@ -8,13 +8,10 @@ export const eventAPI = {
     return api.post('/event', payload);
   },
 
-  getEventById: async (eventId: string) => {
-    return api.get(`/event/${eventId}`);
-  },
+  getEventById: async (eventId: string) => api.get(`/event/${eventId}`),
 
-  createEventCommunication: async (eventId: string, payload: CommunicationForm) => {
-    return api.post(`/event/${eventId}/communications`, payload);
-  },
+  createEventCommunication: async (eventId: string, payload: CommunicationForm) =>
+    api.post(`/event/${eventId}/communications`, payload),
 
   getEventCommunications: async (eventId: string) => {
     return api.get(`/event/${eventId}/communications`);
@@ -32,7 +29,7 @@ export const eventAPI = {
     return api.get(`event/${eventId}/attendees/${userId}`);
   },
 
-  getEventBySlug: async (slug: string): Promise<IEventResponse> => {
+  getEventBySlug: async (slug: string): Promise<IEventResponse | undefined> => {
     const response = await api.get(`/event/slug/${slug}`);
     return response.data;
   },

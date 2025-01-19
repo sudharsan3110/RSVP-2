@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useGetAttendeeDetails, useGetEventDetails } from '@/lib/react-query/event';
-import { useParams } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import QRCode from 'react-qr-code';
 import TicketPageSkeleton from '@/components/event-detail/TicketPageSkeleton';
 const TicketPage = () => {
   const { id } = useParams();
+  if (!id) return notFound();
+
   const [loading, setLoading] = useState(true);
 
   const { data: userData } = useCurrentUser();

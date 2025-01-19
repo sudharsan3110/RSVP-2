@@ -1,7 +1,7 @@
-import { AxiosError } from 'axios';
 import Container from '@/components/common/Container';
 import EventDetail from '@/components/event-detail/EventDetail';
 import { eventAPI } from '@/lib/axios/event-API';
+import { AxiosError } from 'axios';
 import { notFound } from 'next/navigation';
 
 const EventDetailPage = async ({ params }: { params: { slug: string } }) => {
@@ -9,9 +9,8 @@ const EventDetailPage = async ({ params }: { params: { slug: string } }) => {
 
   try {
     const eventData = await eventAPI.getEventBySlug(slug);
-    if (!eventData) {
-      notFound();
-    }
+    if (!eventData) notFound();
+
     return (
       <Container className="container-main pt-8">
         <EventDetail eventData={eventData} />

@@ -1,13 +1,15 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { Bars2Icon } from '@heroicons/react/24/solid';
-import { Button } from '../../ui/button';
-import Logo from '../Logo';
-import Container from '../Container';
-import useScroll from '@/hooks/useScroll';
 import SigninDialog from '@/components/auth/SigninDialog';
+import Autheticated from '@/components/common/header/Autheticated';
+import useScroll from '@/hooks/useScroll';
+import { useCurrentUser } from '@/lib/react-query/auth';
+import { Bars2Icon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import { Button } from '../../ui/button';
+import Container from '../Container';
+import Logo from '../Logo';
 
 const navItemsWithoutSignup = [
   { name: 'Find Events', href: '/discover', target: false },
@@ -17,6 +19,13 @@ const navItemsWithoutSignup = [
 const Guest = () => {
   const [isOpen, setIsOpen] = useState(false);
   const isScrolled = useScroll();
+  const { data, dataUpdatedAt } = useCurrentUser();
+
+  const loginedUser = useMemo(() => {
+    return data?.data;
+  }, [dataUpdatedAt]);
+
+  if (loginedUser) return <Autheticated />;
 
   return (
     <>
@@ -35,6 +44,7 @@ const Guest = () => {
                 </Button>
               </Link>
             ))}
+
             <div className="space-x-3">
               <SigninDialog variant="signin">
                 <Button variant={'outline'} className="text-md border-[#AC6AFF]">
