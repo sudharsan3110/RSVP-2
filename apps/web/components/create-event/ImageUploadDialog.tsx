@@ -24,6 +24,7 @@ const ImageUploadDialog = ({ children }: Props) => {
   const { control, setValue } = useFormContext<CreateEventFormType>();
   const [image, setImage] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -38,7 +39,9 @@ const ImageUploadDialog = ({ children }: Props) => {
         const signedUrl = response.data.signedUrl;
         const fileUrl = URL.createObjectURL(file);
         setImage(fileUrl);
-        setUrl(signedUrl);
+        const actualUrl = signedUrl.split('?')[0];
+        setUrl(actualUrl);
+        setSignedUrl(signedUrl);
       } catch (error) {
         console.error('Upload failed:', error);
         setImage(null);
@@ -51,7 +54,7 @@ const ImageUploadDialog = ({ children }: Props) => {
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      if (image && url) setValue('eventImageId', { file: image, url: url });
+      if (image && url) setValue('eventImageId', { file: image, url: url, signedUrl: signedUrl });
     }
   };
   return (

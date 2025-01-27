@@ -27,19 +27,20 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
       <div className="relative w-full overflow-hidden">
         <Image
           src={event.eventImageId ?? '/images/event-detail-mobile.svg'}
-          alt=""
           objectFit="cover"
+          width={200}
+          height={200}
           priority
-          layout="fill"
+          alt="event-details-background"
           className="absolute inset-0 hidden h-full w-full scale-110 object-cover blur-md md:block"
         />
         <div className="relative mx-auto h-[300px] w-full object-cover sm:h-[350px] sm:w-[600px] md:h-[400px] md:w-[800px] lg:h-[600px] lg:w-[970px]">
           <Image
-            // src="/images/event-detail-mobile.svg"
             src={event.eventImageId ?? '/images/event-detail-mobile.svg'}
-            layout="fill"
-            objectFit="cover"
+            width={1920}
+            height={1080}
             priority
+            className="h-full w-full object-cover"
             alt="event-detail-desktop"
           />
         </div>

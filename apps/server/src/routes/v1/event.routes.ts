@@ -49,6 +49,8 @@ eventRouter.get('/slug/:slug', validate({ params: getEventBySlugSchema }), getEv
 
 eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEvent);
 
+eventRouter.get('/upload-image', uploadEventImage);
+
 eventRouter.get('/:eventId', authMiddleware, getEventById);
 
 eventRouter.patch(
@@ -75,8 +77,6 @@ eventRouter.get(
   validate({ query: eventsPlannedByUserReqSchema }),
   plannedByUser
 );
-
-eventRouter.get('/upload-image', uploadEventImage);
 
 eventRouter.post(
   '/:eventId/attendees',

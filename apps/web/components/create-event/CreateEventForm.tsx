@@ -49,8 +49,9 @@ const CreateEventForm = () => {
       toDate: allowedDate,
       capacity: 20,
       eventImageId: {
-        url: '',
+        signedUrl: '',
         file: '',
+        url: '',
       },
     },
   });
@@ -86,9 +87,9 @@ const CreateEventForm = () => {
       eventDate: fromDate,
     };
 
-    if (eventImageId.file && eventImageId.url) {
-      const imageFile = fileFromUrl(eventImageId.file, 'event-image');
-      await axios.put(eventImageId.url, imageFile);
+    if (eventImageId.file && eventImageId.signedUrl) {
+      const imageFile = await fileFromUrl(eventImageId.file, 'event-image');
+      await axios.put(eventImageId.signedUrl, imageFile);
       mutate(submissionData);
     }
     // remove this later

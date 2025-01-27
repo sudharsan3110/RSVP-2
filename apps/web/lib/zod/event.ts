@@ -38,6 +38,7 @@ export const createEventFormSchema = z
     eventImageId: z.object({
       file: z.string().nullable(),
       url: z.string().nullable(),
+      signedUrl: z.string().nullable(),
     }),
     fromDateTime: z.string().optional(),
     toDateTime: z.string().optional(),
