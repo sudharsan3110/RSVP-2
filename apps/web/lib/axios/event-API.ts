@@ -21,6 +21,11 @@ export const eventAPI = {
     return api.post(`event/${eventId}/attendees`);
   },
 
+  getEvent: async (): Promise<IEvent[]> => {
+    const response = await api.get('/event');
+    return response.data.data;
+  },
+
   softDeleteAttendee: async (eventId: string) => {
     return api.delete(`event/${eventId}/attendee`);
   },

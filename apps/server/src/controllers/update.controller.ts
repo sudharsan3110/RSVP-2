@@ -6,9 +6,8 @@ import { userUpdateSchema } from '@/validations/event.validation';
 import catchAsync from '@/utils/catchAsync';
 import generatePresignedUrl from '@/utils/s3';
 import { Users } from '@/db/models/users';
-import axios from 'axios';
-import config from '@/config/config';
 import { Attendees } from '@/db/models/attendees';
+import EmailService from '@/utils/sendEmail';
 
 type createNotificationBody = z.infer<typeof userUpdateSchema>;
 
@@ -59,7 +58,7 @@ export const createNotification = catchAsync(
 
     const usersList = await Users.findAllByIds(attendeeIds);
 
-    let emailData = JSON.stringify({
+    let emailData = {
       id: 6,
       subject: RSVP_SUBJECT_MSG,
       recipient: notificationDeta.user.email,
@@ -69,25 +68,14 @@ export const createNotification = catchAsync(
         updatesLink: `https://www.rsvp.kim/v1/event/${notificationDeta.eventId}/communication`,
       },
       bcc: usersList.map((user) => user.primary_email),
-    });
-
-    let axiosConfig = {
-      method: 'post',
-      url: `${config.EMAIL_API_URL}/email`,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: config.EMAIL_TOKEN,
-      },
-      data: emailData,
     };
 
-    // const emailResponse = await axios.request(axiosConfig);
-    // if (emailResponse.status === 200) {
-    //   console.log(JSON.stringify(emailResponse.data));
-    // } else {
-    //   console.log(emailResponse);
-    // }
-    console.log(JSON.stringify(axiosConfig, null, 2));
+    const emailResponse = await EmailService.send(emailData);
+    if (emailResponse.status === 200) {
+      console.log(JSON.stringify(emailResponse.data));
+    } else {
+      console.log(emailResponse);
+    }
 
     return res.status(201).json(notificationDeta);
   }

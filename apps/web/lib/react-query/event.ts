@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 import { CreateEventSubmissionType } from '../zod/event';
@@ -8,6 +8,13 @@ import { useRouter } from 'next/navigation';
 interface ErrorResponse {
   message?: string;
 }
+
+export const useGetEvent = () => {
+  return useQuery({
+    queryKey: ['event'],
+    queryFn: () => eventAPI.getEvent(),
+  });
+};
 
 export const useCreateEvent = () => {
   const router = useRouter();
