@@ -22,6 +22,21 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
     return profileUrl?.src ?? userAvatarOptions[0]?.src!;
   };
 
+  const trimVenue = (venue: string): JSX.Element | string => {
+    if (!venue) return 'Venue not specified';
+
+    const isValidUrl = venue.match(/^https?:\/\//);
+    const displayText = isValidUrl && venue.length > 50 ? `${venue.substring(0, 50)}...` : venue;
+
+    return isValidUrl ? (
+      <a href={venue} target="_blank" rel="noopener noreferrer">
+        {displayText}
+      </a>
+    ) : (
+      'Venue not specified'
+    );
+  };
+
   return (
     <main>
       <div className="relative w-full overflow-hidden">
@@ -79,9 +94,9 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
                 {event?.venueType === 'later' && 'To be announced'}
               </p>
               <p className="text-sm text-secondary">
-                {event?.venueType === 'physical' &&
-                  (event?.venueAddress ?? 'Location not specified')}
-                {event?.venueType === 'virtual' && (event?.venueUrl ?? 'URL not specified')}
+                {event?.venueType === 'physical' && trimVenue(event?.venueAddress || '')}
+                {event?.venueType === 'virtual' && trimVenue(event?.venueUrl || '')}
+                {event?.venueType === 'virtual' && trimVenue(event?.venueUrl || '')}
                 {event?.venueType === 'later' &&
                   'You will be notified once host updates the details'}
               </p>

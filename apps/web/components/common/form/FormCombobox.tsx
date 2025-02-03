@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Control, FieldPath, FieldValues } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ function FormCombobox<
   placeholder?: string;
   disabled?: boolean;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <FormField
       control={control}
@@ -44,7 +46,7 @@ function FormCombobox<
       render={({ field }) => (
         <FormItem className="flex w-full flex-col">
           {label && <FormLabel>{label}</FormLabel>}
-          <Popover>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
             <FormControl>
               <PopoverTrigger asChild>
                 <Button
@@ -77,6 +79,7 @@ function FormCombobox<
                           key={option.value}
                           onSelect={() => {
                             field.onChange(option.value);
+                            setIsOpen(false);
                           }}
                         >
                           {option.label}

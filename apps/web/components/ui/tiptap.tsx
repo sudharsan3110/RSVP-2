@@ -53,20 +53,6 @@ const Tiptap = ({
       }),
       Blockquote.configure(),
       HorizontalRule.configure(),
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-      }),
-      Youtube.configure({
-        inline: false,
-        controls: false,
-        nocookie: true,
-        allowFullscreen: false,
-        autoplay: true,
-        disableKBcontrols: true,
-        height: 200,
-        width: 350,
-      }),
     ],
     content: description,
     onUpdate({ editor }) {
@@ -81,10 +67,6 @@ const Tiptap = ({
   });
 
   if (!editor) return null;
-
-  const percentage = editor
-    ? Math.round((100 / limit) * editor.storage.characterCount.characters())
-    : 0;
 
   return (
     <div

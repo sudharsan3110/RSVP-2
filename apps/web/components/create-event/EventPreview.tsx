@@ -10,9 +10,10 @@ import ImageUploadDialog from './ImageUploadDialog';
 type EventPreviewProps = {
   className?: string;
   children?: ReactNode;
+  venueType?: string;
 };
 
-const EventPreview = ({ className, children }: EventPreviewProps) => {
+const EventPreview = ({ className, children, venueType }: EventPreviewProps) => {
   const { watch, setValue } = useFormContext<CreateEventFormType>();
   const image = watch('eventImageId');
 
@@ -47,12 +48,14 @@ const EventPreview = ({ className, children }: EventPreviewProps) => {
       <h2 className="mb-4 line-clamp-2 text-left text-4xl font-semibold text-white">
         {watch('name') || '-'}
       </h2>
-      <div className="mb-6 flex gap-3.5 lg:mb-4">
-        <MapPinIcon className="mt-[3px] size-6 shrink-0" />
-        <p className="line-clamp-2 text-[1.125rem]/[1.5rem] font-medium text-white">
-          {watch('location') || '-'}
-        </p>
-      </div>
+      {venueType === 'physical' && (
+        <div className="mb-6 flex gap-3.5 lg:mb-4">
+          <MapPinIcon className="mt-[3px] size-6 shrink-0" />
+          <p className="line-clamp-2 text-[1.125rem]/[1.5rem] font-medium text-white">
+            {watch('location') || '-'}
+          </p>
+        </div>
+      )}
       <section className="flex gap-3.5">
         <CalendarIcon className="mt-[3px] size-6 shrink-0" />
         <div className="text-white">

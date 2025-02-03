@@ -16,12 +16,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { Clock1 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import FormCombobox from '../common/form/FormCombobox';
-import FormDatePicker from '../common/form/FormDatePicker';
-import FormInput from '../common/form/FormInput';
-import FormGroupSelect from '../common/form/FormSelect';
-import FormSwitch from '../common/form/FormSwitch';
-import FormImageUpload from '../common/form/FormUploadImage';
+import {
+  FormCombobox,
+  FormDatePicker,
+  FormInput,
+  FormGroupSelect,
+  FormSwitch,
+  FormImageUpload,
+} from '../common';
 import { Separator } from '../ui/separator';
 import Tiptap from '../ui/tiptap';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
@@ -99,9 +101,6 @@ const CreateEventForm = () => {
   const {
     formState: { errors },
   } = form;
-  console.log('errors', errors);
-
-  console.log('form', form.formState.errors);
 
   return (
     <>
@@ -274,7 +273,10 @@ const CreateEventForm = () => {
               Create Event
             </Button>
           </form>
-          <EventPreview className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 pb-[28px] pt-8 lg:block" />
+          <EventPreview
+            venueType={venueType}
+            className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 pb-[28px] pt-8 lg:block"
+          />
         </section>
       </Form>
     </>
