@@ -1,6 +1,8 @@
+'use client';
+
+import { Suspense } from 'react';
 import Guest from '@/components/common/header/Guest';
-import React, { Suspense } from 'react';
-import Footer from '@/components/common/FooterNonAuthenticated';
+import Footer from '@/components/common/Footer';
 
 const GuestLayout = ({
   children,

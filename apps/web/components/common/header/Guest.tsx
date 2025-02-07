@@ -3,13 +3,13 @@
 import SigninDialog from '@/components/auth/SigninDialog';
 import Autheticated from '@/components/common/header/Autheticated';
 import useScroll from '@/hooks/useScroll';
-import { useCurrentUser } from '@/lib/react-query/auth';
 import { Bars2Icon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../../ui/button';
 import Container from '../Container';
 import Logo from '../Logo';
+import { useLoggedInUser } from '@/hooks/useLoggedInUser';
 
 const navItemsWithoutSignup = [
   { name: 'Find Events', href: '/discover', target: false },
@@ -19,11 +19,7 @@ const navItemsWithoutSignup = [
 const Guest = () => {
   const [isOpen, setIsOpen] = useState(false);
   const isScrolled = useScroll();
-  const { data, dataUpdatedAt } = useCurrentUser();
-
-  const loginedUser = useMemo(() => {
-    return data?.data;
-  }, [dataUpdatedAt]);
+  const { loginedUser } = useLoggedInUser();
 
   if (loginedUser) return <Autheticated />;
 
