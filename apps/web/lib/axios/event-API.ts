@@ -2,6 +2,7 @@ import { IEvent, IEventResponse } from '@/types/event';
 import { CommunicationForm } from '../zod/communication';
 import { CreateEventSubmissionType } from '../zod/event';
 import api from './instance';
+import { Event } from '@/app/models/Events';
 
 export interface GetAttendeeByEventIdParams extends PaginationParams {
   eventId: string;
@@ -19,7 +20,15 @@ export const eventAPI = {
     return api.patch(`/event/${payload.id}`, rest);
   },
 
-  getEventById: async (eventId: string) => api.get(`/event/${eventId}`),
+  getEventById: async (eventId: string) =>
+    api
+      .get(`/event/${eventId}`)
+      .then((res) => ({ totalAttendees: res.data.event, event: new Event(res.data.event) })),
+
+  editEventSlug: async (payload: { eventId: string; slug: string }) =>
+    api.patch(`/event/${payload.eventId}/slug`, payload),
+
+  deleteEvent: async (eventId: string) => api.delete(`/event/${eventId}`),
 
   createEventCommunication: async (eventId: string, payload: CommunicationForm) =>
     api.post(`/event/${eventId}/communications`, payload),

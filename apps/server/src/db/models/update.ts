@@ -30,6 +30,16 @@ export class Update {
   static async findById(eventId: string) {
     const event = await prisma.update.findMany({
       where: { eventId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            primary_email: true,
+            profile_icon: true,
+          },
+        },
+      },
     });
     console.log('event details:', event);
     return event;

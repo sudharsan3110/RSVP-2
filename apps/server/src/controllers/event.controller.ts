@@ -10,6 +10,7 @@ import EmailService from '@/utils/sendEmail';
 import { CohostRepository } from '@/db/models/cohost';
 import {
   attendeePayloadSchema,
+  editSlugSchema,
   verifyQrTokenPayloadSchema,
 } from '@/validations/attendee.validation';
 import {
@@ -57,6 +58,22 @@ export const getEventById = catchAsync(
   }
 );
 
+type EditEventSlugBpdy = z.infer<typeof editSlugSchema>;
+export const editEventSlug = catchAsync(
+  async (req: AuthenticatedRequest<{ id?: string }, {}, EditEventSlugBpdy>, res) => {
+    const { id } = req.params;
+    const { userId } = req;
+    if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
+
+    if (!id) return res.status(400).json({ message: 'Event ID is required' });
+
+    const slug = req.body.slug;
+
+    const updatedSlug = await Events.updateSlug(id, userId, slug);
+
+    return res.status(200).json({ data: updatedSlug, success: true });
+  }
+);
 export const getPopularEvents = catchAsync(async (req, res) => {
   const { limit } = eventLimitSchema.parse(req.query);
   const PopularEvents = await Events.getPopularEvents(limit);
@@ -72,7 +89,6 @@ export const allPlannedEvents = catchAsync(async (req, res) => {
     return res.status(200).json({ data: [] });
   }
 });
-
 
 
 export const filterEvents = catchAsync(async (req, res) => {
@@ -163,16 +179,15 @@ export const updateEvent = catchAsync(
 
 export const deleteEvent = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const eventId = req.params.eventId;
+    const { eventId } = req.params;
+    const { userId } = req;
+    if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
-    const event = await Events.findById(eventId);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
+    const deletedEvent = await Events.delete(eventId, userId);
 
-    await Events.delete(eventId);
-
-    return res.status(200).json({ message: 'success' });
+    return res.status(200).json({ data: deletedEvent, success: true });
   }
 );
 

@@ -9,6 +9,7 @@ const EventDetailPage = async ({ params }: { params: { slug: string } }) => {
 
   try {
     const eventData = await eventAPI.getEventBySlug(slug);
+    console.log(eventData);
     if (!eventData) notFound();
 
     return (

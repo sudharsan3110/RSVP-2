@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/react-query/auth';
-import { useCancelEvent, useGetAttendeeDetails, useGetEventDetails } from '@/lib/react-query/event';
+import { useGetAttendeeDetails, useEventQuery, useCancelEvent, useGetEventDetails } from '@/lib/react-query/event';
 import { notFound, useParams } from 'next/navigation';
 import QRCode from 'react-qr-code';
 import TicketPageSkeleton from '@/components/event-detail/TicketPageSkeleton';
@@ -13,7 +13,7 @@ const TicketPage = () => {
   const [loading, setLoading] = useState(true);
 
   const { data: userData } = useCurrentUser();
-  const { data: eventData, mutate: fetchEventData } = useGetEventDetails();
+  const { data: eventData, mutate: fetchEventData } = useEventQuery();
   const { data: attendeeData, mutate: fetchAttendeeData } = useGetAttendeeDetails();
   const { mutate: cancelEvent } = useCancelEvent();
 

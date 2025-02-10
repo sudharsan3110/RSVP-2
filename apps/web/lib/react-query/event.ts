@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 import { CreateEventSubmissionType } from '../zod/event';
@@ -15,10 +15,13 @@ interface ErrorResponse {
   message?: string;
 }
 
-export const useGetEvent = () => {
+const EVENTS_QUERY_KEY = 'events';
+
+export const useEventQuery = (id: string) => {
   return useQuery({
-    queryKey: ['event'],
-    queryFn: () => eventAPI.getEvent(),
+    queryKey: [EVENTS_QUERY_KEY, id],
+    queryFn: () => eventAPI.getEventById(id),
+    enabled: !!id,
   });
 };
 
@@ -39,7 +42,34 @@ export const useCreateEvent = () => {
   });
 };
 
-export const useGetEventById = (eventId: string) => {
+export const useEditEventSlug = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: eventAPI.editEventSlug,
+    onSuccess: (_, { eventId }) => {
+      toast.success('Event URL updated successfully');
+      queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
+    },
+    onError: () => toast.error('An error occurred'),
+  });
+};
+
+export const useDeleteEventMutation = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: eventAPI.deleteEvent,
+    onSuccess: (_, eventId) => {
+      toast.success('Event cancelled and deleted successfully');
+      queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
+      router.push('/');
+    },
+    onError: () => toast.error('An error occurred'),
+      });
+};
+
+    
+ export const useGetEventById = (eventId: string) => {
   return useQuery<{ event: IEvent; totalAttendees: number }, AxiosError<ErrorResponse>>({
     queryFn: async () => {
       const response = await eventAPI.getEventById(eventId);
@@ -105,6 +135,16 @@ export const useSoftDeleteAttendee = () => {
   });
 };
 
+export const useGetEventById = (id: string) => {
+  return useQuery<IEvent, AxiosError<ErrorResponse>>({
+    queryKey: ['event', 'id', id],
+    queryFn: async () => {
+      const response = await eventAPI.getEventById(id);
+      return response.event;
+    },
+  });
+};
+
 export const useGetEventDetails = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, string>({
     mutationFn: eventAPI.getEventById,
@@ -113,20 +153,14 @@ export const useGetEventDetails = () => {
 
 export const useGetAttendeeDetails = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, { eventId: string; userId: string }>(
-    {
-      mutationFn: eventAPI.getAttendee,
-    }
+    { mutationFn: eventAPI.getAttendee }
   );
 };
 
 export const useCancelEvent = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, { eventId: string }>({
     mutationFn: ({ eventId }) => eventAPI.cancelEvent(eventId),
-    onSuccess: () => {
-      toast.success('Event cancelled successfully');
-    },
-    onError: (error) => {
-      toast.error(error.response?.data.message || 'Failed to cancel event');
-    },
+    onSuccess: () => toast.success('Event cancelled successfully'),
+    onError: () => toast.error('An error occurred'),
   });
 };

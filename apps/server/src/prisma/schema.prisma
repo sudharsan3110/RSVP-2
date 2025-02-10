@@ -87,6 +87,8 @@ model Event {
   hostPermissionRequired Boolean    @map("host_permission_required")
   capacity               Int?
   isActive               Boolean    @default(true)
+  isCancelled            Boolean    @default(false) @map("is_cancelled")
+  isDeleted              Boolean    @default(false) @map("is_deleted")
   createdAt              DateTime   @default(now()) @map("created_at")
   updatedAt              DateTime   @updatedAt @map("updated_at")
   creator                Users      @relation(fields: [creatorId], references: [id], onDelete: Cascade)

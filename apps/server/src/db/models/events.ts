@@ -92,6 +92,27 @@ export class Events {
   static async findById(eventId: string) {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
+      include: {
+        creator: {
+          select: {
+            profile_icon: true,
+            full_name: true,
+            username: true,
+          },
+        },
+        Cohost: {
+          select: {
+            role: true,
+            user: {
+              select: {
+                profile_icon: true,
+                full_name: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
     });
     return event;
   }
@@ -125,23 +146,17 @@ export class Events {
     return updatedEvent;
   }
 
-  static async delete(eventId: string) {
-    return await prisma.$transaction(async (tx) => {
-      await tx.attendee.deleteMany({
-        where: { eventId },
-      });
+  static async updateSlug(eventId: string, creatorId: string, slug: string) {
+    return await prisma.event.update({
+      where: { id: eventId, creatorId },
+      data: { slug },
+    });
+  }
 
-      await tx.cohost.deleteMany({
-        where: { eventId },
-      });
-
-      await tx.update.deleteMany({
-        where: { eventId },
-      });
-
-      return await tx.event.delete({
-        where: { id: eventId },
-      });
+  static async delete(eventId: string, creatorId: string) {
+    return await prisma.event.update({
+      where: { id: eventId, creatorId },
+      data: { isCancelled: true, isDeleted: true },
     });
   }
 

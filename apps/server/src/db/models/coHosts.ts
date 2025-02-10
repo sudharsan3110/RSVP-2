@@ -18,6 +18,7 @@ export class Cohosts {
             id: true,
             full_name: true,
             profile_icon: true,
+            primary_email: true,
           },
         },
       },

@@ -9,20 +9,34 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import GuestManageSection from '@/components/manage-event/guest-manage-section';
 import MoreSection from '@/components/manage-event/more-section';
 import Communication from '@/components/manage-event/Communication';
-import { useParams } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
+import { useEventQuery } from '@/lib/react-query/event';
+import Link from 'next/link';
 
 const ManageEventPage = () => {
-  const params = useParams();
+  const { id } = useParams();
+  if (typeof id !== 'string') notFound();
+
+  const { data, isLoading, isSuccess, status } = useEventQuery(id);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (status === 'error') return notFound();
+
+  if (!isSuccess) return <div>Something went wrong</div>;
+
+  const { event } = data;
   return (
     <Container className="min-h-screen space-y-8 py-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Comin Con 2024</h1>
+          <h1 className="text-2xl font-bold">{event.name}</h1>
           <p className="text-secondary">Manage your event</p>
         </div>
-        <Button variant="tertiary" radius="sm">
-          Event Page <ArrowUpRightIcon className="ml-2 h-4 w-4" />
-        </Button>
+        <Link href={`/${event.slug}`} className="hidden sm:block">
+          <Button variant="tertiary" radius="sm">
+            Event Page <ArrowUpRightIcon className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </header>
       <main>
         <Tabs defaultValue="overview">
@@ -43,17 +57,21 @@ const ManageEventPage = () => {
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
+
           <TabsContent className="mt-6" value="overview">
             <OverviewSection />
           </TabsContent>
+
           <TabsContent className="mt-6" value="guests">
             <GuestManageSection />
           </TabsContent>
+
           <TabsContent className="mt-6" value="communication">
-            <Communication eventId={params.id!.toString()} />
+            <Communication eventId={id} />
           </TabsContent>
+
           <TabsContent className="mt-6" value="more">
-            <MoreSection />
+            <MoreSection eventId={id} slug={event.slug} />
           </TabsContent>
         </Tabs>
       </main>

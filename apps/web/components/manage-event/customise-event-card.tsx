@@ -10,59 +10,68 @@ import {
 import { CalendarIcon, MapPinIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '../ui/button';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useEventQuery } from '@/lib/react-query/event';
+import { useParams, notFound } from 'next/navigation';
+import { formatDateTime } from '@/lib/utils';
 
 const CustomiseEventCard = ({ className }: PropsWithClassName) => {
-  const eventId = useParams().id!.toString();
+  const { id } = useParams();
+  if (typeof id !== 'string') notFound();
+
+  const { data, isSuccess } = useEventQuery(id);
+  if (!isSuccess) return notFound();
+
+  const { event } = data;
+  const { date, time } = formatDateTime(event.startTime.toISOString());
+  const { date: endDate, time: endTime } = formatDateTime(event.endTime.toISOString());
 
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Customise Event</CardTitle>
-        <CardDescription>
-          Customise your event page with title and description to attract more attendees.
-        </CardDescription>
+        <CardTitle>{event.name}</CardTitle>
+        <CardDescription> </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-12 md:flex-row">
         <Image
           priority
-          src="/images/demo-event-image.png"
+          src={event.eventImageId ?? '/images/event-detail-mobile.svg'}
           width={300}
           height={300}
           className="aspect-square w-full rounded-[8px] object-cover md:h-40 md:w-40"
-          alt={'event-image'}
+          alt="event-image"
         />
         <div className="flex flex-col justify-between gap-4">
           <header className="space-y-1">
             <h2 className="line-clamp-2 text-left text-xl font-semibold text-white">
-              Comic Con 2024, Banglore
+              {event.name}
             </h2>
-            <p className="text-sm text-secondary">Hosted By - Quireverse, Anime Community</p>
+            <p className="text-sm text-secondary">Hosted By - {event.creator?.full_name}</p>
           </header>
           <div className="flex items-center gap-3.5">
             <MapPinIcon className="size-5 shrink-0" />
-            <p className="line-clamp-2 font-medium text-white">New York City</p>
+            <p className="line-clamp-2 max-w-sm truncate font-medium text-white">
+              {event.venueAddress}
+            </p>
           </div>
           <div className="flex gap-3.5 text-sm">
             <CalendarIcon className="mt-[3px] size-5 shrink-0" />
             <div className="flex flex-wrap gap-3.5">
               <div>
                 <p className="mb-1 text-xs font-semibold">From</p>
-                <span className="font-medium">12 Dec 2023</span>
-                <span className="ml-1 font-medium">10:00 AM</span>
+                <span className="font-medium">{date}</span>
+                <span className="ml-1 font-medium">{time}</span>
               </div>
               <div>
                 <p className="mb-1 text-xs font-semibold">To</p>
-                <span className="font-medium">15 Dec 2023</span>
-                <span className="ml-1 font-medium">4:00 PM</span>
+                <span className="font-medium">{endDate}</span>
+                <span className="ml-1 font-medium">{endTime}</span>
               </div>
             </div>
           </div>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4 sm:flex-row">
-        <Link href={`/events/${eventId}/edit`} className="w-full sm:flex-1">
+        <Link href={`/events/${id}/edit`} className="w-full sm:flex-1">
           <Button className="w-full sm:flex-1" radius="sm" variant="tertiary">
             Edit Event
           </Button>

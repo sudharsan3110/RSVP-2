@@ -15,6 +15,7 @@ import {
   filterEvents,
   softDeleteAttendee,
   getEventById,
+  editEventSlug,
   getPopularEvents,
   updateEvent,
   verifyQrToken,
@@ -33,6 +34,15 @@ import {
   userUpdateSchema,
   eventLimitSchema,
 } from '@/validations/event.validation';
+import {
+  attendeePayloadSchema,
+  attendeeParamsSchema,
+  attendeeIdSchema,
+  verifyQrTokenPayloadSchema,
+  qrTokenSchema,
+  idParamsSchema,
+  editSlugSchema,
+} from '@/validations/attendee.validation';
 import e, { Router } from 'express';
 
 import {
@@ -78,7 +88,6 @@ eventRouter.delete(
   '/:eventId',
   authMiddleware,
   validate({ params: eventAttendeeReqSchema }),
-  eventManageMiddleware([Role.Creator]),
   deleteEvent
 );
 
@@ -89,10 +98,19 @@ eventRouter.get(
   plannedByUser
 );
 
+eventRouter.get('/upload-image', uploadEventImage);
+
+eventRouter.patch(
+  '/:id/slug',
+  authMiddleware,
+  validate({ params: idParamsSchema, body: attendeePayloadSchema }),
+  editEventSlug
+);
+
 eventRouter.post(
   '/:eventId/attendees',
   authMiddleware,
-  validate({ params: attendeeParamsSchema, body: attendeePayloadSchema }),
+  validate({ params: attendeeParamsSchema, body: editSlugSchema }),
   createAttendee
 );
 
@@ -151,4 +169,5 @@ eventRouter.delete(
   validate({ params: eventParamsSchema }),
   softDeleteAttendee
 );
+
 export { eventRouter };

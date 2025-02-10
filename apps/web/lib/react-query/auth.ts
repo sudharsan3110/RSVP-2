@@ -29,7 +29,6 @@ export const useVerifySignin = () => {
   return useMutation<AxiosResponse<VerifySignInResponse>, Error, VerifySigninPayload>({
     mutationFn: authAPI.verifySignin,
     onSuccess: ({ data }) => {
-      console.log(data);
       if (data.data.user.is_completed) {
         router.push('/events');
       } else {

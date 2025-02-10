@@ -15,7 +15,7 @@ export const getEventHosts = catchAsync(
 
     if (!hosts) return res.status(404).json({ message: 'No hosts found' });
 
-    return res.status(200).json({ message: 'success', data: hosts });
+    return res.status(200).json({ message: 'success', hosts });
   }
 );
 
