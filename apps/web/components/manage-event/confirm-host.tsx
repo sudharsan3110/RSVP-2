@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import { Check, LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { Separator } from '../ui/separator';
 
 type Attendee = {

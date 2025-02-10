@@ -2,7 +2,7 @@ import { prisma } from '../connection';
 import { Paginator } from '@/utils/pagination';
 import { CreateEventDto, IEventFilters } from '@/interface/event';
 import { IPaginationParams } from '@/interface/pagination';
-import { Event, Prisma } from '@prisma/client';
+import { Event, Prisma, VenueType } from '@prisma/client';
 
 export class Events {
   static async create(eventDetails: CreateEventDto) {
@@ -50,10 +50,10 @@ export class Events {
     pagination: IPaginationParams;
   }) {
     const { userId, search, category, fromDate, toDate, venueType } = filters;
-    const eventsPaginator = new Paginator('Event');
+    const eventsPaginator = new Paginator('event');
     const { page = 1, limit = 10, sortBy = 'startTime', sortOrder = 'desc' } = pagination;
 
-    const where = {
+    const where: Prisma.EventWhereInput = {
       ...(userId && { creatorId: userId }),
       ...(category && { category: category }),
       ...(fromDate &&
@@ -70,7 +70,7 @@ export class Events {
           { category: { contains: search } },
         ],
       }),
-      ...(venueType && { venueType: venueType }),
+      ...(venueType && { venueType: venueType as VenueType }),
     };
 
     const { data, metadata } = await eventsPaginator.paginate(
@@ -80,7 +80,7 @@ export class Events {
         sortOrder,
         sortBy,
       },
-      where
+      { where: where }
     );
 
     return {

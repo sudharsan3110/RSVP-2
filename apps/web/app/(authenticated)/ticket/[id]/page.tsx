@@ -21,7 +21,7 @@ const TicketPage = () => {
 
   useEffect(() => {
     if (id) {
-      fetchEventData(id);
+      fetchEventData(id.toString());
     }
   }, [id, fetchEventData]);
 

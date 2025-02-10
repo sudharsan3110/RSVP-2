@@ -1,8 +1,13 @@
 import { IEvent, IEventResponse } from '@/types/event';
-import { CreateEventSubmissionType } from '../zod/event';
 import { CommunicationForm } from '../zod/communication';
+import { CreateEventSubmissionType } from '../zod/event';
 import api from './instance';
 
+export interface GetAttendeeByEventIdParams extends PaginationParams {
+  eventId: string;
+  hasAttended?: boolean;
+  sortBy: string;
+}
 export type UpdateEventSubmissionType = CreateEventSubmissionType & { id: string };
 
 export const eventAPI = {
@@ -21,6 +26,24 @@ export const eventAPI = {
 
   getEventCommunications: async (eventId: string) => {
     return api.get(`/event/${eventId}/communications`);
+  },
+
+  getEventAttendees: async (params: GetAttendeeByEventIdParams) => {
+    return api.get(`/event/${params.eventId}/attendees`, {
+      params: params,
+    });
+  },
+
+  getEventAttendeeExcel: async (params: GetAttendeeByEventIdParams) => {
+    return api.get(`/event/${params.eventId}/attendees/excel`, {
+      params: params,
+    });
+  },
+
+  getEventAttendeesExcel: async (params: GetAttendeeByEventIdParams) => {
+    return api.get(`/event/${params.eventId}/attendees/excel`, {
+      params: params,
+    });
   },
 
   createAttendee: async (eventId: string) => {

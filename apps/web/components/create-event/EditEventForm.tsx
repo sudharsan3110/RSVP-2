@@ -1,20 +1,15 @@
 'use client';
 
-import {
-  useCreateEvent,
-  useGetEventById,
-  useGetEventDetails,
-  useUpdateEvent,
-} from '@/lib/react-query/event';
+import { UpdateEventSubmissionType } from '@/lib/axios/event-API';
+import { useGetEventById, useUpdateEvent } from '@/lib/react-query/event';
 import { fileFromUrl } from '@/lib/utils';
-import { CreateEventFormType, CreateEventSubmissionType } from '@/lib/zod/event';
+import { CreateEventFormType } from '@/lib/zod/event';
 import { combineDateAndTime } from '@/utils/time';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import { useParams } from 'next/navigation';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
-import { useParams } from 'next/navigation';
-import dayjs from 'dayjs';
-import { UpdateEventSubmissionType } from '@/lib/axios/event-API';
 
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
@@ -74,21 +69,23 @@ const EditEventForm = () => {
     mutate(submissionData);
   }
 
+  const event = data?.event;
+
   const defaultValues: CreateEventFormType = {
-    name: data?.name ?? '',
-    category: data?.category ?? '',
-    description: data?.description ?? '',
-    venueType: data?.venueType ?? 'physical',
-    location: data?.venueAddress ?? '',
-    hostPermissionRequired: data?.hostPermissionRequired ?? false,
-    fromTime: dayjs(data?.startTime).format('HH:mm'),
-    fromDate: data?.eventDate ?? allowedDate,
-    toTime: dayjs(data?.endTime).format('HH:mm'),
-    toDate: data?.endTime ?? allowedDate,
-    capacity: data?.capacity ?? 0,
+    name: event?.name ?? '',
+    category: event?.category ?? '',
+    description: event?.description ?? '',
+    venueType: event?.venueType ?? 'physical',
+    location: event?.venueAddress ?? '',
+    hostPermissionRequired: event?.hostPermissionRequired ?? false,
+    fromTime: dayjs(event?.startTime).format('HH:mm'),
+    fromDate: event?.eventDate ?? allowedDate,
+    toTime: dayjs(event?.endTime).format('HH:mm'),
+    toDate: event?.endTime ?? allowedDate,
+    capacity: event?.capacity ?? 0,
     eventImageId: {
       signedUrl: '',
-      file: data?.eventImageId ?? '',
+      file: event?.eventImageId ?? '',
       url: '',
     },
   };

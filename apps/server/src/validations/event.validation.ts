@@ -1,4 +1,5 @@
 import z from 'zod';
+import { paginationParamsSchema } from './pagination.validation';
 
 export enum PAGINATION_ORDER {
   ASC = 'asc',
@@ -77,4 +78,12 @@ export const userUpdateSchema = z.object({
 
 export const eventParamsSchema = z.object({
   eventId: z.string(),
+});
+
+export const attendeesQuerySchema = z.object({
+  ...paginationParamsSchema.shape,
+  hasAttended: z.preprocess((val) => {
+    if (val === 'false') return false;
+    return z.coerce.boolean().parse(val);
+  }, z.boolean().optional()),
 });

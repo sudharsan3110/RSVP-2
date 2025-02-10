@@ -1,6 +1,13 @@
+import { IPaginationParams } from '@/interface/pagination';
+import { Paginator } from '@/utils/pagination';
+import { Attendee, Prisma } from '@prisma/client';
 import { prisma } from '../connection';
-
+interface AttendeesByEvent extends IPaginationParams {
+  eventId: string;
+  hasAttended?: boolean;
+}
 export class Attendees {
+  static attendeePaginator = new Paginator('attendee');
   static async findById(id: string) {
     return await prisma.attendee.findUnique({
       where: { id },
@@ -67,5 +74,66 @@ export class Attendees {
 
   static async countAttendees(eventId: string) {
     return await prisma.attendee.count({ where: { eventId, status: 'Going' } });
+  }
+
+  static async findAttendeesByEventId({
+    eventId,
+    hasAttended,
+    page = 1,
+    limit = 10,
+    sortBy = 'registrationTime',
+    sortOrder = 'desc',
+    search,
+  }: AttendeesByEvent) {
+    const whereClause: Prisma.AttendeeWhereInput = {
+      eventId,
+      user: search
+        ? {
+            OR: [
+              {
+                full_name: {
+                  contains: search,
+                },
+              },
+              {
+                primary_email: {
+                  contains: search,
+                },
+              },
+              {
+                secondary_email: {
+                  contains: search,
+                },
+              },
+            ],
+          }
+        : undefined,
+      hasAttended: hasAttended,
+    };
+
+    return await this.attendeePaginator.paginate(
+      { page, limit, sortBy, sortOrder },
+      { where: whereClause, include: { user: true } }
+    );
+  }
+
+  static async findAllAttendees(eventId: string): Promise<Attendee[]> {
+    const attendees = await prisma.attendee.findMany({
+      where: {
+        eventId,
+        deleted: false,
+      },
+      include: {
+        user: {
+          select: {
+            full_name: true,
+            primary_email: true,
+            contact: true,
+          },
+        },
+      },
+    });
+
+    return attendees;
   }
 }

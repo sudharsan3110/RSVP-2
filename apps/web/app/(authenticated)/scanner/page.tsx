@@ -7,10 +7,10 @@ import Link from 'next/link';
 import Container from '@/components/common/Container';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { IAttendee } from '@/types/attendee';
 import QRScanner from '@/components/scanner/QRScanner';
 import TicketInput from '@/components/scanner/TicketInput';
 import AttendeeDetails from '@/components/scanner/AttendeeDetails';
+import { IAttendee } from '@/types/attendee';
 
 const ScannerPage = () => {
   const [attendeeData, setAttendeeData] = useState<IAttendee | null>(null);

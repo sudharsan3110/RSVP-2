@@ -1,32 +1,42 @@
-import { Router } from 'express';
 import {
-  createEvent,
+  allPlannedEvents,
   createAttendee,
+  createEvent,
   deleteEvent,
-  plannedByUser,
-  getAttendeeDetails,
-  verifyQrToken,
+  filterEvents,
   getAttendeeByQrToken,
+  getAttendeeDetails,
+  getAttendees,
+  getAttendeesExcelSheet,
+  getEventById,
   getEventBySlug,
+  plannedByUser,
   updateEvent,
   filterEvents,
   softDeleteAttendee,
-  getEventById,
+  updateEvent,
+  verifyQrToken,
 } from '@/controllers/event.controller';
 import {
+  attendeeParamsSchema,
+  attendeePayloadSchema,
+  qrTokenSchema,
+  verifyQrTokenPayloadSchema,
+} from '@/validations/attendee.validation';
+import {
+  attendeesQuerySchema,
   CreateEventSchema,
   eventParamsSchema,
   getEventBySlugSchema,
   userUpdateSchema,
 } from '@/validations/event.validation';
-import {
-  attendeePayloadSchema,
-  attendeeParamsSchema,
-  attendeeIdSchema,
-  verifyQrTokenPayloadSchema,
-  qrTokenSchema,
-} from '@/validations/attendee.validation';
+import e, { Router } from 'express';
 
+import {
+  createNotification,
+  getNotification,
+  uploadEventImage,
+} from '@/controllers/update.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
 import { validate } from '@/middleware/validate';
@@ -34,13 +44,8 @@ import {
   eventAttendeeReqSchema,
   eventsPlannedByUserReqSchema,
 } from '@/validations/event.validation';
-import {
-  createNotification,
-  getNotification,
-  uploadEventImage,
-} from '@/controllers/update.controller';
-import upload from '@/middleware/multerUploadMiddleware';
 import { Role } from '@prisma/client';
+import { paginationParamsSchema } from '@/validations/pagination.validation';
 
 const eventRouter: Router = Router();
 
@@ -80,6 +85,20 @@ eventRouter.post(
   authMiddleware,
   validate({ params: attendeeParamsSchema, body: attendeePayloadSchema }),
   createAttendee
+);
+
+eventRouter.get(
+  '/:eventId/attendees',
+  authMiddleware,
+  validate({ params: eventParamsSchema, query: attendeesQuerySchema }),
+  getAttendees
+);
+
+eventRouter.get(
+  '/:eventId/attendees/excel',
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  getAttendeesExcelSheet
 );
 
 eventRouter.post(

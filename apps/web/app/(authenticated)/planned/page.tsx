@@ -73,12 +73,10 @@ const PlannedEvents = () => {
           </section>
 
           <TabsContent value="upcoming">
-            <Timeline events={upcomingEvents} />
+            {upcomingEvents && <Timeline events={upcomingEvents} />}
           </TabsContent>
 
-          <TabsContent value="past">
-            <Timeline events={pastEvents} />
-          </TabsContent>
+          <TabsContent value="past">{pastEvents && <Timeline events={pastEvents} />}</TabsContent>
         </main>
       </Container>
     </Tabs>
@@ -91,4 +89,5 @@ export default function Page() {
       <PlannedEvents />
     </Suspense>
   );
-}
+};
+

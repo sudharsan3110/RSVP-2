@@ -5,15 +5,21 @@ import { Users } from '@/db/models/users';
 import { AuthenticatedRequest } from '@/middleware/authMiddleware';
 import catchAsync from '@/utils/catchAsync';
 import { sluggify } from '@/utils/function';
+import * as XLSX from 'xlsx';
 import EmailService from '@/utils/sendEmail';
 import { CohostRepository } from '@/db/models/cohost';
 import {
   attendeePayloadSchema,
   verifyQrTokenPayloadSchema,
 } from '@/validations/attendee.validation';
-import { CreateEventSchema, eventsPlannedByUserReqSchema } from '@/validations/event.validation';
+import {
+  attendeesQuerySchema,
+  CreateEventSchema,
+  eventsPlannedByUserReqSchema,
+} from '@/validations/event.validation';
 import { createHash, randomUUID } from 'crypto';
 import z from 'zod';
+import { PaginationParams } from '@/validations/pagination.validation';
 
 type createEventBody = z.infer<typeof CreateEventSchema>;
 type CreateAttendeeBody = z.infer<typeof attendeePayloadSchema>;
@@ -114,8 +120,6 @@ export const createEvent = catchAsync(
       slug: sluggify(data.name),
     };
 
-    console.log(formattedData);
-
     const newEvent = await Events.create(formattedData);
 
     await CohostRepository.addHost(userId, newEvent.id, 'Creator');
@@ -183,6 +187,7 @@ export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {},
   }
 });
 
+// Attendee routes
 export const createAttendee = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, CreateAttendeeBody>, res) => {
     const userId = req.userId;
@@ -251,9 +256,88 @@ export const createAttendee = catchAsync(
   }
 );
 
+export const getAttendees = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
+    const eventId = req.params.eventId;
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const pagination = await attendeesQuerySchema.parseAsync(req.query);
+    const attendees = await Attendees.findAttendeesByEventId({ eventId, ...pagination });
+
+    return res.status(200).json(attendees);
+  }
+);
+
+export const getAttendeesExcelSheet = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
+    const eventId = req.params.eventId;
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const attendees = await Attendees.findAllAttendees(eventId);
+    // Transform data for Excel export
+    const exportData = attendees.map((attendee: any, index) => ({
+      'Sr. No': index + 1,
+      'Full Name': attendee.user.full_name,
+      Email: attendee.user.primary_email,
+      Contact: attendee.user.contact || '-',
+      'Registration Time': new Date(attendee.registrationTime).toLocaleString(),
+      Status: attendee.status,
+      'Has Attended': attendee.hasAttended ? 'Yes' : 'No',
+      'Check-in Time': attendee.checkInTime ? new Date(attendee.checkInTime).toLocaleString() : '-',
+      Feedback: attendee.feedback || '-',
+      'QR Token': attendee.qrToken,
+      'Allowed Status': attendee.allowedStatus ? 'Yes' : 'No',
+      'Last Updated': new Date(attendee.updatedAt).toLocaleString(),
+    }));
+
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Set column widths
+    const colWidths = [
+      { wch: 36 }, // ID
+      { wch: 10 }, // User ID
+      { wch: 30 }, // Full Name
+      { wch: 30 }, // Email
+      { wch: 15 }, // Contact
+      { wch: 20 }, // Registration Time
+      { wch: 15 }, // Status
+      { wch: 12 }, // Has Attended
+      { wch: 20 }, // Check-in Time
+      { wch: 40 }, // Feedback
+      { wch: 10 }, // QR Token
+      { wch: 15 }, // Allowed Status
+      { wch: 20 }, // Last Updated
+    ];
+    worksheet['!cols'] = colWidths;
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendees');
+
+    // Generate buffer
+    const excelBuffer = XLSX.write(workbook, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    });
+
+    // Set response headers
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader('Content-Disposition', `attachment; filename=attendees-${eventId}.xlsx`);
+
+    // Send the file
+    res.send(excelBuffer);
+  }
+);
+
 export const getAttendeeDetails = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string; userId?: string }, {}, {}>, res) => {
-    const userId = req.params.userId;
+    const userId = req.userId;
     const eventId = req.params.eventId;
 
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });

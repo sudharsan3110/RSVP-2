@@ -2,9 +2,14 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 import { CreateEventSubmissionType } from '../zod/event';
-import { eventAPI, UpdateEventSubmissionType } from '../axios/event-API';
-import { useRouter } from 'next/navigation';
+import {
+  eventAPI,
+  GetAttendeeByEventIdParams,
+  UpdateEventSubmissionType,
+} from '../axios/event-API';
+import { Attendee } from '@/types/attendee';
 import { IEvent } from '@/types/event';
+import { useRouter } from 'next/navigation';
 
 interface ErrorResponse {
   message?: string;
@@ -31,6 +36,36 @@ export const useCreateEvent = () => {
     onError: (error) => {
       toast.error(error.response?.data.message || 'An error occurred');
     },
+  });
+};
+
+export const useGetEventById = (eventId: string) => {
+  return useQuery<{ event: IEvent; totalAttendees: number }, AxiosError<ErrorResponse>>({
+    queryFn: async () => {
+      const response = await eventAPI.getEventById(eventId);
+      const data = response.data;
+      return { event: response.data.event, totalAttendees: data.totalAttendees };
+    },
+    queryKey: ['attendees', eventId],
+  });
+};
+
+export const useGetAttendeeByEventId = (filter: GetAttendeeByEventIdParams) => {
+  return useQuery<{ attendees: Attendee[]; total: number }, AxiosError<ErrorResponse>>({
+    queryFn: async () => {
+      const response = await eventAPI.getEventAttendees(filter);
+      const attendees = Array.from(response.data.data).map(
+        (attendee) => new Attendee(attendee as any)
+      );
+      return { attendees, total: response.data.total };
+    },
+    queryKey: ['attendees', filter],
+  });
+};
+
+export const useGetAttendeeExcelByEventId = () => {
+  return useMutation<AxiosResponse, AxiosError<ErrorResponse>, GetAttendeeByEventIdParams>({
+    mutationFn: eventAPI.getEventAttendeesExcel,
   });
 };
 
@@ -66,16 +101,6 @@ export const useSoftDeleteAttendee = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data.message || 'Failed to cancel registration');
-    },
-  });
-};
-
-export const useGetEventById = (id: string) => {
-  return useQuery<IEvent, AxiosError<ErrorResponse>>({
-    queryKey: ['event', 'id', id],
-    queryFn: async () => {
-      const response = await eventAPI.getEventById(id);
-      return response.data.event;
     },
   });
 };

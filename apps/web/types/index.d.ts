@@ -12,3 +12,12 @@ type EmailAttachmentOptions = {
   path: string;
   cid: string;
 };
+
+type PaginationParams = {
+  page?: number;
+  limit?: number;
+  cursor?: string;
+  search?: string;
+  orderBy?: string;
+  orderDirection?: 'asc' | 'desc';
+};
