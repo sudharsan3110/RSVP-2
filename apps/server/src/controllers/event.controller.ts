@@ -13,6 +13,8 @@ import {
   verifyQrTokenPayloadSchema,
 } from '@/validations/attendee.validation';
 import {
+  CreateEventSchema,
+  eventLimitSchema,
   attendeesQuerySchema,
   CreateEventSchema,
   eventsPlannedByUserReqSchema,
@@ -54,6 +56,24 @@ export const getEventById = catchAsync(
     return res.status(200).json({ event, totalAttendees });
   }
 );
+
+export const getPopularEvents = catchAsync(async (req, res) => {
+  const { limit } = eventLimitSchema.parse(req.query);
+  const PopularEvents = await Events.getPopularEvents(limit);
+  if (PopularEvents.length != 0) return res.status(200).json({ data: PopularEvents });
+  else return res.status(200).json({ data: [] });
+});
+
+export const allPlannedEvents = catchAsync(async (req, res) => {
+  const getEventsData = await Events.findAllEvents();
+  if (getEventsData.length != 0) {
+    return res.status(200).json({ message: 'All Events Data', data: getEventsData });
+  } else {
+    return res.status(200).json({ data: [] });
+  }
+});
+
+
 
 export const filterEvents = catchAsync(async (req, res) => {
   try {

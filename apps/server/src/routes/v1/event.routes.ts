@@ -14,6 +14,8 @@ import {
   updateEvent,
   filterEvents,
   softDeleteAttendee,
+  getEventById,
+  getPopularEvents,
   updateEvent,
   verifyQrToken,
 } from '@/controllers/event.controller';
@@ -29,6 +31,7 @@ import {
   eventParamsSchema,
   getEventBySlugSchema,
   userUpdateSchema,
+  eventLimitSchema,
 } from '@/validations/event.validation';
 import e, { Router } from 'express';
 
@@ -53,8 +56,14 @@ eventRouter.get('/slug/:slug', validate({ params: getEventBySlugSchema }), getEv
 
 eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEvent);
 
+
+
+eventRouter.get('/popular', validate({query:eventLimitSchema}), getPopularEvents);
+
 eventRouter.get('/upload-image', uploadEventImage);
+
 eventRouter.get('/filter', filterEvents);
+
 
 eventRouter.get('/:eventId', authMiddleware, getEventById);
 

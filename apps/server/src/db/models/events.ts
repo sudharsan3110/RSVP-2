@@ -95,6 +95,27 @@ export class Events {
     });
     return event;
   }
+  static async getPopularEvents(take: number) {
+    const events = await prisma.event.findMany({
+      where: {
+        eventDate: {
+          gte: new Date(),
+          lte: new Date(new Date().setDate(new Date().getDate() + 30)), // Next 30 days
+        },
+        isActive: true,
+      },
+      include: {
+        Attendee: true,
+      },
+      orderBy: {
+        Attendee: {
+          _count: 'desc',
+        },
+      },
+      take,
+    });
+    return events;
+  }
 
   static async update(eventId: string, data: Partial<Event>) {
     const updatedEvent = await prisma.event.update({
