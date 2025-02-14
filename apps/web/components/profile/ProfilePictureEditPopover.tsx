@@ -1,5 +1,7 @@
 'use client';
 
+import { Control, Controller } from 'react-hook-form';
+import { ProfileFormType } from '@/lib/zod/profile';
 import {
   Dialog,
   DialogContent,
@@ -15,12 +17,10 @@ import { useState } from 'react';
 import { Button } from '../ui/button';
 
 type Props = {
-  profilePictureUrl: string;
-  // eslint-disable-next-line
-  setProfilePictureState: (url: string) => void;
+  control: Control<ProfileFormType>;
 };
-const ProfilePictureEditPopover = ({ profilePictureUrl, setProfilePictureState }: Props) => {
-  const [selectedPicture, setSelectedPicture] = useState(profilePictureUrl);
+
+const ProfilePictureEditPopover = ({ control }: Props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -36,25 +36,32 @@ const ProfilePictureEditPopover = ({ profilePictureUrl, setProfilePictureState }
         </DialogHeader>
         <DialogDescription>Choose a profile icon</DialogDescription>
         <div className="my-4 grid grid-cols-3 gap-x-4 gap-y-6 md:grid-cols-4 md:gap-x-10">
-          {userAvatarOptions.map((avatar, index) => (
-            <Image
-              priority
-              key={index}
-              width={120}
-              height={120}
-              onClick={() => setSelectedPicture(avatar.id)}
-              className={`cursor-pointer rounded-full bg-white ${selectedPicture === avatar.id ? 'border-[4px] border-primary' : ''}`}
-              src={avatar.src}
-              alt="Profile picture option"
-              data-testid={`profile-picture-option${index}`}
-            />
-          ))}
+          <Controller
+            name="profile_icon"
+            control={control}
+            render={({ field }) => (
+              <>
+                {userAvatarOptions.map((avatar, index) => (
+                  <Image
+                    priority
+                    key={index}
+                    width={120}
+                    height={120}
+                    onClick={() => field.onChange(avatar.id)}
+                    className={`cursor-pointer rounded-full bg-white ${
+                      field.value === avatar.id ? 'border-[4px] border-primary' : ''
+                    }`}
+                    src={avatar.src}
+                    alt="Profile picture option"
+                    data-testid={`profile-picture-option${index}`}
+                  />
+                ))}
+              </>
+            )}
+          />
         </div>
         <Button
-          onClick={() => {
-            setProfilePictureState(selectedPicture);
-            setIsDialogOpen(false);
-          }}
+          onClick={() => setIsDialogOpen(false)}
           className="ml-auto mt-3 h-9 rounded-[6px] text-sm font-semibold text-white"
         >
           Save

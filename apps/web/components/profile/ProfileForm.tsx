@@ -69,10 +69,7 @@ const ProfileForm = ({ user }: Props) => {
             alt="Profile picture"
             className="rounded-full border-2 border-solid border-purple-500 bg-white"
           />
-          <ProfilePictureEditPopover
-            profilePictureUrl={profilePictureUrl}
-            setProfilePictureState={(value) => form.setValue('profile_icon', value)}
-          />
+          <ProfilePictureEditPopover control={form.control} />
         </div>
         <FormInput control={form.control} name="full_name" label="Full name" type="text" />
         <FormInput control={form.control} name="location" label="Location" type="text" />

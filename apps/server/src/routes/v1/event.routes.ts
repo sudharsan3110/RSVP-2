@@ -54,7 +54,10 @@ import { paginationParamsSchema } from '@/validations/pagination.validation';
 
 const eventRouter: Router = Router();
 
+eventRouter.get('/upload-image', uploadEventImage);
+
 eventRouter.get('/slug/:slug', validate({ params: getEventBySlugSchema }), getEventBySlug);
+eventRouter.get('/', allPlannedEvents);
 
 eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEvent);
 
@@ -84,8 +87,6 @@ eventRouter.get(
   validate({ query: eventsPlannedByUserReqSchema }),
   plannedByUser
 );
-
-eventRouter.get('/upload-image', uploadEventImage);
 
 eventRouter.patch(
   '/:id/slug',

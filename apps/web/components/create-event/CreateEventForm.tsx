@@ -70,10 +70,7 @@ const CreateEventForm = () => {
       await axios.put(eventImageId.signedUrl, imageFile);
       mutate(submissionData);
     }
-    // remove this later
-    mutate(submissionData);
   }
-
 
   return (
     <>

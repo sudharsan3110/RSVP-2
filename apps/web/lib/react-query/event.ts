@@ -25,6 +25,13 @@ export const useEventQuery = (id: string) => {
   });
 };
 
+export const useGetEvent = () => {
+  return useQuery({
+    queryKey: ['event'],
+    queryFn: () => eventAPI.getEvent(),
+  });
+};
+
 export const useCreateEvent = () => {
   const router = useRouter();
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, CreateEventSubmissionType>({
@@ -65,11 +72,10 @@ export const useDeleteEventMutation = () => {
       router.push('/');
     },
     onError: () => toast.error('An error occurred'),
-      });
+  });
 };
 
-    
- export const useGetEventById = (eventId: string) => {
+export const useGetEventById = (eventId: string) => {
   return useQuery<{ event: IEvent; totalAttendees: number }, AxiosError<ErrorResponse>>({
     queryFn: async () => {
       const response = await eventAPI.getEventById(eventId);

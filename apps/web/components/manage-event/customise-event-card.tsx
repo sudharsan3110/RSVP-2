@@ -13,6 +13,7 @@ import { Button } from '../ui/button';
 import { useEventQuery } from '@/lib/react-query/event';
 import { useParams, notFound } from 'next/navigation';
 import { formatDateTime } from '@/lib/utils';
+import Link from 'next/link';
 
 const CustomiseEventCard = ({ className }: PropsWithClassName) => {
   const { id } = useParams();
