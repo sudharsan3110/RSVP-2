@@ -42,6 +42,10 @@ export const createEventHost = catchAsync(
 
     if (!user) return res.status(404).json({ message: 'User does not exists' });
 
+    if (!user.is_completed) {
+      return res.status(400).json({ message: 'User profile is not completed' });
+    }
+
     const hostExists = await CohostRepository.findByUserIdAndEventId(user.id, eventId);
 
     if (hostExists) return res.status(400).json({ message: 'Host already exists' });

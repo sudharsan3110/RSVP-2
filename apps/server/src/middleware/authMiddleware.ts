@@ -38,7 +38,6 @@ const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: Ne
   try {
     const token = req.cookies.accessToken || req.headers.accessToken;
 
-    console.log('Checking from access token', token);
     const accessTokenDecoded = token ? verifyAccessToken(token) : null;
 
     if (accessTokenDecoded) {

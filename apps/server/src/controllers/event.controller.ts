@@ -22,6 +22,7 @@ import {
 import { createHash, randomUUID } from 'crypto';
 import z from 'zod';
 import { PaginationParams } from '@/validations/pagination.validation';
+import { Role } from '@prisma/client';
 
 type createEventBody = z.infer<typeof CreateEventSchema>;
 type CreateAttendeeBody = z.infer<typeof attendeePayloadSchema>;
@@ -268,22 +269,24 @@ export const createAttendee = catchAsync(
       qrToken: qrToken,
       userId: req.userId,
       eventId: eventId,
+      ...(event.hostPermissionRequired && { allowedStatus: false }),
       ...req.body,
     };
-
     const newAttendee = await Attendees.create(attendeeData);
     const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
     console.log('URL to be sent via email:', url);
 
-    await EmailService.send({
-      id: 5,
-      subject: 'Event Registration Confirmation',
-      recipient: user.primary_email,
-      body: {
-        email: user.primary_email,
-        qrLink: url,
-      },
-    });
+    if (config.env !== 'production') {
+      await EmailService.send({
+        id: 5,
+        subject: 'Event Registration Confirmation',
+        recipient: user.primary_email,
+        body: {
+          email: user.primary_email,
+          qrLink: url,
+        },
+      });
+    }
 
     return res.status(201).json(newAttendee);
   }
@@ -387,11 +390,6 @@ export const getAttendeeDetails = catchAsync(
       if (deleted_user) {
         return res.status(400).json({ message: 'Attendee has been deleted' });
       }
-      return res.status(200).json(attendee);
-    }
-
-    const hasAccess = await CohostRepository.checkHostForEvent(userId, attendee.eventId);
-    if (hasAccess) {
       return res.status(200).json(attendee);
     }
 

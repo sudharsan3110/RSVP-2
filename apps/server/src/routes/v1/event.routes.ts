@@ -70,6 +70,7 @@ eventRouter.patch(
   '/:eventId',
   authMiddleware,
   validate({ params: eventAttendeeReqSchema, body: CreateEventSchema }),
+  eventManageMiddleware([Role.Creator]),
   updateEvent
 );
 
@@ -77,6 +78,7 @@ eventRouter.delete(
   '/:eventId',
   authMiddleware,
   validate({ params: eventAttendeeReqSchema }),
+  eventManageMiddleware([Role.Creator]),
   deleteEvent
 );
 
@@ -91,13 +93,14 @@ eventRouter.patch(
   '/:id/slug',
   authMiddleware,
   validate({ params: idParamsSchema, body: attendeePayloadSchema }),
+  eventManageMiddleware([Role.Creator]),
   editEventSlug
 );
 
 eventRouter.post(
   '/:eventId/attendees',
   authMiddleware,
-  validate({ params: attendeeParamsSchema, body: editSlugSchema }),
+  validate({ params: attendeeParamsSchema }),
   createAttendee
 );
 
@@ -105,6 +108,7 @@ eventRouter.get(
   '/:eventId/attendees',
   authMiddleware,
   validate({ params: eventParamsSchema, query: attendeesQuerySchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
   getAttendees
 );
 
@@ -112,6 +116,7 @@ eventRouter.get(
   '/:eventId/attendees/excel',
   authMiddleware,
   validate({ params: eventParamsSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
   getAttendeesExcelSheet
 );
 
@@ -119,6 +124,7 @@ eventRouter.post(
   '/:eventId/communications',
   authMiddleware,
   validate({ params: eventParamsSchema, body: userUpdateSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
   createNotification
 );
 

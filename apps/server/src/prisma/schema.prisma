@@ -109,7 +109,7 @@ model Attendee {
   feedback         String?   @db.VarChar(512)
   qrToken          String    @unique @db.VarChar(512)
   status           Status    @default(Waiting)
-  allowedStatus    Boolean   @default(false)
+  allowedStatus    Boolean   @default(true)
   deleted          Boolean   @default(false) @map("deleted")
   updatedAt        DateTime  @updatedAt @map("updated_at")
   user             Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
