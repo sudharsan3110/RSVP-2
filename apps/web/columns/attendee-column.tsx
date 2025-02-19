@@ -2,8 +2,10 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge, BadgeVariant } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Attendee, Status } from '@/types/attendee';
-import { CellContext, ColumnDef } from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
+import { useAllowedGuestColumn, useUpdateAllowStatus } from '@/lib/react-query/event';
+import { useState, useEffect } from 'react';
 
 const attendeeColumns: ColumnDef<Attendee>[] = [
   {
@@ -75,7 +77,30 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
 ];
 
 const AllowedGuestColumn = ({ attendee }: { attendee: Attendee }) => {
-  return <Switch checked={attendee.allowedStatus} />;
+  const { mutate } = useUpdateAllowStatus();
+
+  const { data: hasAccess } = useAllowedGuestColumn(attendee.eventId, attendee.userId);
+
+  useEffect(() => {
+    setIsToggled(attendee.allowedStatus);
+  }, [attendee.allowedStatus]);
+
+  const [isToggled, setIsToggled] = useState(attendee.allowedStatus);
+
+  const handleCheckedChange = (checked: boolean) => {
+    setIsToggled(checked);
+    mutate({
+      eventId: attendee.eventId,
+      userId: attendee.userId,
+      allowedStatus: checked,
+    });
+  };
+
+  if (hasAccess) {
+    return <Switch checked={isToggled} onCheckedChange={handleCheckedChange} />;
+  }
+
+  return <Switch disabled />;
 };
 
 export { attendeeColumns };

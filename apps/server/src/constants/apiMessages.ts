@@ -9,4 +9,13 @@ export const API_MESSAGES = {
       FAILED: 'Something went wrong while deleting the cohost record',
     },
   },
+
+  ALLOW_GUEST: {
+    UNAUTHORIZED_ACCESS: 'Unauthorized access',
+    EVENTID_REQUIRED: 'Event ID is required',
+    ATTENDEE_NOT_FOUND: 'Attendee not found',
+    INVALID_TOKEN: 'Invalid or expired token',
+    SUCCESSFUL_ATTENDEE_UPDATE: 'Attendee allow status updated successfully',
+    SUCCESS: 'Success',
+  },
 };

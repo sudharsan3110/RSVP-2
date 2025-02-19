@@ -16,6 +16,8 @@ import {
   getPopularEvents,
   updateEvent,
   verifyQrToken,
+  checkAllowStatus,
+  updateAttendeeAllowStatus,
 } from '@/controllers/event.controller';
 
 import {
@@ -154,6 +156,22 @@ eventRouter.get(
   validate({ params: qrTokenSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
   getAttendeeByQrToken
+);
+
+eventRouter.patch(
+  '/:eventId/attendee/:userId/allowStatus',
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
+  checkAllowStatus
+);
+
+eventRouter.patch(
+  '/:eventId/attendee/allowStatus',
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
+  updateAttendeeAllowStatus
 );
 
 eventRouter.delete(

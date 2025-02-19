@@ -2,6 +2,7 @@ import { IPaginationParams } from '@/interface/pagination';
 import { Paginator } from '@/utils/pagination';
 import { Attendee, Prisma } from '@prisma/client';
 import { prisma } from '../connection';
+import { API_MESSAGES } from '@/constants/apiMessages';
 interface AttendeesByEvent extends IPaginationParams {
   eventId: string;
   hasAttended?: boolean;
@@ -135,5 +136,28 @@ export class Attendees {
     });
 
     return attendees;
+  }
+
+  static async updateAllowStatus(eventId: string, userId: string, allowedStatus: boolean) {
+    const attendee = await prisma.attendee.findFirst({
+      where: {
+        eventId,
+        userId,
+        deleted: false,
+      },
+    });
+
+    if (!attendee) {
+      throw new Error(API_MESSAGES.ALLOW_GUEST.ATTENDEE_NOT_FOUND);
+    }
+
+    return await prisma.attendee.update({
+      where: {
+        id: attendee.id,
+      },
+      data: {
+        allowedStatus,
+      },
+    });
   }
 }

@@ -157,6 +157,36 @@ export const useCancelEvent = () => {
   });
 };
 
+export const useAllowedGuestColumn = (eventId: string, userId: string) => {
+  return useQuery({
+    queryKey: ['allowStatus', eventId, userId],
+    queryFn: async () => {
+      const response = await eventAPI.checkAllowStatus(eventId, userId);
+      return response.data.data.hasAccess;
+    },
+    select: (hasAccess) => hasAccess,
+  });
+};
+
+export const useUpdateAllowStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      userId,
+      allowedStatus,
+    }: {
+      eventId: string;
+      userId: string;
+      allowedStatus: boolean;
+    }) => eventAPI.updateAttendeeAllowStatus(eventId, userId, allowedStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendees'] });
+    },
+  });
+};
+
 export const usePopularEvents = (limit?: number) => {
   return useQuery({
     queryKey: ['popular-events', limit],

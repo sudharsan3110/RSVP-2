@@ -23,6 +23,7 @@ import { createHash, randomUUID } from 'crypto';
 import z from 'zod';
 import { PaginationParams } from '@/validations/pagination.validation';
 import { Role } from '@prisma/client';
+import { API_MESSAGES } from '@/constants/apiMessages';
 
 type createEventBody = z.infer<typeof CreateEventSchema>;
 type CreateAttendeeBody = z.infer<typeof attendeePayloadSchema>;
@@ -394,6 +395,50 @@ export const getAttendeeDetails = catchAsync(
     }
 
     return res.status(403).json({ message: 'Unauthorized access' });
+  }
+);
+
+export const checkAllowStatus = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
+    const { eventId } = req.params;
+    const userId = req.userId;
+
+    if (!eventId)
+      return res.status(400).json({ message: API_MESSAGES.ALLOW_GUEST.EVENTID_REQUIRED });
+    if (!userId) return res.status(401).json({ message: API_MESSAGES.ALLOW_GUEST.INVALID_TOKEN });
+
+    const hasAccess = await CohostRepository.checkHostForEvent(userId, eventId);
+
+    if (!hasAccess) {
+      return res.status(403).json({ message: API_MESSAGES.ALLOW_GUEST.UNAUTHORIZED_ACCESS });
+    }
+
+    return res.status(200).json({
+      message: API_MESSAGES.ALLOW_GUEST.SUCCESS,
+      data: { hasAccess },
+    });
+  }
+);
+
+interface AllowStatusRequestBody {
+  allowedStatus: boolean;
+  userId: string;
+}
+
+export const updateAttendeeAllowStatus = catchAsync(
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, AllowStatusRequestBody>, res) => {
+    const { eventId } = req.params;
+    const { userId, allowedStatus } = req.body;
+
+    if (!eventId)
+      return res.status(400).json({ message: API_MESSAGES.ALLOW_GUEST.EVENTID_REQUIRED });
+
+    const updatedAttendee = await Attendees.updateAllowStatus(eventId, userId, allowedStatus);
+
+    return res.status(200).json({
+      message: API_MESSAGES.ALLOW_GUEST.SUCCESSFUL_ATTENDEE_UPDATE,
+      data: updatedAttendee,
+    });
   }
 );
 

@@ -84,14 +84,14 @@ export class CohostRepository {
   static async checkHostForEvent(
     userId: string,
     eventId: string,
-    roles: Role[]=[]
+    roles: Role[] = [Role.Creator, Role.Manager]
   ): Promise<boolean> {
     const cohost = await prisma.cohost.findFirst({
       where: {
         userId,
         eventId,
         role: {
-          in: roleArray,
+          in: roles,
         },
       },
     });

@@ -93,6 +93,21 @@ export const eventAPI = {
     return response.data;
   },
 
+  checkAllowStatus: async (eventId: string, userId: string) => {
+    return api.patch(`/event/${eventId}/attendee/${userId}/allowStatus`, {
+      eventId,
+      userId,
+    });
+  },
+
+  updateAttendeeAllowStatus: async (eventId: string, userId: string, allowedStatus: boolean) => {
+    return api.patch(`/event/${eventId}/attendee/allowStatus`, {
+      eventId,
+      userId,
+      allowedStatus,
+    });
+  },
+
   getPopularEvents: async (limit?: number) => {
     const response = await api.get('/event/popular', {
       params: { limit },
