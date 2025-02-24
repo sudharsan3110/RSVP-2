@@ -35,25 +35,52 @@ export const EventSchema = z.object({
   eventDate: z.coerce.date(),
 });
 
-export const CreateEventSchema = EventSchema.strict().refine(
-  (data) => {
-    if (data.venueType === 'physical') {
-      return data.venueAddress !== null && data.venueUrl == null;
+export const CreateEventSchema = EventSchema.strict()
+  .refine(
+    (data) => {
+      if (data.venueType === 'physical') {
+        return data.venueAddress !== null && data.venueUrl == null;
+      }
+      if (data.venueType === 'virtual') {
+        return data.venueUrl !== null && data.venueAddress == null;
+      }
+      if (data.venueType === 'later') {
+        return data.venueUrl == null && data.venueAddress == null;
+      }
+      return false;
+    },
+    {
+      message:
+        'Physical events must have a venue address (not URL), virtual events must have a URL (not address)',
+      path: ['venueType'],
     }
-    if (data.venueType === 'virtual') {
-      return data.venueUrl !== null && data.venueAddress == null;
+  )
+  .refine(
+    (data) => {
+      const currentDateTime = new Date();
+      const currentDate = new Date(currentDateTime.setHours(0, 0, 0, 0));
+      const eventDate = new Date(data.eventDate);
+      eventDate.setHours(0, 0, 0, 0);
+      const startTime = new Date(data.startTime);
+      const endTime = new Date(data.endTime);
+
+      if (!(eventDate >= currentDate)) {
+        return false;
+      }
+      if (!(startTime > currentDateTime)) {
+        return false;
+      }
+      if (!(endTime > startTime)) {
+        return false;
+      }
+
+      return true;
+    },
+    {
+      message: 'Event dates must be valid: event date must be in the future',
+      path: ['eventDate', 'startTime', 'endTime'],
     }
-    if (data.venueType === 'later') {
-      return data.venueUrl == null && data.venueAddress == null;
-    }
-    return false;
-  },
-  {
-    message:
-      'Physical events must have a venue address (not URL), virtual events must have a URL (not address)',
-    path: ['venueType'],
-  }
-);
+  );
 
 export const UpdateEventSchema = EventSchema.partial();
 

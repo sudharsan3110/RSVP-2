@@ -495,9 +495,22 @@ export const verifyQrToken = catchAsync(
     }
 
     const currentTime = new Date();
+    const eventStartTime = new Date(event.startTime);
+    const eventEndTime = new Date(event.endTime);
 
-    if (currentTime < new Date(event.startTime) || currentTime > new Date(event.endTime)) {
-      return res.status(400).json({ message: 'Ticket not valid at this time' });
+    const verificationStartTime = new Date(eventStartTime);
+    verificationStartTime.setHours(eventStartTime.getHours() - 1);
+
+    if (currentTime < verificationStartTime) {
+      return res.status(400).json({
+        message: 'Ticket verification will start 1 hour before the event',
+      });
+    }
+
+    if (currentTime > eventEndTime) {
+      return res.status(400).json({
+        message: 'Event has ended. Ticket is no longer valid',
+      });
     }
 
     await Attendees.update(attendee.id, {
