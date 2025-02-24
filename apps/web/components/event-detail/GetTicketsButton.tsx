@@ -4,6 +4,7 @@ import { useCurrentUser } from '@/lib/react-query/auth';
 import {
   useCreateAttendee,
   useGetAttendeeDetails,
+  useGetAttendeeTicketDetails,
   useSoftDeleteAttendee,
 } from '@/lib/react-query/event';
 import Link from 'next/link';
@@ -18,7 +19,7 @@ type GetTicketsButtonProps = {
 const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess } = useCreateAttendee();
-  const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeDetails(eventId);
+  const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
   const {
     mutate: cancelRegistration,
     isSuccess: cancelRegistrationSuccess,

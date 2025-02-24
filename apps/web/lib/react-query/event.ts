@@ -149,6 +149,15 @@ export const useGetAttendeeDetails = (eventId: string) => {
   });
 };
 
+export const useGetAttendeeTicketDetails = (eventId: string) => {
+  return useQuery({
+    queryKey: ['event', eventId, 'ticket'],
+    queryFn: () => eventAPI.getAttendeeTicketDetail(eventId),
+    retry: 1,
+    enabled: !!eventId,
+  });
+};
+
 export const useCancelEvent = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, { eventId: string }>({
     mutationFn: ({ eventId }) => eventAPI.cancelEvent(eventId),

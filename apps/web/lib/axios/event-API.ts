@@ -74,6 +74,10 @@ export const eventAPI = {
     return api.get(`event/${eventId}/attendees`).then((res) => res.data as IAttendee);
   },
 
+  getAttendeeTicketDetail: async (eventId: string) => {
+    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as IAttendee);
+  },
+
   getEventBySlug: async (slug: string): Promise<IEventResponse | undefined> => {
     const response = await api.get(`/event/slug/${slug}`);
     return response.data;

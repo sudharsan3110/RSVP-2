@@ -225,6 +225,7 @@ export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {},
 // Attendee routes
 export const createAttendee = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, CreateAttendeeBody>, res) => {
+    let AttendeeStatus = {};
     const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ message: 'Invalid or expired token' });
@@ -266,13 +267,19 @@ export const createAttendee = catchAsync(
     const hash = createHash('sha256').update(uuid).digest('base64');
     const qrToken = hash.slice(0, 6);
 
+    if (!event.hostPermissionRequired) {
+      AttendeeStatus = { allowedStatus: true, status: 'Going' };
+    } else {
+      AttendeeStatus = { allowedStatus: false, status: 'Waiting' };
+    }
+
     const attendeeData = {
       qrToken: qrToken,
       userId: req.userId,
       eventId: eventId,
-      ...(event.hostPermissionRequired && { allowedStatus: false }),
-      ...req.body,
+      ...AttendeeStatus,
     };
+
     const newAttendee = await Attendees.create(attendeeData);
     const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
     console.log('URL to be sent via email:', url);
