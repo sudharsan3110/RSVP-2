@@ -510,7 +510,6 @@ export const verifyQrToken = catchAsync(
     const verificationStartTime = new Date(eventStartTime);
     verificationStartTime.setHours(eventStartTime.getHours() - 1);
 
-
     if (currentTime < verificationStartTime) {
       return res.status(400).json({
         message: 'Ticket verification will start 1 hour before the event',

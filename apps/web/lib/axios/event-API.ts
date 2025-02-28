@@ -1,6 +1,6 @@
 import { Event } from '@/types/Events';
 import { Attendee } from '@/types/attendee';
-import { IEvent, IEventResponse } from '@/types/event';
+import { IEvent, IEventHost, IEventResponse } from '@/types/event';
 import { CommunicationForm } from '../zod/communication';
 import { CreateEventSubmissionType } from '../zod/event';
 import api from './instance';
@@ -91,7 +91,7 @@ export const eventAPI = {
   },
 
   getAttendeeTicketDetail: async (eventId: string) => {
-    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as IAttendee);
+    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
   },
 
   getEventBySlug: async (slug: string): Promise<IEventResponse | undefined> => {
@@ -133,5 +133,15 @@ export const eventAPI = {
       params: { limit },
     });
     return response.data.data;
+  },
+
+  getEventCohosts: async (eventId: string): Promise<IEventHost[]> => {
+    const hosts = await api.get(`/cohosts/events/${eventId}`);
+    return hosts.data.hosts;
+  },
+
+  deleteEventCohost: async (eventId: string, cohostId: string) => {
+    const response = await api.delete(`cohosts/events/${eventId}/${cohostId}`);
+    return response.data;
   },
 };

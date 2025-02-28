@@ -110,3 +110,5 @@ export const locationName = [
     label: 'Bangalore',
   },
 ];
+
+export const VERCEL_AVATAR_BASE_URL = `https://avatar.vercel.sh`;

@@ -71,6 +71,12 @@ export const removeEventCohost = catchAsync(
     if (!eventId || !cohostUserId)
       return res.status(400).json({ message: 'Event Id and cohost user is required' });
 
+    if (userId === cohostUserId)
+      return res.status(400).json({ message: API_MESSAGES.COHOST.REMOVE.CANNOT_REMOVE_SELF });
+
+    const eventExists = await Events.findById(eventId);
+    if (eventExists == null) return res.status(400).json({ message: API_MESSAGES.EVENT.NOT_FOUND });
+
     const isUserCreator = await CohostRepository.checkCreatorForEvent(userId as string, eventId);
     const isUserMod =
       (await CohostRepository.hasRole(userId as string, eventId, Role.Manager)) || isUserCreator;
@@ -80,9 +86,16 @@ export const removeEventCohost = catchAsync(
         message: API_MESSAGES.COHOST.REMOVE.INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED,
       });
 
+    const isCohostCreator = await CohostRepository.checkCreatorForEvent(cohostUserId, eventId);
+
+    if (isCohostCreator) {
+      return res.status(400).json({
+        message: API_MESSAGES.COHOST.REMOVE.CANNOT_REMOVE_CREATOR,
+      });
+    }
+
     const isCohostMod =
-      (await CohostRepository.checkCreatorForEvent(cohostUserId, eventId)) ||
-      (await CohostRepository.hasRole(cohostUserId, eventId, Role.Manager));
+      isCohostCreator || (await CohostRepository.hasRole(cohostUserId, eventId, Role.Manager));
 
     if (!isUserCreator && isCohostMod)
       return res.status(400).json({

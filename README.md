@@ -51,9 +51,11 @@ Create, share, and sell tickets effortlessly. Your all-in-one event management s
 
 ## AWS CloudFormation setup:
 
-Navigate to [AWS cloudformation setup](./docs/aws_cloudformation_setup.md) for information about environmental variables: 
+Navigate to [AWS cloudformation setup](./docs/aws_cloudformation_setup.md) for information about environmental variables:
+
 - `AWS_ACCESS_KEY'
 - 'AWS_SECRET_KEY'
 - 'AWS_BUCKET_NAME'
 - 'AWS_REGION`
+
 ---

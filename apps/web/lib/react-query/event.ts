@@ -16,7 +16,16 @@ interface ErrorResponse {
 }
 
 const EVENTS_QUERY_KEY = 'events';
+const EVENT_COHOST_KEY = 'cohost';
 const ATTENDEE_QUERY_KEY = 'attendees';
+
+export const useEventQuery = (id: string) => {
+  return useQuery({
+    queryKey: [EVENTS_QUERY_KEY, id],
+    queryFn: () => eventAPI.getEventById(id),
+    enabled: !!id,
+  });
+};
 
 export const useGetEvent = () => {
   return useQuery({
@@ -218,5 +227,28 @@ export const usePopularEvents = (limit?: number) => {
   return useQuery({
     queryKey: ['popular-events', limit],
     queryFn: () => eventAPI.getPopularEvents(limit),
+  });
+};
+
+export const useDeleteCohost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ eventId, cohostId }: { eventId: string; cohostId: string }) =>
+      eventAPI.deleteEventCohost(eventId, cohostId),
+    onSuccess: (resp, { eventId }) => {
+      toast.success(resp?.message);
+      queryClient.invalidateQueries({ queryKey: [EVENT_COHOST_KEY, eventId] });
+    },
+    onError: (resp: AxiosError) => {
+      const errMsg = resp.response?.data as ErrorResponse | undefined;
+      toast.error(errMsg?.message ?? resp.message ?? 'An unexpected error occured');
+    },
+  });
+};
+
+export const useGetEventCohosts = (eventId: string) => {
+  return useQuery({
+    queryKey: [EVENT_COHOST_KEY, eventId],
+    queryFn: () => eventAPI.getEventCohosts(eventId),
   });
 };
