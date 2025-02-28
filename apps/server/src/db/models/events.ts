@@ -132,6 +132,7 @@ export class Events {
           lte: new Date(new Date().setDate(new Date().getDate() + 30)), // Next 30 days
         },
         isActive: true,
+        hostPermissionRequired: false,
       },
       include: {
         creator: {

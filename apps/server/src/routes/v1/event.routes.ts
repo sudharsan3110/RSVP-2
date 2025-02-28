@@ -44,6 +44,7 @@ import {
 } from '@/controllers/update.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
+import { apiLimiter, qrVerifyLimiter } from '@/middleware/rateLimiter';
 import { validate } from '@/middleware/validate';
 import {
   eventAttendeeReqSchema,
@@ -53,28 +54,40 @@ import { Role } from '@prisma/client';
 
 const eventRouter: Router = Router();
 
-eventRouter.get('/upload-image', uploadEventImage);
+eventRouter.get('/upload-image', apiLimiter, uploadEventImage);
 
-eventRouter.get('/slug/:slug', validate({ params: getEventBySlugSchema }), getEventBySlug);
+eventRouter.get(
+  '/slug/:slug',
+  apiLimiter,
+  validate({ params: getEventBySlugSchema }),
+  getEventBySlug
+);
+eventRouter.get('/', apiLimiter, allPlannedEvents);
 
-eventRouter.get('/', allPlannedEvents);
+eventRouter.post(
+  '/',
+  apiLimiter,
+  authMiddleware,
+  validate({ body: CreateEventSchema }),
+  createEvent
+);
 
-eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEvent);
+eventRouter.get('/popular', apiLimiter, validate({ query: eventLimitSchema }), getPopularEvents);
 
-eventRouter.get('/popular', validate({ query: eventLimitSchema }), getPopularEvents);
-
-eventRouter.get('/filter', filterEvents);
+eventRouter.get('/filter', apiLimiter, filterEvents);
 
 eventRouter.get(
   '/user',
+  apiLimiter,
   authMiddleware,
   validate({ query: eventsPlannedByUserReqSchema }),
   plannedByUser
 );
-eventRouter.get('/:eventId', authMiddleware, getEventById);
+eventRouter.get('/:eventId', apiLimiter, authMiddleware, getEventById);
 
 eventRouter.patch(
   '/:eventId',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventAttendeeReqSchema, body: CreateEventSchema }),
   eventManageMiddleware([Role.Creator]),
@@ -83,15 +96,24 @@ eventRouter.patch(
 
 eventRouter.delete(
   '/:eventId',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventAttendeeReqSchema }),
   eventManageMiddleware([Role.Creator]),
   deleteEvent
 );
 
+eventRouter.get(
+  '/user',
+  apiLimiter,
+  authMiddleware,
+  validate({ query: eventsPlannedByUserReqSchema }),
+  plannedByUser
+);
 
 eventRouter.patch(
   '/:id/slug',
+  apiLimiter,
   authMiddleware,
   validate({ params: idParamsSchema, body: attendeePayloadSchema }),
   eventManageMiddleware([Role.Creator]),
@@ -100,6 +122,7 @@ eventRouter.patch(
 
 eventRouter.post(
   '/:eventId/attendees',
+  apiLimiter,
   authMiddleware,
   validate({ params: attendeeParamsSchema }),
   createAttendee
@@ -107,6 +130,7 @@ eventRouter.post(
 
 eventRouter.get(
   '/:eventId/attendees',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema, query: attendeesQuerySchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -115,6 +139,7 @@ eventRouter.get(
 
 eventRouter.get(
   '/:eventId/attendees/excel',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -123,6 +148,7 @@ eventRouter.get(
 
 eventRouter.post(
   '/:eventId/communications',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema, body: userUpdateSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -131,18 +157,21 @@ eventRouter.post(
 
 eventRouter.get(
   '/:eventId/communications',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   getNotification
 );
 eventRouter.get(
   '/:eventId/attendees/ticket',
+  apiLimiter,
   authMiddleware,
   validate({ params: attendeeParamsSchema }),
   getAttendeeDetails
 );
 eventRouter.patch(
   '/:eventId/attendee/:attendeeId/verify',
+  qrVerifyLimiter,
   authMiddleware,
   validate({ params: verifyQrTokenParamsSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -151,6 +180,7 @@ eventRouter.patch(
 
 eventRouter.get(
   '/:eventId/attendee/qr/:qrToken',
+  apiLimiter,
   authMiddleware,
   validate({ params: qrTokenSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -159,6 +189,7 @@ eventRouter.get(
 
 eventRouter.patch(
   '/:eventId/attendee/:userId/allowStatus',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -167,6 +198,7 @@ eventRouter.patch(
 
 eventRouter.patch(
   '/:eventId/attendee/allowStatus',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
@@ -175,6 +207,7 @@ eventRouter.patch(
 
 eventRouter.delete(
   '/:eventId/attendee',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   softDeleteAttendee
