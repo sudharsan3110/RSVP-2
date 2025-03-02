@@ -1,8 +1,15 @@
-import { IEvent, IEventResponse } from '@/types/event';
-import { CreateEventSubmissionType } from '../zod/event';
+import { Event } from '@/types/Events';
+import { Attendee } from '@/types/attendee';
+import { IEvent, IEventHost, IEventResponse } from '@/types/event';
 import { CommunicationForm } from '../zod/communication';
+import { CreateEventSubmissionType } from '../zod/event';
 import api from './instance';
 
+export interface GetAttendeeByEventIdParams extends PaginationParams {
+  eventId: string;
+  hasAttended?: boolean;
+  sortBy: string;
+}
 export type UpdateEventSubmissionType = CreateEventSubmissionType & { id: string };
 
 export const eventAPI = {
@@ -14,13 +21,40 @@ export const eventAPI = {
     return api.patch(`/event/${payload.id}`, rest);
   },
 
-  getEventById: async (eventId: string) => api.get(`/event/${eventId}`),
+  getEventById: async (eventId: string) =>
+    api.get(`/event/${eventId}`).then((res) => ({
+      totalAttendees: res.data.totalAttendees as number,
+      event: new Event(res.data.event),
+    })),
+
+  editEventSlug: async (payload: { eventId: string; slug: string }) =>
+    api.patch(`/event/${payload.eventId}/slug`, payload),
+
+  deleteEvent: async (eventId: string) => api.delete(`/event/${eventId}`),
 
   createEventCommunication: async (eventId: string, payload: CommunicationForm) =>
     api.post(`/event/${eventId}/communications`, payload),
 
   getEventCommunications: async (eventId: string) => {
     return api.get(`/event/${eventId}/communications`);
+  },
+
+  getEventAttendees: async (params: GetAttendeeByEventIdParams) => {
+    return api.get(`/event/${params.eventId}/attendees`, {
+      params: params,
+    });
+  },
+
+  getEventAttendeeExcel: async (params: GetAttendeeByEventIdParams) => {
+    return api.get(`/event/${params.eventId}/attendees/excel`, {
+      params: params,
+    });
+  },
+
+  getEventAttendeesExcel: async (params: GetAttendeeByEventIdParams) => {
+    return api.get(`/event/${params.eventId}/attendees/excel`, {
+      params: params,
+    });
   },
 
   createAttendee: async (eventId: string) => {
@@ -36,8 +70,28 @@ export const eventAPI = {
     return api.delete(`event/${eventId}/attendee`);
   },
 
-  getAttendee: async ({ eventId, userId }: { eventId: string; userId: string }) => {
-    return api.get(`event/${eventId}/attendees/${userId}`);
+  getAttendee: async (eventId: string) => {
+    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
+  },
+
+  verifyAttendee: async (payload: { eventId: string; attendeeId: string }) => {
+    return api.patch(`event/${payload.eventId}/attendee/${payload.attendeeId}/verify`, payload);
+  },
+
+  getAttendeeByTicketCode: async ({
+    eventId,
+    ticketCode,
+  }: {
+    ticketCode: string;
+    eventId: string;
+  }) => {
+    return api
+      .get(`/event/${eventId}/attendee/qr/${ticketCode}`)
+      .then((res) => res.data as Attendee);
+  },
+
+  getAttendeeTicketDetail: async (eventId: string) => {
+    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
   },
 
   getEventBySlug: async (slug: string): Promise<IEventResponse | undefined> => {
@@ -56,6 +110,38 @@ export const eventAPI = {
 
   cancelEvent: async (eventId: string) => {
     const response = await api.delete(`/event/${eventId}/attendee`);
+    return response.data;
+  },
+
+  checkAllowStatus: async (eventId: string, userId: string) => {
+    return api.patch(`/event/${eventId}/attendee/${userId}/allowStatus`, {
+      eventId,
+      userId,
+    });
+  },
+
+  updateAttendeeAllowStatus: async (eventId: string, userId: string, allowedStatus: boolean) => {
+    return api.patch(`/event/${eventId}/attendee/allowStatus`, {
+      eventId,
+      userId,
+      allowedStatus,
+    });
+  },
+
+  getPopularEvents: async (limit?: number) => {
+    const response = await api.get('/event/popular', {
+      params: { limit },
+    });
+    return response.data.data;
+  },
+
+  getEventCohosts: async (eventId: string): Promise<IEventHost[]> => {
+    const hosts = await api.get(`/cohosts/events/${eventId}`);
+    return hosts.data.hosts;
+  },
+
+  deleteEventCohost: async (eventId: string, cohostId: string) => {
+    const response = await api.delete(`cohosts/events/${eventId}/${cohostId}`);
     return response.data;
   },
 };

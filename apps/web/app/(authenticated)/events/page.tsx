@@ -1,15 +1,9 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import NullScreen from '@/components/common/NullScreen';
-import { useGetEvent } from '@/lib/react-query/event.ts';
 import Container from '@/components/common/Container.tsx';
 import EventCard from '@/components/common/EventCard.tsx';
-import { IEvent } from '@/types/event.ts';
-import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import NoResults from '@/components/common/NoResults';
+import NullScreen from '@/components/common/NullScreen';
 import { Button } from '@/components/ui/button.tsx';
-import { cn } from '@/lib/utils.ts';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
-import { locationName } from '@/utils/constants.ts';
 import {
   Command,
   CommandEmpty,
@@ -17,6 +11,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command.tsx';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import {
   Select,
   SelectContent,
@@ -26,6 +21,12 @@ import {
   SelectValue,
 } from '@/components/ui/select.tsx';
 import useDebounce from '@/hooks/useDebounce';
+import { useGetEvent } from '@/lib/react-query/event.ts';
+import { cn } from '@/lib/utils.ts';
+import { IEvent } from '@/types/event.ts';
+import { locationName, NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
+import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface HandleSearchEvent {
   target: {
@@ -38,7 +39,7 @@ const Events = () => {
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [isFilterOpen] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [filteredEvents, setFilteredEvents] = useState<IEvent[] | undefined>(event);
 
@@ -58,7 +59,8 @@ const Events = () => {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
-  return event ? (
+
+  return event?.length != 0 ? (
     <Container className="min-h-screen space-y-8 py-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row">
         <div className="space-y-2">
@@ -176,13 +178,15 @@ const Events = () => {
         </section>
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredEvents?.map((eventData: IEvent) => (
-            <EventCard event={eventData} key={eventData.id} />
+            <EventCard event={eventData} key={eventData.id} type="manage" />
           ))}
         </div>
       </main>
     </Container>
   ) : (
-    <NullScreen />
+    <section className="mx-auto my-48 w-full max-w-[352px] text-center">
+      <NoResults title={NO_EVENT_TITLE} message={NO_EVENTS_MESSAGE} />
+    </section>
   );
 };
 

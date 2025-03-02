@@ -24,15 +24,17 @@ export const signin = catchAsync(async (req: Request<{}, {}, SigninRequestBody>,
   const token = await Users.createMagicLink(user.id);
   console.log(`${config.CLIENT_URL}?token=${token}`);
 
-  await EmailService.send({
-    id: 4,
-    subject: 'Sign in to your account',
-    recipient: email,
-    body: {
-      email,
-      magicLink: `${config.CLIENT_URL}?token=${token}`,
-    },
-  });
+  if (config.env !== 'development') {
+    await EmailService.send({
+      id: 4,
+      subject: 'Sign in to your account',
+      recipient: email,
+      body: {
+        email,
+        magicLink: `${config.CLIENT_URL}?token=${token}`,
+      },
+    });
+  }
 
   return res.status(200).json({ message: 'success' });
 });

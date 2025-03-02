@@ -20,6 +20,7 @@ const config = {
     extend: {
       colors: {
         dark: {
+          400: 'hsl(val(--dark-400))',
           500: 'hsl(var(--dark-500))',
           900: 'hsl(var(--dark-900))',
           800: 'hsl(var(--dark-800))',

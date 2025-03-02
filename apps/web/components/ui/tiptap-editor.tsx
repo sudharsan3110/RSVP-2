@@ -148,12 +148,48 @@ const Editor = ({ editor }: { editor: EditorType | null }) => {
           'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
           editor.isActive('link') ? 'bg-primary text-primary-foreground' : ''
         )}
-        onPressedChange={() =>
-          editor.commands.setLink({ href: prompt('Enter the URL', url) || '' })
-        }
+        onPressedChange={() => {
+          let inputUrl = prompt('Enter the URL', url) || '';
+          if (!inputUrl.startsWith('http://') && !inputUrl.startsWith('https://')) {
+            inputUrl = `https://${inputUrl}`;
+          }
+          editor.commands.setLink({ href: inputUrl });
+        }}
       >
         <LinkIcon className="h-4 w-4" />
       </Toggle>
+
+      {/* Image */}
+      {/* <Toggle
+        size="sm"
+        pressed={editor.isActive('image')}
+        className={clsx(
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('image') ? 'bg-primary text-primary-foreground' : ''
+        )}
+        onPressedChange={() =>
+          editor.commands.setImage({ src: prompt('Enter the URL', url) || '' })
+        }
+      >
+        <ImageIcon className="h-4 w-4" />
+      </Toggle> */}
+
+      {/* Youtube */}
+      {/* <Toggle
+        size="sm"
+        pressed={editor.isActive('youtube')}
+        className={clsx(
+          'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+          editor.isActive('youtube') ? 'bg-primary text-primary-foreground' : ''
+        )}
+        onPressedChange={() =>
+          editor.commands.setYoutubeVideo({
+            src: prompt('Enter the URL', url) || '',
+          })
+        }
+      >
+        <YoutubeIcon className="h-4 w-4" />
+      </Toggle> */}
     </div>
   );
 };

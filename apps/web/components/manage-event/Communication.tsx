@@ -1,20 +1,20 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Card, CardContent } from '../ui/card';
-import { ScrollArea } from '../ui/scroll-area';
-import ChatMessage from './ChatMessage';
-import { FormField, FormItem } from '../ui/form';
-import Tiptap from '../ui/tiptap';
-import { communication, CommunicationForm } from '@/lib/zod/communication';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../ui/button';
 import {
   useCreateEventCommunication,
   useEventCommunications,
 } from '@/lib/react-query/communication';
+import { cn } from '@/lib/utils';
+import { communication, CommunicationForm } from '@/lib/zod/communication';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
+import { FormField, FormItem } from '../ui/form';
 import FormProvider from '../ui/form-provider';
+import { ScrollArea } from '../ui/scroll-area';
+import Tiptap from '../ui/tiptap';
+import ChatMessage from './ChatMessage';
 
 interface CommunicationProps {
   eventId: string;
@@ -47,9 +47,7 @@ const Communication = ({ eventId }: CommunicationProps) => {
 
   const onSubmit = (data: CommunicationForm) => {
     createCommunication(data, {
-      onSuccess: () => {
-        form.reset(); // Reset form after successful submission
-      },
+      onSuccess: () => form.reset(),
     });
   };
 
@@ -69,12 +67,12 @@ const Communication = ({ eventId }: CommunicationProps) => {
         <section>
           <Card className="w-full border-none bg-transparent lg:w-1/2">
             <CardContent>
-              <ScrollArea className="h-96 p-4">
+              <ScrollArea className={cn(communicationsData?.data?.length > 3 && 'h-96 p-4')}>
                 {(communicationsData as CommunicationsData)?.data?.map(
                   (msg: CommunicationMessage, index: number) => (
                     <ChatMessage
                       key={index}
-                      sender={msg.user.name}
+                      user={msg.user}
                       message={msg.content}
                       time={formatTime(msg.updatedAt)}
                     />

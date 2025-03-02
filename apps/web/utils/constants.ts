@@ -89,6 +89,13 @@ export const eventCategoryOptions: FormSelectOption[] = [
   { value: 'others', label: 'Others...' },
 ];
 
+export const NO_PLANNED_EVENTS_TITLE = 'No Planned Events';
+export const NO_PLANNED_EVENTS_MESSAGE =
+  'You’re not attending any events yet. Browse and RSVP to upcoming events!.';
+
+export const NO_EVENT_TITLE = 'No Upcoming Events';
+export const NO_EVENTS_MESSAGE =
+  'There are no events available at the moment. Stay tuned for upcoming events!';
 export const locationName = [
   {
     value: 'delhi',
@@ -103,3 +110,5 @@ export const locationName = [
     label: 'Bangalore',
   },
 ];
+
+export const VERCEL_AVATAR_BASE_URL = `https://avatar.vercel.sh`;

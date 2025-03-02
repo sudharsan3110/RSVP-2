@@ -1,59 +1,29 @@
 'use client';
-import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/react-query/auth';
-import { useCancelEvent, useGetAttendeeDetails, useGetEventDetails } from '@/lib/react-query/event';
-import { notFound, useParams } from 'next/navigation';
-import QRCode from 'react-qr-code';
-import TicketPageSkeleton from '@/components/event-detail/TicketPageSkeleton';
+import { useCancelEvent, useGetAttendeeDetails, useGetEventById } from '@/lib/react-query/event';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import { Presentation } from 'lucide-react';
+import { notFound, useParams } from 'next/navigation';
+import QRCode from 'react-qr-code';
 
 const TicketPage = () => {
-  const [loading, setLoading] = useState(true);
-
-  const { data: userData } = useCurrentUser();
-  const { data: eventData, mutate: fetchEventData } = useGetEventDetails();
-  const { data: attendeeData, mutate: fetchAttendeeData } = useGetAttendeeDetails();
-  const { mutate: cancelEvent } = useCancelEvent();
-
   const { id } = useParams();
 
-  useEffect(() => {
-    if (id) {
-      fetchEventData(id);
-    }
-  }, [id, fetchEventData]);
+  if (typeof id !== 'string') notFound();
 
-  useEffect(() => {
-    const eventId = eventData?.data?.event?.id;
-    const userId = userData?.data?.data?.id;
-    if (eventId && userId) {
-      fetchAttendeeData({ eventId, userId });
-    }
-  }, [eventData, userData, fetchAttendeeData]);
+  const { data: userData } = useCurrentUser();
+  const { data: attendeeData, isLoading: isAttendeeLoading } = useGetAttendeeDetails(id);
+  const { data: eventData, isLoading: isEventLoading } = useGetEventById(id);
+  const { mutate: cancelEvent } = useCancelEvent();
 
-  useEffect(() => {
-    if (eventData && attendeeData) {
-      setLoading(false);
-    }
-  }, [eventData, attendeeData]);
-
-  if (!id || typeof id !== 'string') {
-    return notFound();
-  }
-
-  if (loading) {
-    return <TicketPageSkeleton />;
-  }
-
-  const qrToken = attendeeData?.data?.qrToken || '';
+  const qrToken = attendeeData?.qrToken || '';
   const confirmationCode = `${qrToken?.slice(0, 3)} - ${qrToken?.slice(3, 6)}`;
-  const attendeeName = userData?.data?.data?.full_name || 'Guest';
-  const eventName = eventData?.data?.event?.name || 'Event';
-  const eventDescription = eventData?.data?.event?.description || '';
-  const eventDate = eventData?.data?.event?.startTime
-    ? new Date(eventData?.data?.event?.startTime).toISOString().split('T')[0]
+  const attendeeName = userData?.data?.full_name || 'Guest';
+  const eventName = eventData?.event?.name || 'Event';
+  const eventDescription = eventData?.event?.description || '';
+  const eventDate = eventData?.event?.startTime
+    ? new Date(eventData?.event?.startTime).toISOString().split('T')[0]
     : 'TBD';
 
   const handleEventCancel = () => {
@@ -61,6 +31,8 @@ const TicketPage = () => {
       cancelEvent({ eventId: id });
     }
   };
+
+  const loading = isAttendeeLoading || isEventLoading;
 
   return (
     <div className="container-main my-10">
@@ -73,19 +45,17 @@ const TicketPage = () => {
           <p dangerouslySetInnerHTML={{ __html: eventDescription }} />
         </div>
         <div className="flex w-full flex-col items-center justify-between gap-x-10 gap-y-3 md:w-1/2 md:flex-row">
-          <Button className="h-12 w-full rounded-[6px] md:w-1/2">
-            {eventData?.data?.event?.venueType === 'virtual' ? (
-              <>
-                <Presentation className="mr-2 size-6" />
-                See Meeting
-              </>
-            ) : eventData?.data?.event?.venueType === 'physical' ? (
-              <>
-                <MapPinIcon className="mr-2 size-6" />
-                Get Directions
-              </>
-            ) : null}
-          </Button>
+          {eventData?.event?.venueType === 'virtual' ? (
+            <Button className="h-12 w-full rounded-[6px] md:w-1/2">
+              <Presentation className="mr-2 size-6" />
+              See Meeting
+            </Button>
+          ) : eventData?.event?.venueType === 'physical' ? (
+            <Button className="h-12 w-full rounded-[6px] md:w-1/2">
+              <MapPinIcon className="mr-2 size-6" />
+              Get Directions
+            </Button>
+          ) : null}
           <Button
             className="h-12 w-full rounded-[6px] border bg-dark-900 md:w-1/2"
             variant="destructive"
@@ -126,7 +96,7 @@ const TicketPage = () => {
             </div>
             <div>
               <p className="font-bold">CONFIRMATION CODE</p>
-              <p className="mt-3 text-4xl font-bold md:text-5xl">{confirmationCode}</p>
+              <p className="mt-3 text-4xl font-bold uppercase md:text-5xl">{confirmationCode}</p>
             </div>
           </div>
         </div>

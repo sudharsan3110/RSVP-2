@@ -1,15 +1,15 @@
 'use client';
 
-import { Button } from '../ui/button';
+import { useCurrentUser } from '@/lib/react-query/auth';
 import {
   useCreateAttendee,
   useGetAttendeeDetails,
+  useGetAttendeeTicketDetails,
   useSoftDeleteAttendee,
 } from '@/lib/react-query/event';
-import SigninDialog from '../auth/SigninDialog';
-import { useCurrentUser } from '@/lib/react-query/auth';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import SigninDialog from '../auth/SigninDialog';
+import { Button } from '../ui/button';
 
 type GetTicketsButtonProps = {
   eventId: string;
@@ -19,13 +19,12 @@ type GetTicketsButtonProps = {
 const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess } = useCreateAttendee();
-  const { mutate: getAttendeeData, isSuccess: attendeeDataSuccess } = useGetAttendeeDetails();
+  const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
   const {
     mutate: cancelRegistration,
     isSuccess: cancelRegistrationSuccess,
     reset: resetCancelRegistration,
   } = useSoftDeleteAttendee();
-  const [loading, setLoading] = useState(true);
 
   const handleGetTickets = async () => {
     resetCancelRegistration();
@@ -36,17 +35,7 @@ const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonPro
     cancelRegistration(eventId);
   };
 
-  useEffect(() => {
-    if (!userData || !userData.data?.data?.id) return;
-    getAttendeeData(
-      { eventId, userId: userData.data.data.id },
-      {
-        onSettled: () => setLoading(false),
-      }
-    );
-  }, [eventId, userData]);
-
-  if (loading && userDataLoading) {
+  if (isLoading && userDataLoading) {
     return (
       <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2" disabled>
         Loading...
@@ -57,9 +46,11 @@ const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonPro
   if ((isSuccess || attendeeDataSuccess) && !cancelRegistrationSuccess) {
     return (
       <div className="flex w-full flex-col gap-4">
-        <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2">
-          <Link href={`/ticket/${eventId}`}>Show Tickets</Link>
-        </Button>
+        <Link href={`/ticket/${eventId}`}>
+          <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2">
+            Show Tickets
+          </Button>
+        </Link>
         <Button
           variant="destructive"
           className="w-full rounded-full px-4 py-2"
@@ -79,9 +70,17 @@ const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonPro
     );
   }
 
+  if (isPermissionRequired) {
+    return (
+      <Button className="mt-4 w-full cursor-auto rounded-full px-4 py-2" variant="outline">
+        Waiting for Approval
+      </Button>
+    );
+  }
+
   return (
     <Button className="mt-4 w-full rounded-full px-4 py-2" onClick={handleGetTickets}>
-      {isPermissionRequired ? 'Waiting for Approval' : 'Get Tickets'}
+      Get Tickets
     </Button>
   );
 };

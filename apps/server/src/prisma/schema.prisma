@@ -22,7 +22,7 @@ model Users {
   twitter                     String?    @db.VarChar(256)
   instagram                   String?    @db.VarChar(256)
   website                     String?    @db.VarChar(256)
-  profile_icon                String?    @db.VarChar(256)
+  profile_icon                String?    @db.VarChar(256)@default("1")
   event_participation_enabled Boolean    @default(false)
   created_at                  DateTime   @default(now())
   updated_at                  DateTime   @default(now()) @updatedAt
@@ -87,6 +87,8 @@ model Event {
   hostPermissionRequired Boolean    @map("host_permission_required")
   capacity               Int?
   isActive               Boolean    @default(true)
+  isCancelled            Boolean    @default(false) @map("is_cancelled")
+  isDeleted              Boolean    @default(false) @map("is_deleted")
   createdAt              DateTime   @default(now()) @map("created_at")
   updatedAt              DateTime   @updatedAt @map("updated_at")
   creator                Users      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
@@ -107,7 +109,7 @@ model Attendee {
   feedback         String?   @db.VarChar(512)
   qrToken          String    @unique @db.VarChar(512)
   status           Status    @default(Waiting)
-  allowedStatus    Boolean   @default(false)
+  allowedStatus    Boolean   @default(true)
   deleted          Boolean   @default(false) @map("deleted")
   updatedAt        DateTime  @updatedAt @map("updated_at")
   user             Users     @relation(fields: [userId], references: [id], onDelete: Cascade)

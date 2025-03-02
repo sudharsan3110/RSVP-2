@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   TicketIcon,
   CalendarDateRangeIcon,
@@ -30,10 +31,17 @@ const Autheticated = () => {
   const isScrolled = useScroll();
   const { mutate } = useSignout();
   const { data: userData } = useCurrentUser();
+  const pathname = usePathname();
 
   const profileIcon = userAvatarOptions.find(
     (option) => option.id === userData?.data?.data?.profile_icon
   );
+  const getActiveClass = (path: string) => {
+    return pathname === path ? 'text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white';
+  };
+  const eventsActiveClass = getActiveClass('/events');
+  const plannedActiveClass = getActiveClass('/planned');
+  const discoverActiveClass = getActiveClass('/discover');
 
   const handleLogout = () => {
     if (userData?.data?.data?.id) {
@@ -52,20 +60,26 @@ const Autheticated = () => {
           <div className="flex flex-1">
             <div className="hidden gap-3 md:flex">
               <Link href="/events">
-                <Button className="text-md text-white" variant={'ghost'}>
-                  <TicketIcon className="mr-2 h-5 w-5 text-white" />
+                <Button className={`text-md group ${eventsActiveClass}`} variant={'ghost'}>
+                  <TicketIcon
+                    className={`mr-2 h-5 w-5 group-hover:text-white ${eventsActiveClass}`}
+                  />
                   Events
                 </Button>
               </Link>
               <Link href="/planned">
-                <Button className="text-md text-white" variant={'ghost'}>
-                  <CalendarDateRangeIcon className="mr-2 h-5 w-5 text-white" />
+                <Button className={`text-md group ${plannedActiveClass}`} variant={'ghost'}>
+                  <CalendarDateRangeIcon
+                    className={`mr-2 h-5 w-5 text-gray-400 group-hover:text-white ${plannedActiveClass}`}
+                  />
                   Planned
                 </Button>
               </Link>
               <Link href="/discover">
-                <Button className="text-md text-white" variant={'ghost'}>
-                  <Icons.discover />
+                <Button className={`text-md group ${discoverActiveClass}`} variant={'ghost'}>
+                  <Icons.discover
+                    className={`mr-2 h-5 w-5 group-hover:text-white ${discoverActiveClass} `}
+                  />
                   Discover
                 </Button>
               </Link>

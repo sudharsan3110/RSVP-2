@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from '@/components/common/Container';
 import {
   MagnifyingGlassIcon,
@@ -30,11 +30,65 @@ import {
 import Tags from '@/components/tags/Tags';
 import { locationName } from '@/utils/constants';
 import NoResults from '@/components/common/NoResults';
+import EventCard from '@/components/common/EventCard';
+import { IEvent } from '@/types/event';
+import useDebounce from '@/hooks/useDebounce';
 
 const DiscoverEvents = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(true);
+
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSort, setSelectedSort] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const debouncedSearchQuery = useDebounce(searchQuery, 600);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+
+        queryParams.append('page', page.toString());
+        queryParams.append('limit', limit.toString());
+
+        if (debouncedSearchQuery) queryParams.append('searchParam', debouncedSearchQuery);
+        if (selectedSort) {
+          queryParams.append('sortBy', selectedSort);
+        }
+        if (selectedLocation) queryParams.append('location', selectedLocation);
+        if (selectedTag) queryParams.append('category', selectedTag);
+
+        const response = await fetch(
+          `http://localhost:8000/v1/event/filter?${queryParams.toString()}`
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        if (response.ok) {
+          setEvents(data.data);
+        } else {
+          console.error('Error fetching events:', data.message);
+          setEvents([]);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [debouncedSearchQuery, selectedSort, selectedLocation, page, limit, selectedTag]);
 
   return (
     <Container asChild>
@@ -53,7 +107,9 @@ const DiscoverEvents = () => {
                 <input
                   type="text"
                   className="block w-full rounded-md border border-dark-500 bg-dark-500 py-2 pl-10 pr-3 leading-5 text-white placeholder-white focus:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500 sm:text-sm"
-                  placeholder="Comic"
+                  placeholder="Search Events"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
@@ -93,24 +149,14 @@ const DiscoverEvents = () => {
                     className="w-[90vw] justify-between rounded-[8px] border md:w-[200px]"
                     data-testid="locationButton"
                   >
-                    {value
-                      ? locationName.find((location) => location.value === value)?.label
+                    {selectedLocation
+                      ? locationName.find((location) => location.value === selectedLocation)?.label
                       : 'Location'}
                     <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[90vw] rounded-[8px] p-0 md:w-[200px]">
                   <Command>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
-                      </div>
-                      <input
-                        type="text"
-                        className="block w-full bg-transparent py-2 pl-10 pr-3 leading-5 text-white placeholder-white focus:border-dark-900 focus:outline-none focus:ring-2 focus:ring-dark-900 sm:text-sm"
-                        placeholder="Search Here..."
-                      />
-                    </div>
                     <CommandList>
                       <CommandEmpty>No Location found.</CommandEmpty>
                       <CommandGroup>
@@ -118,8 +164,8 @@ const DiscoverEvents = () => {
                           <CommandItem
                             key={location.value}
                             value={location.value}
-                            onSelect={(currentValue) => {
-                              setValue(currentValue === value ? '' : currentValue);
+                            onSelect={() => {
+                              setSelectedLocation(location.value);
                               setOpen(false);
                             }}
                             className="cursor-pointer"
@@ -127,7 +173,7 @@ const DiscoverEvents = () => {
                             <CheckIcon
                               className={cn(
                                 'mr-2 h-4 w-4',
-                                value === location.value ? 'opacity-100' : 'opacity-0'
+                                selectedLocation === location.value ? 'opacity-100' : 'opacity-0'
                               )}
                             />
                             {location.label}
@@ -139,24 +185,15 @@ const DiscoverEvents = () => {
                 </PopoverContent>
               </Popover>
 
-              <Select>
-                <SelectTrigger
-                  className="w-[90vw] hover:rounded-[8px] md:w-[200px]"
-                  aria-label="Sort By"
-                >
+              <Select onValueChange={(value) => setSelectedSort(value)}>
+                <SelectTrigger className="w-[90vw] hover:rounded-[8px] md:w-[200px]">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem className="cursor-pointer hover:rounded-[8px]" value="date">
-                      Date
-                    </SelectItem>
-                    <SelectItem className="cursor-pointer hover:rounded-[8px]" value="attendees">
-                      Attendees
-                    </SelectItem>
-                    <SelectItem className="cursor-pointer hover:rounded-[8px]" value="price">
-                      Price
-                    </SelectItem>
+                    <SelectItem value="eventDate">Date</SelectItem>
+                    <SelectItem value="capacity">Attendees</SelectItem>
+                    <SelectItem value="price">Price</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -164,15 +201,22 @@ const DiscoverEvents = () => {
           </section>
 
           <section className="mt-1">
-            <Tags />
+            <Tags selectedTag={selectedTag} setSelectedTag={setSelectedTag} />
           </section>
-        </section>
 
-        <section className="mx-auto my-28 w-full max-w-[352px] text-center">
-          <NoResults
-            title="No Events found"
-            message="Your search “Comic” did not match any events. Please try again."
-          />
+          <section className="mt-6">
+            {loading ? (
+              <p className="text-center text-white">Loading events...</p>
+            ) : events.length > 0 ? (
+              <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {events.map((event: any, index: number) => (
+                  <EventCard event={event} />
+                ))}
+              </div>
+            ) : (
+              <NoResults title="No Events found" message="Try adjusting your search filters." />
+            )}
+          </section>
         </section>
       </main>
     </Container>

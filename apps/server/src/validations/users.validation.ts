@@ -11,7 +11,7 @@ const fullProfileSchema = z
     full_name: z.string().min(1),
     location: z.string(),
     bio: z.string(),
-    profile_icon: z.string(),
+    profile_icon: z.string().default('1'),
     twitter: z.string().optional(),
     instagram: z.string().optional(),
     website: z.string().optional(),

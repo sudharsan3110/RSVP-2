@@ -16,10 +16,10 @@ export const useSignInMutation = () => {
   return useMutation<AxiosResponse, Error, SigninPayload>({
     mutationFn: authAPI.signin,
     onSuccess: () => {
-      toast('Signin successful');
+      toast.success('Magic link sent to your email. Please check your inbox.');
     },
     onError: () => {
-      toast('Something went wrong');
+      toast.error('Failed to send magic link. Please try again.');
     },
   });
 };
@@ -29,7 +29,6 @@ export const useVerifySignin = () => {
   return useMutation<AxiosResponse<VerifySignInResponse>, Error, VerifySigninPayload>({
     mutationFn: authAPI.verifySignin,
     onSuccess: ({ data }) => {
-      console.log(data);
       if (data.data.user.is_completed) {
         router.push('/events');
       } else {

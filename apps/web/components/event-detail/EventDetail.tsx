@@ -8,6 +8,7 @@ import AvatarGroup from './AvatarGroup';
 import { userAvatarOptions } from '@/utils/constants';
 import { ClockIcon, LinkIcon } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { venueDisplay } from '@/utils/event';
 
 const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees: number } }) => {
   const { event, totalAttendees } = eventData;
@@ -20,21 +21,6 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
   const getProfilePictureUrl = (profileIConId: number | string) => {
     const profileUrl = userAvatarOptions.find((option) => option.id === profileIConId);
     return profileUrl?.src ?? userAvatarOptions[0]?.src!;
-  };
-
-  const trimVenue = (venue: string): JSX.Element | string => {
-    if (!venue) return 'Venue not specified';
-
-    const isValidUrl = venue.match(/^https?:\/\//);
-    const displayText = isValidUrl && venue.length > 50 ? `${venue.substring(0, 50)}...` : venue;
-
-    return isValidUrl ? (
-      <a href={venue} target="_blank" rel="noopener noreferrer">
-        {displayText}
-      </a>
-    ) : (
-      'Venue not specified'
-    );
   };
 
   return (
@@ -93,13 +79,7 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
                 {event?.venueType === 'virtual' && 'Event Link'}
                 {event?.venueType === 'later' && 'To be announced'}
               </p>
-              <p className="text-sm text-secondary">
-                {event?.venueType === 'physical' && trimVenue(event?.venueAddress || '')}
-                {event?.venueType === 'virtual' && trimVenue(event?.venueUrl || '')}
-                {event?.venueType === 'virtual' && trimVenue(event?.venueUrl || '')}
-                {event?.venueType === 'later' &&
-                  'You will be notified once host updates the details'}
-              </p>
+              <p className="text-sm text-secondary">{venueDisplay(event)}</p>
             </article>
           </section>
           <section className="mt-6 p-3 pl-0">

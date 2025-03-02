@@ -2,7 +2,6 @@ import { Separator } from '@/components/ui/separator';
 import CustomiseEventCard from './customise-event-card';
 import EventHostManagment from './event-host-managment';
 import RecentRegistrations from './recent-registrations';
-import { useParams } from 'next/navigation';
 
 const OverviewSection = () => {
   return (

@@ -3,6 +3,8 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { IEventHost } from '@/types/event';
+import { VERCEL_AVATAR_BASE_URL } from '@/utils/constants';
 
 // Define the shape of your data
 export type EventHost = {
@@ -12,23 +14,9 @@ export type EventHost = {
   status: 'Active' | 'Inactive';
 };
 
-// Static data example for table
-export const eventHostsData: EventHost[] = [
-  {
-    id: '1',
-    name: 'Olivia Rhye',
-    email: 'olivia@example.com',
-    status: 'Active',
-  },
-  {
-    id: '2',
-    name: 'Phoenix Baker',
-    email: 'phoenix@example.com',
-    status: 'Inactive',
-  },
-];
-
-export const eventHostColumns: ColumnDef<EventHost>[] = [
+export const eventHostColumns = (
+  handleRemoveCohost: (cohostId: string) => void
+): ColumnDef<IEventHost>[] => [
   {
     accessorKey: 'name',
     header: 'Host',
@@ -36,21 +24,21 @@ export const eventHostColumns: ColumnDef<EventHost>[] = [
       <div className="flex items-center">
         <Avatar className="h-9 w-9">
           <AvatarImage
-            src={`https://avatar.vercel.sh/${row.original.id}.png`}
-            alt={row.original.name}
+            src={`${VERCEL_AVATAR_BASE_URL}/${row.original.user.id}.png`}
+            alt={row.original.user.full_name}
           />
-          <AvatarFallback>{row.original.name.charAt(0)}</AvatarFallback>
+          <AvatarFallback>{row.original.user.full_name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="ml-3">
-          <p className="text-sm font-medium">{row.original.name}</p>
-          <p className="text-xs text-muted-foreground">{row.original.email}</p>
+          <p className="text-sm font-medium">{row.original.user.full_name}</p>
+          <p className="text-xs text-muted-foreground">{row.original.user.primary_email}</p>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: 'email',
-    header: 'Email',
+    accessorKey: 'role',
+    header: 'Role',
   },
   {
     id: 'actions',
@@ -62,8 +50,7 @@ export const eventHostColumns: ColumnDef<EventHost>[] = [
           radius="sm"
           size="sm"
           onClick={() => {
-            // Handle remove host action
-            console.log(`Remove host: ${host.name}`);
+            if (host?.user?.id) handleRemoveCohost(host.user.id);
           }}
         >
           Remove Host

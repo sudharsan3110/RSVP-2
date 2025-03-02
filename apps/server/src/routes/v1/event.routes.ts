@@ -1,67 +1,102 @@
-import { Router } from 'express';
 import {
-  createEvent,
+  allPlannedEvents,
+  checkAllowStatus,
   createAttendee,
+  createEvent,
   deleteEvent,
-  plannedByUser,
-  getAttendeeDetails,
-  verifyQrToken,
-  getAttendeeByQrToken,
-  getEventBySlug,
-  updateEvent,
+  editEventSlug,
   filterEvents,
-  softDeleteAttendee,
+  getAttendeeByQrToken,
+  getAttendeeDetails,
+  getAttendees,
+  getAttendeesExcelSheet,
   getEventById,
+  getEventBySlug,
+  getPopularEvents,
+  plannedByUser,
+  softDeleteAttendee,
+  updateAttendeeAllowStatus,
+  updateEvent,
+  verifyQrToken,
 } from '@/controllers/event.controller';
+
 import {
+  attendeeParamsSchema,
+  attendeePayloadSchema,
+  idParamsSchema,
+  qrTokenSchema,
+  verifyQrTokenParamsSchema,
+} from '@/validations/attendee.validation';
+import {
+  attendeesQuerySchema,
   CreateEventSchema,
+  eventLimitSchema,
   eventParamsSchema,
   getEventBySlugSchema,
   userUpdateSchema,
 } from '@/validations/event.validation';
-import {
-  attendeePayloadSchema,
-  attendeeParamsSchema,
-  attendeeIdSchema,
-  verifyQrTokenPayloadSchema,
-  qrTokenSchema,
-} from '@/validations/attendee.validation';
+import { Router } from 'express';
 
-import authMiddleware from '@/middleware/authMiddleware';
-import { eventManageMiddleware } from '@/middleware/hostMiddleware';
-import { validate } from '@/middleware/validate';
-import {
-  eventAttendeeReqSchema,
-  eventsPlannedByUserReqSchema,
-} from '@/validations/event.validation';
 import {
   createNotification,
   getNotification,
   uploadEventImage,
 } from '@/controllers/update.controller';
-import upload from '@/middleware/multerUploadMiddleware';
+import authMiddleware from '@/middleware/authMiddleware';
+import { eventManageMiddleware } from '@/middleware/hostMiddleware';
+import { apiLimiter, qrVerifyLimiter } from '@/middleware/rateLimiter';
+import { validate } from '@/middleware/validate';
+import {
+  eventAttendeeReqSchema,
+  eventsPlannedByUserReqSchema,
+} from '@/validations/event.validation';
 import { Role } from '@prisma/client';
 
 const eventRouter: Router = Router();
 
-eventRouter.get('/slug/:slug', validate({ params: getEventBySlugSchema }), getEventBySlug);
+eventRouter.get('/upload-image', apiLimiter, uploadEventImage);
 
-eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEvent);
+eventRouter.get(
+  '/slug/:slug',
+  apiLimiter,
+  validate({ params: getEventBySlugSchema }),
+  getEventBySlug
+);
+eventRouter.get('/', apiLimiter, allPlannedEvents);
 
-eventRouter.get('/upload-image', uploadEventImage);
-eventRouter.get('/filter', filterEvents);
+eventRouter.post(
+  '/',
+  apiLimiter,
+  authMiddleware,
+  validate({ body: CreateEventSchema }),
+  createEvent
+);
 
-eventRouter.get('/:eventId', authMiddleware, getEventById);
+eventRouter.get('/popular', apiLimiter, validate({ query: eventLimitSchema }), getPopularEvents);
+
+eventRouter.get('/filter', apiLimiter, filterEvents);
+
+eventRouter.get(
+  '/user',
+  apiLimiter,
+  authMiddleware,
+  validate({ query: eventsPlannedByUserReqSchema }),
+  plannedByUser
+);
+eventRouter.get('/:eventId', apiLimiter, authMiddleware, getEventById);
 
 eventRouter.patch(
   '/:eventId',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventAttendeeReqSchema, body: CreateEventSchema }),
+  eventManageMiddleware([Role.Creator]),
   updateEvent
 );
 
 eventRouter.delete(
   '/:eventId',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventAttendeeReqSchema }),
   eventManageMiddleware([Role.Creator]),
@@ -70,57 +105,112 @@ eventRouter.delete(
 
 eventRouter.get(
   '/user',
+  apiLimiter,
   authMiddleware,
   validate({ query: eventsPlannedByUserReqSchema }),
   plannedByUser
 );
 
+eventRouter.patch(
+  '/:id/slug',
+  apiLimiter,
+  authMiddleware,
+  validate({ params: idParamsSchema, body: attendeePayloadSchema }),
+  eventManageMiddleware([Role.Creator]),
+  editEventSlug
+);
+
 eventRouter.post(
   '/:eventId/attendees',
+  apiLimiter,
   authMiddleware,
-  validate({ params: attendeeParamsSchema, body: attendeePayloadSchema }),
+  validate({ params: attendeeParamsSchema }),
   createAttendee
+);
+
+eventRouter.get(
+  '/:eventId/attendees',
+  apiLimiter,
+  authMiddleware,
+  validate({ params: eventParamsSchema, query: attendeesQuerySchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
+  getAttendees
+);
+
+eventRouter.get(
+  '/:eventId/attendees/excel',
+  apiLimiter,
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
+  getAttendeesExcelSheet
 );
 
 eventRouter.post(
   '/:eventId/communications',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema, body: userUpdateSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
   createNotification
 );
 
 eventRouter.get(
   '/:eventId/communications',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   getNotification
 );
 eventRouter.get(
-  '/:eventId/attendees/:userId',
+  '/:eventId/attendees/ticket',
+  apiLimiter,
   authMiddleware,
   validate({ params: attendeeParamsSchema }),
   getAttendeeDetails
 );
-eventRouter.post(
-  '/attendee/verify',
+eventRouter.patch(
+  '/:eventId/attendee/:attendeeId/verify',
+  qrVerifyLimiter,
   authMiddleware,
-  validate({ body: verifyQrTokenPayloadSchema }),
+  validate({ params: verifyQrTokenParamsSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
   verifyQrToken
 );
 
 eventRouter.get(
   '/:eventId/attendee/qr/:qrToken',
+  apiLimiter,
   authMiddleware,
   validate({ params: qrTokenSchema }),
   eventManageMiddleware([Role.Creator, Role.Manager]),
   getAttendeeByQrToken
 );
 
+eventRouter.patch(
+  '/:eventId/attendee/:userId/allowStatus',
+  apiLimiter,
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
+  checkAllowStatus
+);
+
+eventRouter.patch(
+  '/:eventId/attendee/allowStatus',
+  apiLimiter,
+  authMiddleware,
+  validate({ params: eventParamsSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
+  updateAttendeeAllowStatus
+);
+
 eventRouter.delete(
   '/:eventId/attendee',
+  apiLimiter,
   authMiddleware,
   validate({ params: eventParamsSchema }),
   softDeleteAttendee
 );
+
 export { eventRouter };

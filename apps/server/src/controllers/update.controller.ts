@@ -99,31 +99,29 @@ export const getNotification = catchAsync(
 
     const notifications = await Update.findById(param.eventId as string);
 
-    if (!notifications || notifications.length === 0) {
-      return res.status(404).json({ message: 'No notifications found for this event' });
-    }
+    console.log('notifications', notifications);
 
-    const getUserDetails = await Users.findById(event.creatorId);
+    // if (!notifications || notifications.length === 0) {
+    //   return res.status(200).json({notifications:[]});
+    // }
 
-    if (!getUserDetails?.id) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    // const getUserDetails = await Users.findById(event.creatorId);
 
-    const eventNotifications = notifications.map((notification) => ({
-      ...notification,
-      user: {
-        id: getUserDetails.id,
-        name: getUserDetails.full_name,
-        email: getUserDetails.primary_email,
-      },
-    }));
+    // if (!getUserDetails?.id) {
+    //   return res.status(404).json({ message: 'User not found' });
+    // }
+
+    // const eventNotifications = notifications.map((notification) => ({
+    //   ...notification,
+    //   user: {
+    //     id: getUserDetails.id,
+    //     name: getUserDetails.full_name,
+    //     email: getUserDetails.primary_email,
+    //   },
+    // }));
 
     // console.log('notifications', eventNotifications);
 
-    if (!notifications) {
-      return res.status(404).json({ message: 'Notification not found' });
-    } else {
-      return res.status(200).json(eventNotifications);
-    }
+    return res.status(200).json(notifications);
   }
 );

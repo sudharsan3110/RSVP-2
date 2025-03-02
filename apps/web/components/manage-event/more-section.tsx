@@ -1,19 +1,27 @@
 'use client';
 
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useDeleteEventMutation, useEditEventSlug } from '@/lib/react-query/event';
+import { useForm } from 'react-hook-form';
 import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
 import FormProvider from '../ui/form-provider';
 import { Separator } from '../ui/separator';
 
-type Inputs = {
-  url: string;
-};
+const MoreSection = ({ eventId, slug }: { eventId: string; slug: string }) => {
+  const { mutate, isPending } = useEditEventSlug();
+  const { mutate: delMutate, isPending: deleteLoading } = useDeleteEventMutation();
 
-const MoreSection = () => {
-  const form = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log('URL sent successfully', data.url);
+  const form = useForm({
+    defaultValues: { slug },
+  });
+
+  const {
+    reset,
+    formState: { isDirty },
+  } = form;
+
+  const onSubmit = (data: { slug: string }) => {
+    mutate({ eventId, slug: data.slug }, { onSuccess: () => reset({ slug: data.slug }) });
   };
 
   return (
@@ -28,14 +36,24 @@ const MoreSection = () => {
         </div>
 
         <FormProvider methods={form} onSubmit={form.handleSubmit(onSubmit)}>
-          <FormInput control={form.control} name="url" label="Public URL">
+          <FormInput control={form.control} name="slug" label="Public URL">
             <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://rsvp.com/</span>
           </FormInput>
           <div className="mt-4 flex justify-end space-x-4">
-            <Button variant="ghost" className="rounded-[6px] border-dark-500">
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-[6px] border-dark-500"
+              onClick={() => reset()}
+            >
               Reset
             </Button>
-            <Button variant="default" className="rounded-[6px]" type="submit">
+            <Button
+              variant="default"
+              className="rounded-[6px]"
+              type="submit"
+              disabled={isPending || !isDirty}
+            >
               Update
             </Button>
           </div>
@@ -52,7 +70,12 @@ const MoreSection = () => {
           any registered guests, we will notify them that the event has been canceled.
         </p>
 
-        <Button variant="destructive" className="rounded-[6px]">
+        <Button
+          variant="destructive"
+          className="rounded-[6px]"
+          onClick={() => delMutate(eventId)}
+          disabled={deleteLoading}
+        >
           Delete My Event
         </Button>
       </section>

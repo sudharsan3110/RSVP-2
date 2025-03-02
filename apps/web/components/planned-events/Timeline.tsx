@@ -76,7 +76,7 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
   const timelineData = events ? transformEventsToTimelineData(events) : [];
 
   return (
-    <div className="bg-dark mx-auto max-w-[70rem] text-white md:w-[90%]">
+    <div className="bg- mx-auto max-w-[70rem] text-white md:w-[90%]">
       <div className="relative md:pl-24">
         {/* Timeline Rod */}
         <div className="absolute bottom-0 left-0 top-0 w-0.5 bg-gray-700 md:left-24"></div>
@@ -121,16 +121,6 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
                           <p className="text-sm font-medium leading-[19.6px]">{event.location}</p>
                         </CardContent>
                       </div>
-                    </div>
-                    <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
-                      <div className="flex flex-row items-center justify-between gap-1 border-r-2 pr-3">
-                        {/* Tick */}
-                        <Icons.tick />
-                        <span className="text-[14px] font-semibold leading-[16.8px]">
-                          {event.attendees}
-                        </span>
-                      </div>
-
                       <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
                         <div className="flex flex-row items-center justify-between gap-1 border-r-2 pr-3">
                           {/* Tick */}

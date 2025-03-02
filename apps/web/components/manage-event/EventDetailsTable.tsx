@@ -1,111 +1,74 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { attendeeColumns } from '@/columns/attendee-column';
 import { Input } from '@/components/ui/input';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-import { Switch } from '@/components/ui/switch';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowDown, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useGetAttendeeByEventId } from '@/lib/react-query/event';
+import { Search } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import TablePagination from '../common/Pagination';
+import { DataTable } from '../ui/data-table';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+
+interface FilterState {
+  searchTerm: string;
+  hasAttended?: boolean;
+  page: number;
+}
 
 export default function EventDetailsTable() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [filters, setFilters] = useState<FilterState>({
+    searchTerm: '',
+    page: 1,
+  });
 
-  const guests = [
-    {
-      name: 'Olivia Rhye',
-      username: '@olivia',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Phoenix Baker',
-      username: '@phoenix',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Lana Steiner',
-      username: '@lana',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Demi Wilkinson',
-      username: '@demi',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Candice Wu',
-      username: '@candice',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Natali Craig',
-      username: '@natali',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Drew Cano',
-      username: '@drew',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Orlando Diggs',
-      username: '@orlando',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Andi Lane',
-      username: '@andi',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-    {
-      name: 'Kate Morrison',
-      username: '@kate',
-      ticketId: 'X7F9-R2K3',
-      status: 'Checked In',
-      date: '22 Jan 2022',
-    },
-  ];
+  const params = useParams();
+  const eventId = params.id?.toString() || '';
 
-  const filteredGuests = guests.filter(
-    (guest) =>
-      guest.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filter === 'All' || guest.status === filter)
-  );
+  // Pass all filters to the API call
+  const { data, isLoading } = useGetAttendeeByEventId({
+    eventId,
+    page: filters.page,
+    limit: 10,
+    search: filters.searchTerm,
+    hasAttended: filters.hasAttended,
+    sortBy: 'registrationTime',
+  });
+
+  const attendees = data?.attendees ?? [];
+  const totalPages = data?.total ?? 0;
+
+  // Debounced search handler
+  const handleSearch = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      searchTerm: value,
+      page: 1, // Reset to first page on search
+    }));
+  };
+
+  // Status filter handler
+  const handleStatusChange = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      hasAttended: value === 'checkedIn' ? true : value === 'pending' ? false : undefined,
+      page: 1,
+    }));
+  };
+
+  const tabValue = useMemo(() => {
+    if (filters.hasAttended === true) return 'checkedIn';
+    if (filters.hasAttended === false) return 'pending';
+    return 'all';
+  }, [filters.hasAttended]);
+
+  // Page change handler
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({
+      ...prev,
+      page,
+    }));
+  };
 
   return (
     <div className="space-y-6">
@@ -117,72 +80,29 @@ export default function EventDetailsTable() {
             <Input
               type="text"
               placeholder="Search User"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
               className="w-full pl-8 sm:w-[400px]"
             />
           </div>
-          <Tabs value={filter} onValueChange={setFilter} className="w-full sm:w-auto">
+          <Tabs value={tabValue} onValueChange={handleStatusChange} className="w-full sm:w-auto">
             <TabsList className="flex flex-wrap justify-center sm:justify-start">
-              <TabsTrigger value="All">All</TabsTrigger>
-              <TabsTrigger value="CheckedIn">Checked In</TabsTrigger>
-              <TabsTrigger value="Pending">Pending</TabsTrigger>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="checkedIn">Checked In</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
         <div className="overflow-x-auto">
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>
-                  Status <ArrowDown className="inline h-5 w-5" />
-                </TableHead>
-                <TableHead>Ticket ID</TableHead>
-                <TableHead>Allow Guest</TableHead>
-                <TableHead>Registration Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredGuests.map((guest, index) => (
-                <TableRow key={index}>
-                  <TableCell className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarFallback>{guest.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div>{guest.name}</div>
-                      <div className="text-sm text-muted-foreground">{guest.username}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="success">{guest.status}</Badge>
-                  </TableCell>
-                  <TableCell>{guest.ticketId}</TableCell>
-                  <TableCell>
-                    <Switch />
-                  </TableCell>
-                  <TableCell>{guest.date}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable columns={attendeeColumns} data={attendees} loading={isLoading} />
         </div>
 
-        <Pagination className="flex flex-col items-center justify-between space-y-2 border-t px-6 py-4 sm:flex-row sm:space-y-0">
-          <PaginationPrevious href="#" />
-          <PaginationContent className="flex space-x-2">
-            <PaginationLink href="#">1</PaginationLink>
-            <PaginationLink href="#">2</PaginationLink>
-            <PaginationLink href="#">3</PaginationLink>
-            <PaginationEllipsis />
-            <PaginationLink href="#">8</PaginationLink>
-            <PaginationLink href="#">9</PaginationLink>
-            <PaginationLink href="#">10</PaginationLink>
-          </PaginationContent>
-          <PaginationNext href="#" />
-        </Pagination>
+        <TablePagination
+          currentPage={filters.page}
+          totalPages={totalPages}
+          onChange={handlePageChange}
+        />
       </div>
     </div>
   );

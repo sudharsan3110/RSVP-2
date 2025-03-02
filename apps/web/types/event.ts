@@ -20,8 +20,11 @@ export interface IEvent {
   numberOfAttendees?: number;
   host?: string;
   Cohost: ICohost[];
+  creator: Creator;
 }
-
+export interface Creator {
+  full_name: string;
+}
 export interface ICohost {
   user: {
     profile_icon: string;
@@ -37,6 +40,17 @@ export interface IEventResponse {
 export interface IEventCard {
   className?: string;
   event: IEvent | null;
+  type?: 'manage';
+}
+
+export interface IEventHost {
+  role: 'Creator' | 'Manager' | 'Celebrity' | 'ReadOnly';
+  user: {
+    id: string;
+    full_name: string;
+    profile_icon: string;
+    primary_email: string;
+  };
 }
 
 export type VenueType = 'physical' | 'virtual' | 'later';
