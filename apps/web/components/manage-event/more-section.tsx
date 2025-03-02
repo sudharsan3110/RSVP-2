@@ -80,6 +80,8 @@ const MoreSection = ({ eventId, slug }: { eventId: string; slug: string }) => {
         </Button>
       </section>
 
+      <Separator className="my-11 bg-separator" />
+
       <section className="space-y-6 md:w-1/2">
         <h3>Delete Event</h3>
 
@@ -90,7 +92,7 @@ const MoreSection = ({ eventId, slug }: { eventId: string; slug: string }) => {
 
         <Button
           variant="destructive"
-          className="rounded-[6px]"
+          className="rounded-[6px] opacity-50 hover:opacity-100"
           onClick={() => delMutate(eventId)}
           disabled={deleteLoading}
         >
