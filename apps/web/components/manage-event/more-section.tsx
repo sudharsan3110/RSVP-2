@@ -66,8 +66,26 @@ const MoreSection = ({ eventId, slug }: { eventId: string; slug: string }) => {
         <h3>Cancel Event</h3>
 
         <p className="text-sm">
-          Cancel and permanently delete this event. This operation cannot be undone. If there are
-          any registered guests, we will notify them that the event has been canceled.
+          Canceling this event cannot be undone. All attendees will be notified of the cancellation.
+          However, the host will still have access to the event details and related information.
+        </p>
+
+        <Button
+          variant="destructive"
+          className="rounded-[6px]"
+          onClick={() => delMutate(eventId)}
+          disabled={deleteLoading}
+        >
+          Cancel Event
+        </Button>
+      </section>
+
+      <section className="space-y-6 md:w-1/2">
+        <h3>Delete Event</h3>
+
+        <p className="text-sm">
+          Deleting this event will remove all event data and associated metadata. The host will no
+          longer have access to any information related to this event. This action cannot be undone.
         </p>
 
         <Button
