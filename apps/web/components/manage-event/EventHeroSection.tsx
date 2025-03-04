@@ -9,14 +9,12 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 export const EventHeroSection = () => {
-  const [isDownload, setIsDownload] = React.useState(false);
   const eventId = useParams().id?.toString();
 
   const { data } = useGetEventById(eventId!);
-  const { mutateAsync } = useGetAttendeeExcelByEventId();
+  const { mutateAsync, isPending } = useGetAttendeeExcelByEventId();
 
   const downloadExcel = async () => {
-    setIsDownload(true);
     try {
       if (!eventId) return;
       const response = await mutateAsync({ eventId: eventId, sortBy: 'createdAt' });
@@ -39,8 +37,6 @@ export const EventHeroSection = () => {
     } catch (error) {
       console.error(error);
       toast.error('Failed to download');
-    } finally {
-      setIsDownload(false);
     }
   };
 
@@ -84,7 +80,7 @@ export const EventHeroSection = () => {
             </div>
             <div className="ml-5">
               <h3 className="text-left font-bold text-white">
-                {isDownload ? 'Downloading...' : 'Download Guest List'}
+                {isPending ? 'Downloading...' : 'Download Guest List'}
               </h3>
               <p className="text-sm text-gray-200">Download data of your guest in xlsx.</p>
             </div>

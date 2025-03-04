@@ -15,7 +15,7 @@ const Footer = ({ className }: PropsWithClassName) => {
   const { loginedUser } = useLoggedInUser();
 
   return (
-    <footer data-testid="footer" className={cn('footer mt-auto', className)}>
+    <footer data-testid="footer" className={cn('footer mt-auto pt-16', className)}>
       <div className="bg-black px-11 py-8">
         <Container className="flex flex-col justify-between sm:flex-row">
           <div>

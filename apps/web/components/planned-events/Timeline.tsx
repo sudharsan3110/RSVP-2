@@ -1,9 +1,9 @@
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import eventImageSrc from '@/public/images/demo-event-image.png';
-import { Icons } from '../common/Icon';
 import { IEvent } from '@/types/event';
+import Image from 'next/image';
 import Link from 'next/link';
+import { Icons } from '../common/Icon';
 
 interface Event {
   title: string;

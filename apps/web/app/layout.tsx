@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <QueryProvider>
       <html lang="en">
-        <body className={cn(plusJakartaSans.className, 'dark')}>
+        <body className={cn(plusJakartaSans.className, 'dark flex min-h-screen flex-col')}>
           {children}
           <Toaster richColors />
         </body>

@@ -52,7 +52,7 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
   },
   {
     accessorKey: 'hasAttended',
-    header: 'Ticket ID',
+    header: 'Attendance',
     cell: ({ row }) => (
       <Badge variant={row.original.hasAttended ? 'success' : 'destructive'}>
         {row.original.hasAttended ? 'Attended' : 'Not Attended'}
@@ -97,7 +97,6 @@ const AllowedGuestColumn = ({ attendee }: { attendee: Attendee }) => {
   const [isToggled, setIsToggled] = useState(attendee.allowedStatus);
 
   const handleCheckedChange = (checked: boolean) => {
-    console.log('checked', checked);
     setIsToggled(checked);
     mutate({
       eventId: attendee.eventId,

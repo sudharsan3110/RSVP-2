@@ -37,7 +37,7 @@ export function DataTable<TData, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead className="text-white" key={header.id}>
+                  <TableHead className="text-nowrap text-secondary-foreground" key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -51,8 +51,8 @@ export function DataTable<TData, TValue>({
           {loading &&
             Array.from({ length: 10 }).map((_, index) => (
               <TableRow key={index}>
-                {columns.map((column) => (
-                  <TableCell key={column.id}>
+                {columns.map((_, index) => (
+                  <TableCell key={index}>
                     <Skeleton className="h-2.5 w-full rounded-md" />
                   </TableCell>
                 ))}

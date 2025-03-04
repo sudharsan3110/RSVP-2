@@ -1,4 +1,5 @@
 'use client';
+import LoadingScreen from '@/components/common/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useCancelEvent, useGetAttendeeDetails, useGetEventById } from '@/lib/react-query/event';
@@ -33,6 +34,8 @@ const TicketPage = () => {
   };
 
   const loading = isAttendeeLoading || isEventLoading;
+
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="container-main my-10">

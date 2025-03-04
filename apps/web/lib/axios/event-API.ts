@@ -54,6 +54,10 @@ export const eventAPI = {
   getEventAttendeesExcel: async (params: GetAttendeeByEventIdParams) => {
     return api.get(`/event/${params.eventId}/attendees/excel`, {
       params: params,
+      responseType: 'arraybuffer',
+      headers: {
+        Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      },
     });
   },
 

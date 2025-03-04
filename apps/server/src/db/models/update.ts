@@ -41,7 +41,6 @@ export class Update {
         },
       },
     });
-    console.log('event details:', event);
     return event;
   }
 }

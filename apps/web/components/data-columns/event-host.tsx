@@ -1,10 +1,10 @@
 'use client';
 
-import { ColumnDef } from '@tanstack/react-table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { IEventHost } from '@/types/event';
 import { VERCEL_AVATAR_BASE_URL } from '@/utils/constants';
+import { ColumnDef } from '@tanstack/react-table';
 
 // Define the shape of your data
 export type EventHost = {

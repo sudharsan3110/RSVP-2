@@ -1,7 +1,5 @@
 'use client';
 
-import { Control, Controller } from 'react-hook-form';
-import { ProfileFormType } from '@/lib/zod/profile';
 import {
   Dialog,
   DialogContent,
@@ -10,11 +8,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { ProfileFormType } from '@/lib/zod/profile';
 import { userAvatarOptions } from '@/utils/constants';
 import { Pencil } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Button } from '../ui/button';
+import { Control, Controller } from 'react-hook-form';
 
 type Props = {
   control: Control<ProfileFormType>;
