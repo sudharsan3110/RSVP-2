@@ -68,8 +68,8 @@ const Footer = ({ className }: PropsWithClassName) => {
               )}
             >
               <Link href="/">RSVP</Link>
-              <Link href="/privacy-policy">Terms of Service</Link>
-              <Link href="/terms-and-conditions">Privacy Policy</Link>
+              <Link href="/privacy-terms/#terms">Terms of Service</Link>
+              <Link href="/privacy-terms">Privacy Policy</Link>
             </div>
           </div>
         </Container>
