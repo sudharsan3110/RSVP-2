@@ -1,17 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import Container from '@/components/common/Container';
-import {
-  MagnifyingGlassIcon,
-  ChevronDownIcon,
-  CheckIcon,
-  FunnelIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import EventCard from '@/components/common/EventCard';
+import NoResults from '@/components/common/NoResults';
+import Tags from '@/components/tags/Tags';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import {
   Command,
   CommandEmpty,
@@ -19,6 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -27,16 +21,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Tags from '@/components/tags/Tags';
-import { locationName } from '@/utils/constants';
-import NoResults from '@/components/common/NoResults';
-import EventCard from '@/components/common/EventCard';
-import { IEvent } from '@/types/event';
 import useDebounce from '@/hooks/useDebounce';
+import { cn } from '@/lib/utils';
+import { locationName } from '@/utils/constants';
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 const DiscoverEvents = () => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(true);
 
   const [events, setEvents] = useState([]);
@@ -70,8 +68,6 @@ const DiscoverEvents = () => {
         );
 
         const data = await response.json();
-
-        console.log(data);
 
         if (response.ok) {
           setEvents(data.data);

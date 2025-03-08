@@ -3,9 +3,14 @@ type ChangelogData = {
   version: string;
   bannerImageUrl: string;
   contributors: string[];
-  features?: string[];
-  improvements?: string[];
-  bugFixes?: string[];
+  features?: Features[];
+  improvements?: Features[];
+  bugFixes?: Features[];
+};
+
+export type Features = {
+  summary: string;
+  contributors: string[];
 };
 
 class Changelog {
@@ -13,9 +18,9 @@ class Changelog {
   bannerImageUrl: string;
   version: string;
   contributors: string[];
-  features: string[];
-  improvements: string[];
-  bugFixes: string[];
+  features: Features[];
+  improvements: Features[];
+  bugFixes: Features[];
   constructor({
     releaseDate,
     bannerImageUrl,

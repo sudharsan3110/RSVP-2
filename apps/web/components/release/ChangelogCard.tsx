@@ -1,10 +1,43 @@
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import ContributorAvatar from './ContributorAvatar';
-import Changelog from '@/types/changelog';
+import Changelog, { Features } from '@/types/changelog';
+import React from 'react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 type Props = {
   changelog: Changelog;
+};
+
+interface ChangelogProps {
+  title: string;
+  features: Features[];
+  className?: string;
+}
+
+const ChangelogList: React.FC<ChangelogProps> = ({ title, features, className }) => {
+  return (
+    <div className={cn('mt-4', className)}>
+      <h2 className="mb-4 text-xl font-semibold">{title}</h2>
+      <ul className="ml-5 list-disc space-y-2 leading-8">
+        {features.map((feature, index) => (
+          <li key={index}>
+            {feature.summary} (By{' '}
+            {feature.contributors.map((contributor, i, arr) => (
+              <span key={contributor}>
+                <Link href={`https://github.com/${contributor}`} className="hover:underline">
+                  {contributor}
+                </Link>
+                {i < arr.length - 2 ? ', ' : i === arr.length - 2 ? ' and ' : ''}
+              </span>
+            ))}
+            )
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 const ChangelogCard = ({ changelog }: Props) => {
@@ -45,34 +78,13 @@ const ChangelogCard = ({ changelog }: Props) => {
             </ul>
           </div>
           {changelog.features.length > 0 && (
-            <div className="mt-8">
-              <h2 className="mb-4 text-xl font-semibold">🎉 New Features </h2>
-              <ul className="ml-5 list-disc space-y-2 leading-8">
-                {changelog.features.map((feature, index) => (
-                  <li key={index}>{feature}</li>
-                ))}
-              </ul>
-            </div>
+            <ChangelogList title="🚀 All Features" features={changelog.features} />
           )}
           {changelog.improvements.length > 0 && (
-            <div className="mt-8">
-              <h2 className="mb-4 text-xl font-semibold">🔧 Improvements </h2>
-              <ul className="ml-5 list-disc space-y-2 leading-8">
-                {changelog.improvements.map((improvement, index) => (
-                  <li key={index}>{improvement}</li>
-                ))}
-              </ul>
-            </div>
+            <ChangelogList title="🔧 Improvements" features={changelog.improvements} />
           )}
           {changelog.bugFixes.length > 0 && (
-            <div className="mt-8">
-              <h2 className="mb-4 text-xl font-semibold">🐞 Bug Fixes </h2>
-              <ul className="ml-5 list-disc space-y-2 leading-8">
-                {changelog.bugFixes.map((bugFix, index) => (
-                  <li key={index}>{bugFix}</li>
-                ))}
-              </ul>
-            </div>
+            <ChangelogList title="🐞 Bug Fixes" features={changelog.bugFixes} />
           )}
         </div>
       </div>

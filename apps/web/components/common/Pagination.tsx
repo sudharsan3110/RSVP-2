@@ -61,7 +61,7 @@ const TablePagination: React.FC<PaginationProps> = ({
 
   return (
     <Pagination
-      className={`flex flex-col items-center justify-between space-y-2 border-t px-6 py-4 sm:flex-row sm:space-y-0 ${className}`}
+      className={`flex flex-row items-center justify-between border-t px-6 py-4 sm:space-y-0 ${className}`}
     >
       <PaginationPrevious
         onClick={() => currentPage > 1 && onChange(currentPage - 1)}

@@ -1,0 +1,41 @@
+name: Run nextjs app
+
+on:
+  workflow_dispatch:
+  push:
+   branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    env:
+        ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        EMAIL_API_URL: ${{ secrets.EMAIL_API_URL }}
+        EMAIL_TOKEN: ${{ secrets.EMAIL_TOKEN }}
+        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        NODE_ENV: ${{ secrets.NODE_ENV }}
+        QR_SECRET_KEY: ${{ secrets.QR_SECRET_KEY }}
+        REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+            version: 10
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run
+        run: pnpm run dev

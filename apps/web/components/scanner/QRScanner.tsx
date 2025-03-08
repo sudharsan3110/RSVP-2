@@ -22,7 +22,6 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
         // Check for camera permissions
         const hasPermission = await QrScanner.hasCamera();
         if (!hasPermission) {
-          console.log('hasPermission', hasPermission);
           toast.error('Camera Error', {
             description:
               'Camera is blocked or not accessible. Please allow camera access and reload.',

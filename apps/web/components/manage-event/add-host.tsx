@@ -16,27 +16,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useState } from 'react';
 import ConfirmCoHost from './confirm-host';
 import NoResults from '../common/NoResults';
-
-export type Attendee = {
-  id: string;
-  name: string;
-  email: string;
-  status: 'Active' | 'Inactive';
-};
-
-// this is a mock data of users that will be replace by API data
-const usersData: Attendee[] = [
-  { id: '1', name: 'Olivia Rhye', email: 'olivia@example.com', status: 'Active' },
-  { id: '2', name: 'Phoenix Baker', email: 'phoenix@example.com', status: 'Inactive' },
-  { id: '3', name: 'Lana Steiner', email: 'lana@example.com', status: 'Active' },
-  { id: '4', name: 'Demi Wilkinson', email: 'demi@example.com', status: 'Active' },
-];
+import { useGetAttendeeByEventId } from '@/lib/react-query/event';
+import { Attendee } from '@/types/attendee';
+import { useParams } from 'next/navigation';
 
 const AddCoHost = ({ className }: PropsWithClassName) => {
   const [selectedCoHost, setSelectedCoHost] = useState<Attendee | null>(null);
   const [isCohostSelectionDialogOpen, setIsCohostSelectionDialogOpen] = useState(false);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { id } = useParams();
+  const { data, isLoading: isAttendeeLoading } = useGetAttendeeByEventId({
+    eventId: id as string,
+    sortBy: 'registrationTime',
+  });
+  let usersData = data?.attendees || [];
 
   const toggleCohostSelectionDialog = (isOpen: boolean) => {
     setIsCohostSelectionDialogOpen(isOpen);
@@ -54,8 +48,8 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
 
   const filteredAttendees =
     searchQuery !== ''
-      ? usersData.filter((attendee) =>
-          attendee.email.toLowerCase().includes(searchQuery.toLowerCase())
+      ? usersData?.filter((attendee: Attendee) =>
+          attendee.user.primary_email.toLowerCase().includes(searchQuery.toLowerCase())
         )
       : usersData;
 
@@ -89,8 +83,8 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
             </div>
             <ScrollArea className="h-72">
               <div className="flex flex-col gap-3 text-center">
-                {filteredAttendees.length > 0 ? (
-                  filteredAttendees.map((attendee) => (
+                {filteredAttendees?.length > 0 ? (
+                  filteredAttendees.map((attendee: Attendee) => (
                     <div
                       key={attendee.id}
                       className="bg-dark-600 flex items-center justify-between rounded-md border p-3"
@@ -99,13 +93,17 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                         <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={`https://avatar.vercel.sh/${attendee.id}.png`}
-                            alt={attendee.name}
+                            alt={attendee.user.full_name}
                           />
-                          <AvatarFallback>{attendee.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback>
+                            {attendee.user?.full_name?.charAt(0) || 'R'}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="ml-3 text-left">
-                          <p className="text-sm font-medium">{attendee.name}</p>
-                          <p className="text-xs text-muted-foreground">{attendee.email}</p>
+                          <p className="text-sm font-medium">{attendee.user.full_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {attendee.user.primary_email}
+                          </p>
                         </div>
                       </div>
                       <Button

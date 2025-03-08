@@ -230,6 +230,42 @@ export const usePopularEvents = (limit?: number) => {
   });
 };
 
+{
+  /* Manage Cohost */
+}
+export const useGetEventCohosts = (eventId: string) => {
+  return useQuery({
+    queryKey: [EVENT_COHOST_KEY, eventId],
+    queryFn: () => eventAPI.getEventCohosts(eventId),
+  });
+};
+
+export const useAddEventCohost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      eventId,
+      cohostEmail,
+      role,
+    }: {
+      eventId: string;
+      cohostEmail: string;
+      role: string;
+    }) => eventAPI.createEventCohost(eventId, { cohostEmail: cohostEmail, role: role }),
+
+    onSuccess: (resp, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: [EVENT_COHOST_KEY, eventId] });
+      toast.success(`Cohost added succesfull`);
+    },
+
+    onError: (resp: AxiosError) => {
+      const errMsg = resp.response?.data as ErrorResponse | undefined;
+      toast.error(errMsg?.message ?? resp.message ?? 'An unexpected error occured');
+    },
+  });
+};
+
 export const useDeleteCohost = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -243,12 +279,5 @@ export const useDeleteCohost = () => {
       const errMsg = resp.response?.data as ErrorResponse | undefined;
       toast.error(errMsg?.message ?? resp.message ?? 'An unexpected error occured');
     },
-  });
-};
-
-export const useGetEventCohosts = (eventId: string) => {
-  return useQuery({
-    queryKey: [EVENT_COHOST_KEY, eventId],
-    queryFn: () => eventAPI.getEventCohosts(eventId),
   });
 };

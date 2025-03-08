@@ -75,21 +75,27 @@ export default function EventDetailsTable() {
       <h2 className="text-2xl font-bold">Guest List</h2>
       <div className="rounded-lg border bg-dark-900">
         <div className="space-y-4 p-4 sm:flex sm:items-center sm:space-x-4 sm:space-y-0">
-          <div className="relative w-full flex-1 sm:w-auto">
+          <div className="relative flex-1">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search User"
               value={filters.searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-8 sm:w-[400px]"
+              className="w-full max-w-xl pl-8"
             />
           </div>
-          <Tabs value={tabValue} onValueChange={handleStatusChange} className="w-full sm:w-auto">
-            <TabsList className="flex flex-wrap justify-center sm:justify-start">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="checkedIn">Checked In</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
+          <Tabs value={tabValue} onValueChange={handleStatusChange} className="sm:w-auto">
+            <TabsList className="flex justify-center sm:justify-start">
+              <TabsTrigger className="flex-1" value="all">
+                All
+              </TabsTrigger>
+              <TabsTrigger className="flex-1" value="checkedIn">
+                Checked In
+              </TabsTrigger>
+              <TabsTrigger className="flex-1" value="pending">
+                Pending
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

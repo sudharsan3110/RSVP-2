@@ -1,5 +1,13 @@
 export const API_MESSAGES = {
+  USER: {
+    NOT_FOUND: 'User not found or does not exist',
+    PROFILE_INCOMPLETE: 'User profile is incomplete',
+  },
   COHOST: {
+    ADD: {
+      INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED:
+        'Insufficient permissions: You need to be a Creator or Manager to add hosts to an event',
+    },
     REMOVE: {
       SUCCESS: 'Cohost removed successfully',
       INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED:

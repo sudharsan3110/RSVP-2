@@ -3,7 +3,6 @@
 import { useCurrentUser } from '@/lib/react-query/auth';
 import {
   useCreateAttendee,
-  useGetAttendeeDetails,
   useGetAttendeeTicketDetails,
   useSoftDeleteAttendee,
 } from '@/lib/react-query/event';

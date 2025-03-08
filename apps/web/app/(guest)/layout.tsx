@@ -13,7 +13,7 @@ const GuestLayout = ({
     <Suspense>
       <Guest />
       {children}
-      <Footer className="mt-24" />
+      <Footer className="w-full self-end" />
     </Suspense>
   );
 };

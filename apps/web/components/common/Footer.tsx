@@ -15,7 +15,7 @@ const Footer = ({ className }: PropsWithClassName) => {
   const { loginedUser } = useLoggedInUser();
 
   return (
-    <footer data-testid="footer" className={cn('footer mt-auto', className)}>
+    <footer data-testid="footer" className={cn('footer mt-auto pt-16', className)}>
       <div className="bg-black px-11 py-8">
         <Container className="flex flex-col justify-between sm:flex-row">
           <div>
@@ -68,8 +68,8 @@ const Footer = ({ className }: PropsWithClassName) => {
               )}
             >
               <Link href="/">RSVP</Link>
-              <Link href="/privacy-policy">Terms of Service</Link>
-              <Link href="/terms-and-conditions">Privacy Policy</Link>
+              <Link href="/privacy-terms/#terms">Terms of Service</Link>
+              <Link href="/privacy-terms">Privacy Policy</Link>
             </div>
           </div>
         </Container>

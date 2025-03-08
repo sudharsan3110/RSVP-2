@@ -3,7 +3,7 @@
 #### Prerequisite
 
 - Make sure you have your own AWS account. If not sign up [here](https://aws.amazon.com/free)
-- Download the `cft_dev_rsvp.yml` file from [here](./templates/)
+- Download the `cft_dev_rsvp.yml` file from [here](../apps/server/templates/)
 
 ---
 
