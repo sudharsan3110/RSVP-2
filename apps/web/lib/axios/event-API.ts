@@ -139,11 +139,21 @@ export const eventAPI = {
     return response.data.data;
   },
 
+  /* Cohost API */
   getEventCohosts: async (eventId: string): Promise<IEventHost[]> => {
     const hosts = await api.get(`/cohosts/events/${eventId}`);
     return hosts.data.hosts;
   },
 
+  createEventCohost: async (eventId: string, payload: { cohostEmail: string; role: string }) => {
+    const { cohostEmail, role } = payload;
+    const response = await api.post(`cohosts/`, {
+      email: cohostEmail,
+      role: role,
+      eventId: eventId,
+    });
+    return response.data;
+  },
   deleteEventCohost: async (eventId: string, cohostId: string) => {
     const response = await api.delete(`cohosts/events/${eventId}/${cohostId}`);
     return response.data;

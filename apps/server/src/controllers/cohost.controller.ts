@@ -30,26 +30,24 @@ export const createEventHost = catchAsync(
     const { email, eventId, role } = req.body;
 
     const event = await Events.findById(eventId);
+    if (!event) return res.status(404).json({ message: API_MESSAGES.EVENT.NOT_FOUND });
 
-    if (!event) return res.status(404).json({ message: 'Event not found' });
+    const isUserMod = await CohostRepository.hasRole(eventId, userId, Role.Manager);
 
-    if (userId !== event.creatorId)
+    if (userId !== event.creatorId || !isUserMod)
       return res
         .status(403)
-        .json({ message: 'You are not authorized to add a cohost to this event' });
+        .json({ message: API_MESSAGES.COHOST.ADD.INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED });
 
     const user = await Users.userExists(email);
 
-    if (!user) return res.status(404).json({ message: 'User does not exists' });
+    if (!user) return res.status(404).json({ message: API_MESSAGES.USER.NOT_FOUND });
 
-    if (!user.is_completed) {
-      return res.status(400).json({ message: 'User profile is not completed' });
-    }
+    if (!user.is_completed)
+      return res.status(400).json({ message: API_MESSAGES.USER.PROFILE_INCOMPLETE });
 
     const hostExists = await CohostRepository.findByUserIdAndEventId(user.id, eventId);
-
     if (hostExists) return res.status(400).json({ message: 'Host already exists' });
-
     const host = await CohostRepository.create({ eventId, userId: user.id, role });
 
     return res.status(201).json({ message: 'success', data: host });

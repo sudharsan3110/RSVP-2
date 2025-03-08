@@ -11,15 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { Check, LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { Separator } from '../ui/separator';
+import { Attendee } from '@/types/attendee';
+import { useAddEventCohost } from '@/lib/react-query/event';
+import { useParams } from 'next/navigation';
 
-type Attendee = {
-  id: string;
-  name: string;
-  email: string;
-  status: 'Active' | 'Inactive';
-};
 type ConfirmCoHostProps = {
   selectedCoHost: Attendee;
   isConfirmationDialogOpen: boolean;
@@ -31,16 +27,16 @@ const ConfirmCoHost = ({
   setIsConfirmationDialogOpen,
 }: ConfirmCoHostProps) => {
   const [loading, setLoading] = useState(false);
+  const { mutate: mAddCohost } = useAddEventCohost();
+  const { id } = useParams();
 
   const submitCoHostRequest = () => {
-    setLoading(true);
     console.log(selectedCoHost);
-    // API call to add co-host will be added here
-    setTimeout(() => {
-      setLoading(false);
-      setIsConfirmationDialogOpen(false);
-      toast.success(`${selectedCoHost?.name} has been added as co-host`);
-    }, 2000);
+    mAddCohost({
+      eventId: id as string,
+      cohostEmail: selectedCoHost.user.primary_email,
+      role: 'Manager',
+    });
   };
   return (
     <Dialog
@@ -51,7 +47,7 @@ const ConfirmCoHost = ({
         <DialogHeader className="p-6 pb-0 text-left">
           <DialogTitle>Please Confirm Co-host</DialogTitle>
           <DialogDescription className="text-xs text-secondary">
-            Are you sure you want to grant co-host permissions to {selectedCoHost?.name}?
+            Are you sure you want to grant co-host permissions to {selectedCoHost?.user.full_name}?
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 px-6">
