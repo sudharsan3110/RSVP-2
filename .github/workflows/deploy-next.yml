@@ -19,7 +19,6 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         EMAIL_API_URL: ${{ secrets.EMAIL_API_URL }}
         EMAIL_TOKEN: ${{ secrets.EMAIL_TOKEN }}
-        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         NODE_ENV: ${{ secrets.NODE_ENV }}
         QR_SECRET_KEY: ${{ secrets.QR_SECRET_KEY }}
