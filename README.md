@@ -10,52 +10,37 @@ Create, share, and sell tickets effortlessly. Your all-in-one event management s
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-black?style=for-the-badge&logo=mysql&logoColor=white)
 ![Code](https://img.shields.io/badge/Visual_Studio_Code-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white)
+![Astro](https://img.shields.io/badge/astro-%232C2052.svg?style=for-the-badge&logo=astro&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Zod](https://img.shields.io/badge/zod-%233068b7.svg?style=for-the-badge&logo=zod&logoColor=white)
+![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
+![Vitest](https://img.shields.io/badge/-Vitest-252529?style=for-the-badge&logo=vitest&logoColor=FCC72B)
 
 ## How to Run the Project locally
 
-1. **Clone the Repository**:
+```bash
+git clone https://github.com/TeamShiksha/rsvp.git
+cd rsvp
+pnpm install
+pnpm migrate
+pnpm dev
+```
 
-   ```bash
-   git clone https://github.com/TeamShiksha/rsvp.git
-   cd rsvp
-   ```
+## Configure Environment Variables:
 
-2. **Install Dependencies**:
-
-   From the root of the project, run the following command to install dependencies for both the frontend and backend:
-
-   ```bash
-   pnpm install
-   ```
-
-3. **Configure Environment Variables**:
-
-   - Use the `.env_example` file as a reference to set up your environment variables.
-   - Rename it to `.env` and populate the required values.
-
-4. **Setup Prisma ORM**:
-   ```bash
-    ppnpm install prisma --save-dev
-    npx prisma init --datasource-provider mysql
-   ```
-5. **Migrate the Database Schema**:
-
-   ```bash
-    pnpm run migrate
-   ```
-
-6. **Run the Application**:
-   ```bash
-   pnpm run start
-   ```
+- Use the `.env_example` file as a reference to set up your environment variables.
+- Rename it to `.env` and populate the required values.
 
 ## AWS CloudFormation setup:
 
-Navigate to [AWS cloudformation setup](./docs/aws_cloudformation_setup.md) for information about environmental variables:
+Navigate to [AWS cloudformation setup](./apps/server/aws/cft_dev_rsvp.yml) for information about environmental variables:
 
-- `AWS_ACCESS_KEY'
-- 'AWS_SECRET_KEY'
-- 'AWS_BUCKET_NAME'
-- 'AWS_REGION`
+- `AWS_ACCESS_KEY`
+- `AWS_SECRET_KEY`
+- `AWS_BUCKET_NAME`
+- `AWS_REGION`
 
 ---
+
+<p align="center" style="text"><strong>If you liked something about this repository, do give it a 🌟.</strong></p>
