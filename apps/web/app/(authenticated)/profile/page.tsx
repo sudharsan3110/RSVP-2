@@ -56,6 +56,7 @@ const ProfilePage = () => {
           <Separator className="my-11 bg-separator" />
         </>
       )}
+
       <section className="max-w-xl" aria-labelledby="download-data-title">
         <h2 id="download-data-title" className="font-semibold text-white">
           Download your personal data
@@ -67,6 +68,7 @@ const ProfilePage = () => {
           <Download className="mr-2.5" size={20} /> Download
         </Button>
       </section>
+
       <Separator className="my-11 bg-separator" />
       <section className="max-w-xl" aria-labelledby="delete-account-title">
         <h2 id="delete-account-title" className="font-semibold text-white">

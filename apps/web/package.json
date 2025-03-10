@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
     "lint:fix": "next lint --fix",
     "check": "prettier --check .",
     "format": "prettier --write ."
@@ -69,7 +70,6 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.1",
-    "vite-tsconfig-paths": "^4.3.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -77,16 +77,23 @@
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/typography": "^0.5.15",
+    "@tanstack/react-query-devtools": "^5.64.2",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^4.3.4",
     "esbuild-register": "^3.6.0",
     "eslint-config-next": "14.2.6",
-    "@tanstack/react-query-devtools": "^5.64.2",
+    "jsdom": "^26.0.0",
+    "nock": "^14.0.1",
     "postcss": "^8",
     "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.17.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^3.0.8"
   }
 }
