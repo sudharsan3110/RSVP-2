@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { useGetEventById } from '@/lib/react-query/event';
 import { formatDateTime } from '@/lib/utils';
-import { CalendarIcon, MapPinIcon } from 'lucide-react';
+import { CalendarIcon, Check, MapPinIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
@@ -22,9 +23,26 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
   const { data, isSuccess } = useGetEventById(id);
   if (!isSuccess) return notFound();
 
+  const [showCopied, setShowCopied] = useState(false);
+
   const { event } = data;
   const { date, time } = formatDateTime(event.startTime.toISOString());
   const { date: endDate, time: endTime } = formatDateTime(event.endTime.toISOString());
+
+  const handleShare = async () => {
+    try {
+      const currentUrl = window.location.href;
+      await navigator.clipboard.writeText(currentUrl);
+
+      setShowCopied(true);
+
+      setTimeout(() => {
+        setShowCopied(false);
+      }, 400);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
 
   return (
     <Card className={className}>
@@ -77,8 +95,17 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
             Edit Event
           </Button>
         </Link>
-        <Button className="w-full sm:flex-1" radius="sm" variant="tertiary">
-          Share Event
+        <Button className="w-full sm:flex-1" radius="sm" variant="tertiary" onClick={handleShare}>
+          {showCopied ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center rounded-md bg-purple-500/20 p-1">
+                <Check className="size-3.5 text-purple-500" />
+              </div>
+              <span>Link Copied</span>
+            </div>
+          ) : (
+            'Share Event'
+          )}
         </Button>
       </CardFooter>
     </Card>

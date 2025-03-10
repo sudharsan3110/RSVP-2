@@ -86,7 +86,7 @@ export const EventHeroSection = () => {
             </div>
           </button>
 
-          <div className="flex h-[96px] w-full items-center rounded-lg bg-dark-500 p-4">
+          <div className="flex h-[96px] w-full cursor-not-allowed items-center rounded-lg bg-dark-500 p-4 opacity-50">
             <div className="flex h-[64px] w-[64px] items-center justify-center rounded-lg bg-white">
               <Icons.mail className="text-xl" />
             </div>
@@ -96,7 +96,7 @@ export const EventHeroSection = () => {
             </div>
           </div>
 
-          <div className="flex h-[96px] w-full items-center rounded-lg bg-orange p-4">
+          <div className="flex h-[96px] w-full cursor-not-allowed items-center rounded-lg bg-orange p-4 opacity-50">
             <div className="flex h-[64px] w-[64px] items-center justify-center rounded-lg bg-white">
               <Icons.guest className="text-xl" />
             </div>
