@@ -27,7 +27,6 @@ const TablePagination: React.FC<PaginationProps> = ({
     const showEllipsisEnd = currentPage < totalPages - 3;
 
     if (totalPages <= 7) {
-      // Show all pages if total is 7 or less
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }

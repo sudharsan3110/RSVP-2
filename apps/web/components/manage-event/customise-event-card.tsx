@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -14,6 +13,7 @@ import { CalendarIcon, Check, MapPinIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 
 const CustomiseEventCard = ({ className }: PropsWithClassName) => {
@@ -21,9 +21,9 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
   if (typeof id !== 'string') notFound();
 
   const { data, isSuccess } = useGetEventById(id);
-  if (!isSuccess) return notFound();
-
   const [showCopied, setShowCopied] = useState(false);
+
+  if (!isSuccess) return notFound();
 
   const { event } = data;
   const { date, time } = formatDateTime(event.startTime.toISOString());
@@ -99,7 +99,7 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
           {showCopied ? (
             <div className="flex items-center justify-center gap-2">
               <div className="flex items-center justify-center rounded-md bg-purple-500/20 p-1">
-                <Check className="size-3.5 text-purple-500" />
+                <Check className="size-3.5 text-primary" />
               </div>
               <span>Link Copied</span>
             </div>

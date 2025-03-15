@@ -63,7 +63,6 @@ function FormImageUpload<
             <div className="mt-4 space-y-4">
               {value && (
                 <div className="relative aspect-square w-full rounded-lg bg-secondary">
-                  {/* @eslint-disable-next-line */}
                   <img
                     src={value.file}
                     alt="Uploaded Image"

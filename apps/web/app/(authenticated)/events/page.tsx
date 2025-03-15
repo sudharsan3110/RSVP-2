@@ -2,6 +2,7 @@
 import Container from '@/components/common/Container.tsx';
 import EventCard from '@/components/common/EventCard.tsx';
 import NoResults from '@/components/common/NoResults';
+import SuspenseBoundary from '@/components/common/SuspenseBoundary';
 import { Button } from '@/components/ui/button.tsx';
 import {
   Command,
@@ -193,4 +194,10 @@ const Events = () => {
   );
 };
 
-export default Events;
+export default function EventsPage() {
+  return (
+    <SuspenseBoundary>
+      <Events />
+    </SuspenseBoundary>
+  );
+}

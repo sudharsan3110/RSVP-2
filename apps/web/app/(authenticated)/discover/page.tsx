@@ -43,7 +43,7 @@ const DiscoverEvents = () => {
   const [selectedSort, setSelectedSort] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [limit] = useState(10);
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
 
@@ -205,8 +205,8 @@ const DiscoverEvents = () => {
               <p className="text-center text-white">Loading events...</p>
             ) : events.length > 0 ? (
               <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.map((event: any, index: number) => (
-                  <EventCard event={event} />
+                {events.map((event: any) => (
+                  <EventCard key={event.id} event={event} />
                 ))}
               </div>
             ) : (

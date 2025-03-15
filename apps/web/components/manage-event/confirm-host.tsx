@@ -26,7 +26,7 @@ const ConfirmCoHost = ({
   isConfirmationDialogOpen,
   setIsConfirmationDialogOpen,
 }: ConfirmCoHostProps) => {
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const { mutate: mAddCohost } = useAddEventCohost();
   const { id } = useParams();
 

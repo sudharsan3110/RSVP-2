@@ -1,7 +1,5 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { PlusIcon } from '@heroicons/react/24/solid';
 import {
   Dialog,
   DialogContent,
@@ -11,14 +9,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { useState } from 'react';
-import ConfirmCoHost from './confirm-host';
-import NoResults from '../common/NoResults';
 import { useGetAttendeeByEventId } from '@/lib/react-query/event';
+import { cn } from '@/lib/utils';
 import { Attendee } from '@/types/attendee';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/solid';
 import { useParams } from 'next/navigation';
+import { useState } from 'react';
+import NoResults from '../common/NoResults';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import ConfirmCoHost from './confirm-host';
 
 const AddCoHost = ({ className }: PropsWithClassName) => {
   const [selectedCoHost, setSelectedCoHost] = useState<Attendee | null>(null);
@@ -26,7 +26,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { id } = useParams();
-  const { data, isLoading: isAttendeeLoading } = useGetAttendeeByEventId({
+  const { data } = useGetAttendeeByEventId({
     eventId: id as string,
     sortBy: 'registrationTime',
   });

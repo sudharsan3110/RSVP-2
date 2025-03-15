@@ -1,16 +1,14 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { useVerifyAttendee } from '@/lib/react-query/event';
 import { Attendee } from '@/types/attendee';
+import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import NoResults from '../common/NoResults';
 import AttendeeDetailsContent from './AttendeeDetailsContent';
-import { useVerifyAttendee } from '@/lib/react-query/event';
-import { Icons } from '../common/Icon';
-import { useState } from 'react';
 
 interface AttendeeDetailsProps {
   attendee: Attendee | null;
