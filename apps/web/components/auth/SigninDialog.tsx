@@ -10,7 +10,7 @@ import { useSignInMutation } from '@/lib/react-query/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Icons } from '../common/Icon';
@@ -45,16 +45,19 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
 
   let timer: NodeJS.Timeout;
 
+  useEffect(() => {
+    if (isEmailSent) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        setIsResendDisabled(false);
+      }, 120000);
+    }
+  }, [isEmailSent]);
+
   async function onSubmit(values: SignInFormType) {
     mutate(values, {
       onSuccess: () => {
         setIsEmailSent(true);
-        if (isEmailSent) {
-          if (timer) clearTimeout(timer);
-          timer = setTimeout(() => {
-            setIsResendDisabled(false);
-          }, 120000);
-        }
       },
     });
   }
@@ -94,7 +97,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-8"
             >
-              <FormInput control={form.control} name="email" />
+              <FormInput control={form.control} name="email" aria-label="email" />
               <Button
                 type="submit"
                 name="send-magic-link"
@@ -122,6 +125,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
             <Button
               className="mt-10 w-full bg-primary px-4 py-[10px] font-semibold text-white"
               disabled={isResendDisabled}
+              data-testid="resend-btn"
               onClick={handleResend}
             >
               {isResendDisabled ? 'Please wait 2 minutes...' : 'Click to resend'}
