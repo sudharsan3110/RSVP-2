@@ -22,9 +22,9 @@ jobs:
 
       - name: Install Railway
         run: npm i -g @railway/cli
-        
+
       - name: Deploy
         working-directory: ./apps/server
-        run: railway up
+        run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID }}
         env:
             RAILWAY_TOKEN: ${{ secrets.RAILWAY_GITHUB_ACTION_TOKEN }}
