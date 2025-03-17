@@ -1,5 +1,5 @@
 {
-  "name": "rsvp-turbo-demo",
+  "name": "rsvp",
   "private": true,
   "scripts": {
     "build": "turbo build",
