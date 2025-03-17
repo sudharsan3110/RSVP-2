@@ -19,7 +19,9 @@ jobs:
         with:
             version: 10
       - name: Install Railway
-        run: pnpm add -g @railway/cli
+        run: |
+            pnpm approve-builds -g
+            pnpm add -g @railway/cli
       - name: Deploy
         working-directory: ./apps/server
         run: railway up
