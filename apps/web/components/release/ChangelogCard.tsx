@@ -1,7 +1,8 @@
+// components/ChangelogCard.tsx
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import ContributorAvatar from './ContributorAvatar';
-import Changelog, { Features } from '@/types/changelog';
+import Changelog, { Features, ChangeLogSection } from '@/types/changelog';
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -49,7 +50,6 @@ const ChangelogCard = ({ changelog }: Props) => {
       <div className="flex space-x-4 sm:space-x-8">
         <div className="relative h-full">
           <span className="absolute left-[-3px] top-0 h-2 w-2 rounded-full bg-primary" />
-
           <div className="h-full w-0.5 bg-separator" />
         </div>
         <div className="pb-16 group-last:pb-0">
@@ -68,7 +68,7 @@ const ChangelogCard = ({ changelog }: Props) => {
             height={500}
           />
           <div className="mt-8">
-            <h2 className="mb-4 text-xl font-semibold">🧩 Contributors </h2>
+            <h2 className="mb-4 text-xl font-semibold"> Contributors </h2>
             <ul className="flex items-end space-x-2">
               {changelog.contributors.map((contributor) => (
                 <li key={contributor} className="inline-block h-8 w-8">
@@ -77,13 +77,16 @@ const ChangelogCard = ({ changelog }: Props) => {
               ))}
             </ul>
           </div>
-          {changelog.features.length > 0 && (
-            <ChangelogList title="🚀 All Features" features={changelog.features} />
-          )}
-          {changelog.improvements.length > 0 && (
+
+          {changelog.sections?.map((section, index) => (
+            <ChangelogList key={index} title={section.title} features={section.items} />
+          ))}
+
+          {changelog.improvements?.length > 0 && (
             <ChangelogList title="🔧 Improvements" features={changelog.improvements} />
           )}
-          {changelog.bugFixes.length > 0 && (
+
+          {changelog.bugFixes?.length > 0 && (
             <ChangelogList title="🐞 Bug Fixes" features={changelog.bugFixes} />
           )}
         </div>

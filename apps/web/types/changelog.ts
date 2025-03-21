@@ -1,11 +1,17 @@
-type ChangelogData = {
+// types/changelog.ts
+export type ChangelogData = {
   releaseDate: Date;
   version: string;
   bannerImageUrl: string;
   contributors: string[];
-  features?: Features[];
+  sections?: ChangeLogSection[]; // Holds grouped features
   improvements?: Features[];
   bugFixes?: Features[];
+};
+
+export type ChangeLogSection = {
+  title: string;
+  items: Features[];
 };
 
 export type Features = {
@@ -18,15 +24,16 @@ class Changelog {
   bannerImageUrl: string;
   version: string;
   contributors: string[];
-  features: Features[];
+  sections: ChangeLogSection[];
   improvements: Features[];
   bugFixes: Features[];
+
   constructor({
     releaseDate,
     bannerImageUrl,
     version,
     contributors,
-    features = [],
+    sections = [],
     improvements = [],
     bugFixes = [],
   }: ChangelogData) {
@@ -34,9 +41,9 @@ class Changelog {
     this.bannerImageUrl = bannerImageUrl;
     this.version = version;
     this.contributors = contributors;
-    this.features = features;
-    this.improvements = improvements;
-    this.bugFixes = bugFixes;
+    this.sections = sections;
+    this.improvements = improvements ?? [];
+    this.bugFixes = bugFixes ?? [];
   }
 }
 
