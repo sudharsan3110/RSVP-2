@@ -74,10 +74,10 @@ const Footer = ({ className }: PropsWithClassName) => {
               <Link href="/release#changelog" className="hover:underline">
                 Release
               </Link>
-              <Link href="/privacy-policy" className="hover:underline">
+              <Link href="/privacy-terms/#terms" className="hover:underline">
                 Terms of Service
               </Link>
-              <Link href="/terms-and-conditions" className="hover:underline">
+              <Link href="/privacy-terms" className="hover:underline">
                 Privacy Policy
               </Link>
             </div>
