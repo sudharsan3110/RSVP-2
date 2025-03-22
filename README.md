@@ -23,8 +23,8 @@ Create, share, and sell tickets effortlessly. Your all-in-one event management s
 git clone https://github.com/TeamShiksha/rsvp.git
 cd rsvp
 pnpm install
-pnpm migrate
-pnpm dev
+pnpm  -F server migrate
+pnpm -r dev
 ```
 
 ## Configure Environment Variables:

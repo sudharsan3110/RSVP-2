@@ -2,17 +2,22 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json ./
-RUN npm i
+RUN npm install -g pnpm
+RUN pnpm install
 
 COPY . . 
-RUN npm run build
+RUN pnpm build
 
 FROM node:20-alpine AS runtime
+
 WORKDIR /app
+
+RUN npm install -g pnpm
 
 COPY --from=builder /app/dist ./dist
 COPY package.json ./
-RUN npm i --omit=dev
+
+RUN pnpm install --prod
 
 ENV NODE_ENV=production
 
