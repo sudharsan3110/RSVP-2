@@ -15,9 +15,13 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/prisma/schema.prisma ./src/prisma/schema.prisma
 COPY package.json ./
 
 RUN pnpm install --prod
+RUN apk add --no-cache openssl
+RUN pnpm generate
+
 
 ENV NODE_ENV=production
 

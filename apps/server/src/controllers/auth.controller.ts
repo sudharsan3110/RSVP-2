@@ -62,8 +62,8 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'none', // Allow cross-site cookies
-    domain: 'prod-rsvp.vercel.app', // Set to frontend domain (remove subdomain if needed)
+    sameSite: 'none',
+    domain: config.CLIENT_URL,
     maxAge: 15 * 60 * 1000,
     path: '/',
   });
@@ -71,8 +71,8 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'none', // Allow cross-site cookies
-    domain: 'prod-rsvp.vercel.app', // Set to frontend domain
+    sameSite: 'none',
+    domain: config.CLIENT_URL,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   });

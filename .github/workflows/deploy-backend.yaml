@@ -4,15 +4,14 @@ env:
 on:
   workflow_dispatch:
   push:
-   branches:
+    branches:
       - main
-   paths:
-      - 'apps/server/**' 
-
+    paths:
+      - 'apps/server/**'
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -48,9 +47,17 @@ jobs:
             echo "Repository already exists."
           fi
           
-      - name: Get commit hash
-        id: commit
-        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+      - name: Get latest tag from Docker Hub
+        id: get-latest-tag
+        run: |
+          REPO_NAME=${{ secrets.DOCKER_REPOSITORY_NAME}}
+          LATEST_TAG=$(curl -s "https://hub.docker.com/v2/repositories/${{ secrets.DOCKER_USERNAME }}/${REPO_NAME}/tags" | jq -r '.results[0].name')
+          if [ "$LATEST_TAG" = "null" ] || [ -z "$LATEST_TAG" ]; then
+            NEXT_TAG=1
+          else
+            NEXT_TAG=$((LATEST_TAG + 1))
+          fi
+          echo "next_tag=${NEXT_TAG}" >> $GITHUB_OUTPUT
         
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -58,14 +65,20 @@ jobs:
           context: ./apps/server
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/rsvp-backend:latest
-            ${{ secrets.DOCKER_USERNAME }}/rsvp-backend:${{ github.run_number }}-${{ steps.commit.outputs.hash }}
-
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY_NAME}}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY_NAME}}:${{ steps.get-latest-tag.outputs.next_tag }}
+     
       - name: Run Database Migrations
-        working-directory: ./app/server
+        working-directory: ./apps/server
         run: |
-          pnpm install
-
+          pnpm install 
           pnpm run migrate
 
-         
+      - name: Install Railway CLI
+        run: pnpm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_GITHUB_ACTION_TOKEN }}
+          RAILWAY_PROJECT: ${{ secrets.RAILWAY_PROJECT_ID }}
