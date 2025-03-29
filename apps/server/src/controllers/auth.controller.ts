@@ -65,7 +65,7 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: config.env === 'production' ? 'none' : 'lax',
+    sameSite: config.env === 'production' ? 'lax' : 'strict',
     domain,
     maxAge: 15 * 60 * 1000,
     path: '/',
@@ -74,7 +74,7 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: config.env === 'production' ? 'none' : 'lax',
+    sameSite: config.env === 'production' ? 'lax' : 'strict',
     domain,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
