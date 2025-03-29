@@ -1,4 +1,5 @@
 import winston from 'winston';
+const NewRelicTransport = require("newrelic-winston-transport");
 import config from '../config/config';
 
 const enumerateErrorFormat = winston.format((info) => {
@@ -9,18 +10,19 @@ const enumerateErrorFormat = winston.format((info) => {
 });
 
 const logger = winston.createLogger({
-  level: config.env === 'development' ? 'debug' : 'warn',
+  level: config.env === 'production' ? 'error' : 'debug',
   format: winston.format.combine(
     enumerateErrorFormat(),
-    config.env === 'development' ? winston.format.colorize() : winston.format.uncolorize(),
+    config.env === 'production' ? winston.format.uncolorize() : winston.format.colorize(),
     winston.format.splat(),
     winston.format.printf(({ level, message }) => `${level}: ${message}`)
-  ),
-  transports: [
-    new winston.transports.Console({
-      stderrLevels: ['error'],
-    }),
-  ],
+  )
 });
+
+if (config.env === "production") {
+  logger.add(new NewRelicTransport());
+} else {
+  logger.add(new winston.transports.Console());
+}
 
 export default logger;

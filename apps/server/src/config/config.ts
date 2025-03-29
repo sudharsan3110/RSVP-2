@@ -12,6 +12,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(8000),
   EMAIL_TOKEN: z.string(),
   EMAIL_API_URL: z.string().url(),
+  NEWRELIC_APP_NAME: z.string(),
+  NEWRELIC_LICENSE_KEY: z.string()
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -30,6 +32,8 @@ const config = {
   PORT: envVars.data.PORT,
   EMAIL_TOKEN: envVars.data.EMAIL_TOKEN,
   EMAIL_API_URL: envVars.data.EMAIL_API_URL,
+  NEWRELIC_APP_NAME: envVars.data.NEWRELIC_APP_NAME,
+  NEWRELIC_LICENSE_KEY: envVars.data.NEWRELIC_LICENSE_KEY
 };
 
 export default config;

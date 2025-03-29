@@ -11,6 +11,22 @@ exports.config = {
   app_name: [app_name],
   license_key: license_key,
   allow_all_headers: true,
+  logging: {
+    level: process.env.NODE_ENV === 'production' ? 'error' : 'debug',
+    enabled: true,
+  },
+  application_logging: {
+    enabled: true,
+    forwarding: {
+      enabled: true,
+    },
+    local_decorating: {
+      enabled: true,
+    },
+    metrics: {
+      enabled: true,
+    },
+  },
   attributes: {
     exclude: [
       'request.headers.cookie',

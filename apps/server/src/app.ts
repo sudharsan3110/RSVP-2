@@ -1,3 +1,4 @@
+import 'newrelic';
 import config from '@/config/config';
 import logger from '@/utils/logger';
 import { createServer } from './server';
