@@ -22,7 +22,6 @@ RUN pnpm install --prod
 RUN apk add --no-cache openssl
 RUN pnpm generate
 
-
 ENV NODE_ENV=production
 
 EXPOSE 8000

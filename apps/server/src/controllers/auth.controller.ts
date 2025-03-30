@@ -59,12 +59,9 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
   const refreshToken = generateRefreshToken({ userId: user.id });
 
   await Users.updateRefreshToken(user.id, refreshToken);
-  const clientUrl = new URL(config.CLIENT_URL);
-  const domain = clientUrl.hostname;
 
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
-    domain,
     secure: true,
     sameSite: config.env === 'production' ? 'none' : 'lax',
     maxAge: 15 * 60 * 1000,
@@ -73,7 +70,6 @@ export const verifySignin = catchAsync(async (req: Request<{}, {}, VerifySigninB
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    domain,
     secure: true,
     sameSite: config.env === 'production' ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
