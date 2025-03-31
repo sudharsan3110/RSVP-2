@@ -14,10 +14,13 @@ const protectedRoutes = [
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('accessToken');
   const { pathname } = request.nextUrl;
+  console.log(pathname);
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (isProtectedRoute && !token) {
+    console.log('redirecting to login');
+    console.log(token, 'token');
     const url = new URL('/', request.url);
     return NextResponse.redirect(url);
   }
