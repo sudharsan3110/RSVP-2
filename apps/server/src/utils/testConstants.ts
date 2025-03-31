@@ -2,6 +2,7 @@ export const HTTP_OK = 200;
 export const HTTP_CREATED = 201;
 export const HTTP_BAD_REQUEST = 400;
 export const HTTP_NOT_FOUND = 404;
+export const HTTP_UNAUTHORIZED = 401;
 
 export const TEST_USER_ID = 'test-user';
 
@@ -9,6 +10,7 @@ export const ENDPOINT_SLUG = '/slug';
 export const ENDPOINT_POPULAR_EVENTS = '/popular';
 export const ENDPOINT_FILTER_EVENTS = '/filter';
 export const ENDPOINT_USER_EVENTS = '/user';
+export const ENDPOINT_AUTH_ME = '/me';
 
 export const FAKE_EVENT = {
   id: 'event-123',
@@ -23,3 +25,13 @@ export const FAKE_EVENT = {
 };
 
 export const FAKE_ATTENDEE_COUNT = 15;
+
+export const FAKE_USER = {
+  id: TEST_USER_ID,
+  email: 'user@example.com',
+  full_name: 'User Example',
+  username: 'userexample',
+  is_completed: true,
+  magicToken: 'secret-magic-token',
+  refreshToken: 'secret-refresh-token',
+};

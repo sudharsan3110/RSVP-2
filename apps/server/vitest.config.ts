@@ -8,5 +8,10 @@ export default defineConfig({
     environment: 'node',
     include: ['**/__tests__/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**'],
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['**/node_modules/**', '**/dist/**'],
+    },
   },
 });

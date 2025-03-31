@@ -14,6 +14,7 @@ import {
   ENDPOINT_USER_EVENTS,
   FAKE_ATTENDEE_COUNT,
   FAKE_EVENT,
+  FAKE_USER,
   HTTP_BAD_REQUEST,
   HTTP_CREATED,
   HTTP_NOT_FOUND,
@@ -92,8 +93,7 @@ describe('Event Router Endpoints', () => {
     };
 
     it('should create a new event with valid data', async () => {
-      const fakeUser = { id: TEST_USER_ID, is_completed: true, primary_email: 'user@example.com' };
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
+      vi.spyOn(Users as any, 'findById').mockResolvedValue(FAKE_USER);
       const fakeNewEvent = {
         id: 'event-456',
         name: validPhysicalEventPayload.name,
@@ -112,15 +112,14 @@ describe('Event Router Endpoints', () => {
     });
 
     it('should return 400 when payload validation fails (invalid venue fields)', async () => {
-      const fakeUser = { id: TEST_USER_ID, is_completed: true };
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
+      vi.spyOn(Users as any, 'findById').mockResolvedValue(FAKE_USER);
       const res = await request(app).post('/').send(invalidPhysicalEventPayload);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
       expect(res.body).toHaveProperty('errors');
     });
 
     it('should return 400 if user profile is incomplete', async () => {
-      const incompleteUser = { id: TEST_USER_ID, is_completed: false };
+      const incompleteUser = { ...FAKE_USER, is_completed: false };
       vi.spyOn(Users as any, 'findById').mockResolvedValue(incompleteUser);
       const res = await request(app).post('/').send(validPhysicalEventPayload);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
