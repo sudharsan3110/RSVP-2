@@ -31,7 +31,6 @@ const ConfirmCoHost = ({
   const { id } = useParams();
 
   const submitCoHostRequest = () => {
-    console.log(selectedCoHost);
     try {
       mAddCohost({
         eventId: id as string,

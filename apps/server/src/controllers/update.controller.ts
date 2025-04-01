@@ -19,15 +19,11 @@ export const createNotification = catchAsync(
     const RSVP_SUBJECT_MSG = 'Updates from your event';
 
     const event = await Events.findById(param.eventId as string);
-    // console.log('event details:', event);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
     const getUserDetails = await Users.findById(event.creatorId);
-
-    // console.log('user exists', getUserDetails);
-
     if (!getUserDetails?.id) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -120,8 +116,6 @@ export const getNotification = catchAsync(
     //     email: getUserDetails.primary_email,
     //   },
     // }));
-
-    // console.log('notifications', eventNotifications);
 
     return res.status(200).json(notifications);
   }

@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/help-center/**'
+      - 'apps/help-center/src/**'
 
 jobs:
   build:

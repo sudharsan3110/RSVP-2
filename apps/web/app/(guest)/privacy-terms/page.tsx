@@ -6,9 +6,9 @@ const PrivacyPolicy = () => {
   const today = dayjs().format('MMM DD, YYYY');
   return (
     <Container className="container-main dark prose max-w-5xl text-secondary dark:prose-invert prose-h2:text-[1.75rem] prose-p:tracking-wide">
-      <header className="mx-auto mb-28 mt-12 max-w-3xl text-center">
+      <header className="mx-auto mb-12 mt-12 text-center">
         <span className="mb-4 block">Current as of {today}</span>
-        <h1 className="mb-8 font-semibold">Privacy and Terms</h1>
+        <h1 className="mb-4 font-semibold">Privacy and Terms</h1>
         <p>
           Thank you for choosing RSVP! Before using our services, please review our Terms of Service
           carefully. This agreement is a crucial contract between us and our users. We&apos;ve
@@ -72,15 +72,8 @@ const PrivacyPolicy = () => {
         </p>
       </section>
 
-      <section id="terms" className="-mt-32 pt-32">
+      <section id="terms">
         <h2>Terms of Service</h2>
-
-        <p>
-          Thank you for choosing RSVP! Before using our services, please review our Terms of Service
-          carefully. This agreement is a crucial contract between us and our users. We&apos;ve
-          provided a concise summary followed by the complete legal terms.
-        </p>
-
         <p>
           RSVP collects personal information such as your name, email address, and other details
           when you register for an account or use specific features on our platform. We also gather

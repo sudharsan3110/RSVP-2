@@ -1,44 +1,31 @@
 'use client';
 
-import Image from 'next/image';
 import Logo from './Logo';
 import { cn, helpCenterUrl } from '@/lib/utils';
 import Container from './Container';
 import Link from 'next/link';
 import SigninDialog from '../auth/SigninDialog';
-import { Button } from '../ui/button';
 import { useLoggedInUser } from '@/hooks/useLoggedInUser';
 
 const Footer = ({ className }: PropsWithClassName) => {
   const currentYear = new Date().getFullYear();
-
   const { loginedUser } = useLoggedInUser();
 
   return (
-    <footer data-testid="footer" className={cn('footer mt-auto pt-16', className)}>
-      <div className="bg-black px-11 py-8">
-        <Container className="flex flex-col justify-between sm:flex-row">
+    <footer data-testid="footer" className={cn('footer mt-auto pt-16 animate-slide-in-from-bottom', className)}>
+      <div className="bg-black py-8">
+        <Container className="flex flex-col justify-between sm:flex-row text-secondary">
           <div>
             {!loginedUser && (
               <>
                 <Logo className="mb-4 h-10 w-fit" />
-                <div className="flex items-end space-x-2">
+                <div className="flex items-end space-x-2 align-middle">
                   <p className="font-semibold leading-none">
-                    Powered By
-                    <a href="https://team.shiksha" className="hover:underline">
-                      {' '}
-                      Team.Shiksha
+                    Powered by 
+                    <a href="https://team.shiksha" className="hover:underline underline-offset-4">
+                      {' '}Team.Shiksha
                     </a>
                   </p>
-                  <Image
-                    priority
-                    src="/images/team-shiksha-logo.svg"
-                    width={50}
-                    height={50}
-                    className="h-5"
-                    alt="Team.Shiksha Logo"
-                    data-testid="team-shiksha-logo"
-                  />
                 </div>
               </>
             )}
@@ -51,14 +38,14 @@ const Footer = ({ className }: PropsWithClassName) => {
             {!loginedUser && (
               <div className="flex flex-col gap-y-4 text-sm font-medium">
                 <SigninDialog variant="signin">
-                  <Button variant="link" className="h-fit px-0 py-0 hover:underline">
+                  <Link href="#" className="text-secondary h-fit px-0 py-0">
                     Sign In
-                  </Button>
+                  </Link>
                 </SigninDialog>
-                <Link href={helpCenterUrl} className="hover:underline">
+                <Link href={helpCenterUrl}>
                   Help
                 </Link>
-                <Link href="/release#about" className="hover:underline">
+                <Link href="/release">
                   About
                 </Link>
               </div>
@@ -71,13 +58,13 @@ const Footer = ({ className }: PropsWithClassName) => {
                 !loginedUser ? 'flex-col gap-y-4' : 'flex-row gap-x-6'
               )}
             >
-              <Link href="/release#changelog" className="hover:underline">
+              <Link href="/release#changelog">
                 Release
               </Link>
-              <Link href="/privacy-terms/#terms" className="hover:underline">
+              <Link href="/privacy-terms/#terms">
                 Terms of Service
               </Link>
-              <Link href="/privacy-terms" className="hover:underline">
+              <Link href="/privacy-terms">
                 Privacy Policy
               </Link>
             </div>
