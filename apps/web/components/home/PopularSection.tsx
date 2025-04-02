@@ -8,7 +8,7 @@ import SigninDialog from '@/components/auth/SigninDialog.tsx';
 const PopularSection = () => {
   const { data: events, isLoading } = usePopularEvents(3);
 
-  if (isLoading) {
+  if (isLoading || (events && events.length === 0)) {
     return <></>;
   }
 
