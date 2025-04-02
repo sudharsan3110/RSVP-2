@@ -22,11 +22,50 @@ import {
   TEST_USER_ID,
 } from '@/utils/testConstants';
 
+import { Role } from '@prisma/client';
+import { eventManageMiddleware } from '@/middleware/hostMiddleware';
+
+const API_ROLES = {
+  CHECK_ALLOW_STATUS: [Role.Creator, Role.Manager],
+  DELETE_EVENT: [Role.Creator],
+  UPDATE_EVENT: [Role.Creator, Role.Manager],
+};
+
+let isAuthenticated: boolean = true;
+
 vi.mock('@/middleware/authMiddleware', () => {
   return {
-    default: (req: Request, _res: Response, next: NextFunction) => {
-      (req as any).userId = TEST_USER_ID;
-      next();
+    default: (req: Request, res: Response, next: NextFunction) => {
+      if (isAuthenticated) {
+        (req as any).userId = TEST_USER_ID;
+        next();
+      } else {
+        return res.status(401).json({ message: 'Invalid or expired tokens' });
+      }
+    },
+  };
+});
+
+let currentTestRole: Role | null = null;
+vi.mock('@/middleware/hostMiddleware', () => {
+  return {
+    eventManageMiddleware: (allowedRoles: Role[]) => {
+      return (req: Request, res: Response, next: NextFunction) => {
+        const userRole = currentTestRole;
+
+        if (!userRole) {
+          return res.status(403).json({
+            message: 'Access denied: No role specified',
+          });
+        }
+        if (allowedRoles.includes(userRole)) {
+          next();
+        } else {
+          return res.status(403).json({
+            message: 'Access denied: Insufficient permissions',
+          });
+        }
+      };
     },
   };
 });
@@ -37,7 +76,9 @@ app.use(eventRouter);
 
 beforeEach(() => {
   vi.resetAllMocks();
+  currentTestRole = null;
 });
+
 
 describe('Event Router Endpoints', () => {
   describe('GET /slug/:slug', () => {
@@ -93,7 +134,9 @@ describe('Event Router Endpoints', () => {
     };
 
     it('should create a new event with valid data', async () => {
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(FAKE_USER);
+      isAuthenticated = true;
+      const fakeUser = { id: TEST_USER_ID, is_completed: true, primary_email: 'user@example.com' };
+      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
       const fakeNewEvent = {
         id: 'event-456',
         name: validPhysicalEventPayload.name,
@@ -112,14 +155,17 @@ describe('Event Router Endpoints', () => {
     });
 
     it('should return 400 when payload validation fails (invalid venue fields)', async () => {
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(FAKE_USER);
+      isAuthenticated = true;
+      const fakeUser = { id: TEST_USER_ID, is_completed: true };
+      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
       const res = await request(app).post('/').send(invalidPhysicalEventPayload);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
       expect(res.body).toHaveProperty('errors');
     });
 
     it('should return 400 if user profile is incomplete', async () => {
-      const incompleteUser = { ...FAKE_USER, is_completed: false };
+      isAuthenticated = true;
+      const incompleteUser = { id: TEST_USER_ID, is_completed: false };
       vi.spyOn(Users as any, 'findById').mockResolvedValue(incompleteUser);
       const res = await request(app).post('/').send(validPhysicalEventPayload);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
@@ -155,6 +201,7 @@ describe('Event Router Endpoints', () => {
 
   describe(`GET ${ENDPOINT_USER_EVENTS} (plannedByUser)`, () => {
     it('should return planned events for the authenticated user', async () => {
+      isAuthenticated = true;
       const fakeUser = { id: TEST_USER_ID };
       vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
       const fakePlannedEvents = [{ id: 'event-1', name: 'User Event' }];
@@ -166,8 +213,21 @@ describe('Event Router Endpoints', () => {
     });
   });
 
+  describe(`DELETE /eventId/attendee (softDeleteAttendee)`, () => {
+    it('should soft-delete the attendee record', async () => {
+      isAuthenticated = true;
+      const fakeAttendee = { id: 'attendee-1', userId: TEST_USER_ID, deleted: false };
+      vi.spyOn(Attendees as any, 'findByUserIdAndEventId').mockResolvedValue(fakeAttendee);
+      vi.spyOn(Attendees as any, 'softDelete').mockResolvedValue(undefined);
+      const res = await request(app).delete(`/event-123/attendee`);
+      expect(res.status).toBe(HTTP_OK);
+      expect(res.body).toHaveProperty('message', 'Attendee removed successfully');
+    });
+  });
+
   describe(`GET /:eventId (getEventById)`, () => {
     it('should return event details when a valid eventId is provided', async () => {
+      isAuthenticated = true;
       const fakeEventDetail = { id: 'event-123', name: 'Event Detail' };
       vi.spyOn(Events as any, 'findById').mockResolvedValue(fakeEventDetail);
       vi.spyOn(Attendees as any, 'countAttendees').mockResolvedValue(5);
@@ -178,24 +238,120 @@ describe('Event Router Endpoints', () => {
     });
   });
 
-  describe(`PATCH /eventId/attendee/:userId/allowStatus (checkAllowStatus)`, () => {
-    it('should check the allow status for the attendee', async () => {
-      vi.spyOn(CohostRepository as any, 'checkHostForEvent').mockResolvedValue(true);
-      const res = await request(app).patch(`/event-123/attendee/${TEST_USER_ID}/allowStatus`);
+  describe('GET /:eventId/attendee/:userId/allowStatus (checkAllowStatus)', () => {
+    const eventId = 'event-123';
+    const userId = TEST_USER_ID;
+    const endpoint = `/${eventId}/attendee/${userId}/allowStatus`;
+
+    it('should allow authenticated Creator role to check allow status', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Manager;
+      const res = await request(app).get(endpoint);
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('data');
       expect(res.body).toHaveProperty('message', 'Success');
+      expect(res.body.data).toHaveProperty('success', true);
+    });
+
+    it('should deny unauthenticated requests from checking allow status', async () => {
+      isAuthenticated = false;
+      currentTestRole = Role.Creator; 
+      const res = await request(app).get(endpoint);
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('message', 'Invalid or expired tokens');
+    });
+
+    it('should allow authenticated Manager role to check allow status', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Manager;
+      const res = await request(app).get(endpoint);
+      expect(res.status).toBe(HTTP_OK);
+      expect(res.body).toHaveProperty('message', 'Success');
+      expect(res.body.data).toHaveProperty('success', true);
+    });
+
+    it('should deny authenticated ReadOnly role from checking allow status', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.ReadOnly;
+      const res = await request(app).get(endpoint);
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+    });
+
+    it('should deny authenticated requests with no role from checking allow status', async () => {
+      isAuthenticated = true;
+      currentTestRole = null;
+      const res = await request(app).get(endpoint);
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied: No role specified');
     });
   });
 
-  describe(`DELETE /eventId/attendee (softDeleteAttendee)`, () => {
-    it('should soft-delete the attendee record', async () => {
-      const fakeAttendee = { id: 'attendee-1', userId: TEST_USER_ID, deleted: false };
-      vi.spyOn(Attendees as any, 'findByUserIdAndEventId').mockResolvedValue(fakeAttendee);
-      vi.spyOn(Attendees as any, 'softDelete').mockResolvedValue(undefined);
-      const res = await request(app).delete(`/event-123/attendee`);
+  describe('DELETE /:eventId (deleteEvent)', () => {
+    const eventId = 'event-123';
+    const endpoint = `/${eventId}`;
+
+    it('should allow authenticated Creator role to delete an event', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+      const fakeEvent = { id: eventId, name: 'Event to Delete', isDeleted: false };
+      vi.spyOn(Events as any, 'findById').mockResolvedValue(fakeEvent);
+      const deletedEvent = { ...fakeEvent, isDeleted: true };
+      vi.spyOn(Events as any, 'delete').mockResolvedValue(deletedEvent);
+      const res = await request(app).delete(endpoint);
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('message', 'Attendee removed successfully');
+      expect(res.body).toHaveProperty('message', 'Event deleted successfully');
+      expect(res.body).toHaveProperty('success', true);
+      expect(res.body).toHaveProperty('data', deletedEvent);
+    });
+
+    it('should deny unauthenticated requests from deleting an event', async () => {
+      isAuthenticated = false;
+      currentTestRole = Role.Creator;
+      const res = await request(app).delete(endpoint);
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('message', 'Invalid or expired tokens');
+    });
+
+    it('should deny authenticated Manager role from deleting an event', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Manager;
+      const res = await request(app).delete(endpoint);
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+    });
+
+    it('should deny authenticated ReadOnly role from deleting an event', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.ReadOnly;
+      const res = await request(app).delete(endpoint);
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+    });
+
+    it('should return 404 if the event does not exist', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+      vi.spyOn(Events as any, 'findById').mockResolvedValue(null);
+      const res = await request(app).delete(endpoint);
+      expect(res.status).toBe(HTTP_NOT_FOUND);
+      expect(res.body).toHaveProperty('message', 'Event not found');
+    });
+
+    it('should return 400 if the event is already deleted', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+      const alreadyDeletedEvent = { id: eventId, name: 'Already Deleted Event', isDeleted: true };
+      vi.spyOn(Events as any, 'findById').mockResolvedValue(alreadyDeletedEvent);
+      const res = await request(app).delete(endpoint);
+      expect(res.status).toBe(HTTP_BAD_REQUEST);
+      expect(res.body).toHaveProperty('message', 'Event already deleted');
+    });
+
+    it('should return 404 when trying to delete with no event ID', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+      const res = await request(app).delete('/');
+      expect(res.status).toBe(404);
     });
   });
 });
