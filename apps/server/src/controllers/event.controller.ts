@@ -134,6 +134,33 @@ export const filterEvents = catchAsync(async (req, res) => {
   }
 });
 
+export const getUpcomingEventsByUser = catchAsync(
+  async (req: AuthenticatedRequest<{}, {}, {}>, res) => {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
+    const { startDate, endDate, page, limit } = req.query;
+
+    const filters = {
+      userId,
+      startDate: startDate ? new Date(startDate as string) : undefined,
+      endDate: endDate ? new Date(endDate as string) : undefined,
+      page: page ? parseInt(page as string, 10) : 1,
+      limit: limit ? parseInt(limit as string, 10) : 10,
+    };
+
+    const registeredEvents = await Attendees.findRegisteredEventsByUser(filters);
+
+    return res.status(200).json({
+      message: 'Registered events retrieved successfully',
+      data: registeredEvents.events,
+      metadata: registeredEvents.metadata,
+    });
+  }
+);
+
 export const createEvent = catchAsync(
   async (req: AuthenticatedRequest<{}, {}, createEventBody>, res) => {
     const data = req.body;

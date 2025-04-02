@@ -86,6 +86,66 @@ export class Attendees {
     return await prisma.attendee.count({ where: { eventId, status: 'Going' } });
   }
 
+  static async findRegisteredEventsByUser({
+    userId,
+    startDate,
+    endDate,
+    page = 1,
+    limit = 10,
+  }: {
+    userId: string;
+    startDate?: Date;
+    endDate?: Date;
+    page?: number;
+    limit?: number;
+  }) {
+    const whereClause: Prisma.AttendeeWhereInput = {
+      userId,
+      deleted: false,
+      event: {
+        ...(startDate && endDate && {
+          startTime: { gte: startDate },
+          endTime: { lte: endDate },
+        }),
+      },
+    };
+  
+    const attendees = await prisma.attendee.findMany({
+      where: whereClause,
+      include: {
+        event: {
+          select: {
+            id: true,
+            name: true,
+            startTime: true,
+            endTime: true,
+            venueType: true,
+            venueAddress: true,
+            venueUrl: true,
+          },
+        },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        event: {
+          startTime: 'asc',
+        },
+      },
+    });
+  
+    const totalCount = await prisma.attendee.count({ where: whereClause });
+  
+    return {
+      events: attendees.map((attendee) => attendee.event),
+      metadata: {
+        totalItems: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+      },
+    };
+  }
+  
   static async findAttendeesByEventId({
     eventId,
     hasAttended,

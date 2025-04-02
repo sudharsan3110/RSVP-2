@@ -28,3 +28,10 @@ export const verifyQrTokenParamsSchema = z.object({
 export const qrTokenSchema = z.object({
   qrToken: z.string().length(6),
 });
+
+export const upcomingEventsQuerySchema = z.object({
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+  page: z.coerce.number().positive().default(1).optional(),
+  limit: z.coerce.number().positive().default(10).optional(),
+});
