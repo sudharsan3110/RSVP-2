@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://rsvp.up.railway.app/v1/$1"
+            "destination": "https://api.rsvp.kim/v1/$1"
         }
     ]
 }

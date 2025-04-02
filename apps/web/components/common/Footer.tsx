@@ -42,7 +42,7 @@ const Footer = ({ className }: PropsWithClassName) => {
                     Sign In
                   </Link>
                 </SigninDialog>
-                <Link href={helpCenterUrl}>
+                <Link target="_blank" href="https://help.rsvp.kim">
                   Help
                 </Link>
                 <Link href="/release">
