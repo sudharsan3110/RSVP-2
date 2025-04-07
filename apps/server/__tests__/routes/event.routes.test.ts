@@ -354,4 +354,112 @@ describe('Event Router Endpoints', () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe('PATCH /:eventId/slug (UpdateSlug)', () => {
+    const eventId = 'b6dda59b-2aa9-474e-80a4-f4bb87c4aa4c';
+    const endpoint = `/${eventId}/slug`;
+
+    it('should allow creator to update slug for an event', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+
+      const fakeSlugReq = {
+        name: "Test Event",
+        slug: "test-slug",
+        id: eventId,
+        creatorId: TEST_USER_ID
+      }
+
+
+      vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
+      const res = await request(app).patch(endpoint).send({
+        slug: 'test-slug',
+        eventId: eventId
+      });
+
+      expect(res.status).toBe(HTTP_OK);
+      expect(res.body).toHaveProperty('success', true);
+      expect(res.body.data).toMatchObject({
+        id: fakeSlugReq.id,
+        name: fakeSlugReq.name,
+        creatorId: TEST_USER_ID,
+        slug: expect.any(String),
+      });
+    });
+
+    it('should allow manager to update slug for an event', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Manager;
+
+      const fakeSlugReq = {
+        name: "Test Event",
+        slug: "test-slug",
+        id: eventId,
+        creatorId: TEST_USER_ID
+      }
+
+
+      vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
+      const res = await request(app).patch(endpoint).send({
+        slug: 'test-slug',
+        eventId: eventId
+      });
+
+      expect(res.status).toBe(HTTP_OK);
+      expect(res.body).toHaveProperty('success', true);
+      expect(res.body.data).toMatchObject({
+        id: fakeSlugReq.id,
+        name: fakeSlugReq.name,
+        creatorId: TEST_USER_ID,
+        slug: expect.any(String),
+      });
+    });
+
+    it('Should return 403 Forbidden if the requester has permission to read only', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.ReadOnly;
+      const res = await request(app).patch(endpoint).send({
+        slug: 'test-slug',
+        eventId: eventId
+      });
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+    });
+
+    it('Should return 403 Forbidden if the requester is celebrity', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Celebrity;
+      const res = await request(app).patch(endpoint).send({
+        slug: 'test-slug',
+        eventId: eventId
+      });
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+    });
+
+
+    it('Should return 400 Bad Request if the provided slug is empty', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+      const res = await request(app).patch(endpoint).send({
+        slug: '',
+        eventId: eventId
+      });
+
+      expect(res.status).toBe(HTTP_BAD_REQUEST);
+      expect(res.body).toHaveProperty('errors[0].message', 'String must contain at least 1 character(s)');
+    });
+
+    it('Should return 400 Bad Request if the provided slug is missing', async () => {
+      isAuthenticated = true;
+      currentTestRole = Role.Creator;
+      const res = await request(app).patch(endpoint).send({
+        eventId: eventId
+      });
+
+      expect(res.status).toBe(HTTP_BAD_REQUEST);
+      expect(res.body).toHaveProperty('errors[0].message', 'Required');
+    });
+
+  });
 });

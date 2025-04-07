@@ -60,16 +60,16 @@ export const getEventById = catchAsync(
 
 type EditEventSlugBpdy = z.infer<typeof editSlugSchema>;
 export const editEventSlug = catchAsync(
-  async (req: AuthenticatedRequest<{ id?: string }, {}, EditEventSlugBpdy>, res) => {
-    const { id } = req.params;
+  async (req: AuthenticatedRequest<{ eventId?: string }, {}, EditEventSlugBpdy>, res) => {
+    const { eventId } = req.params;
     const { userId } = req;
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
-    if (!id) return res.status(400).json({ message: 'Event ID is required' });
+    if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
     const slug = req.body.slug;
 
-    const updatedSlug = await Events.updateSlug(id, userId, slug);
+    const updatedSlug = await Events.updateSlug(eventId, userId, slug);
 
     return res.status(200).json({ data: updatedSlug, success: true });
   }

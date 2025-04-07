@@ -29,6 +29,7 @@ import {
   qrTokenSchema,
   verifyQrTokenParamsSchema,
   upcomingEventsQuerySchema,
+  editSlugSchema,
 } from '@/validations/attendee.validation';
 import {
   attendeesQuerySchema,
@@ -123,11 +124,11 @@ eventRouter.delete(
 );
 
 eventRouter.patch(
-  '/:id/slug',
+  '/:eventId/slug',
   apiLimiter,
   authMiddleware,
-  validate({ params: idParamsSchema, body: attendeePayloadSchema }),
-  eventManageMiddleware([Role.Creator]),
+  validate({ params: eventParamsSchema, body: editSlugSchema }),
+  eventManageMiddleware([Role.Creator, Role.Manager]),
   editEventSlug
 );
 
