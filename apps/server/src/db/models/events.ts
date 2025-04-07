@@ -170,13 +170,13 @@ export class Events {
   static async cancel(eventId: string, creatorId: string) {
     return await prisma.event.update({
       where: { id: eventId, creatorId },
-      data: { isCancelled: true },
+      data: { isCancelled: true, isActive:false },
     });
   }
   static async delete(eventId: string, creatorId: string) {
     return await prisma.event.update({
       where: { id: eventId, creatorId },
-      data: { isCancelled: true, isDeleted: true },
+      data: { isCancelled: true, isDeleted: true, isActive: false },
     });
   }
 

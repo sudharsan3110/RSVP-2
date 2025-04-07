@@ -7,13 +7,14 @@ import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
 import FormProvider from '../ui/form-provider';
 import ProfileSection from './ProfileSection';
+import { Loader2 } from 'lucide-react';
 
 type Props = {
   user: IUser;
 };
 
 const PhoneNumberForm = ({ user }: Props) => {
-  const { mutate } = useProfileUpdate();
+  const { mutate, isPending } = useProfileUpdate();
   const form = useForm<PhoneNumberFormType>({
     resolver: zodResolver(phoneNumberFormSchema),
     defaultValues: {
@@ -57,8 +58,19 @@ const PhoneNumberForm = ({ user }: Props) => {
           >
             Reset
           </Button>
-          <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
-            Save
+          <Button
+            type="submit"
+            radius="sm"
+            disabled={!form.formState.isDirty || isPending}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving
+              </>
+            ) : (
+              'Save'
+            )}
           </Button>
         </div>
       </ProfileSection>

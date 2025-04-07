@@ -12,13 +12,14 @@ import { userAvatarOptions } from '@/utils/constants';
 import { useProfileUpdate } from '@/lib/react-query/user';
 import { IUser } from '@/types/user';
 import { profileFormSchema, ProfileFormType } from '@/lib/zod/profile';
+import { Loader2 } from 'lucide-react';
 
 type Props = {
   user: IUser;
 };
 
 const ProfileForm = ({ user }: Props) => {
-  const { mutate } = useProfileUpdate();
+  const { mutate, isPending } = useProfileUpdate();
   const form = useForm<ProfileFormType>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -116,8 +117,15 @@ const ProfileForm = ({ user }: Props) => {
           >
             Reset
           </Button>
-          <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
-            Save
+          <Button type="submit" radius="sm" disabled={!form.formState.isDirty || isPending}>
+            {isPending ? (
+              <>
+                Saving
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              </>
+            ) : (
+              'Save'
+            )}
           </Button>
         </div>
       </ProfileSection>

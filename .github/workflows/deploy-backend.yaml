@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/server/**'
+      - 'apps/server/src/**'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -73,12 +73,3 @@ jobs:
         run: |
           pnpm install 
           pnpm run migrate
-
-      - name: Install Railway CLI
-        run: pnpm install -g @railway/cli
-
-      - name: Deploy to Railway
-        run: railway up
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_GITHUB_ACTION_TOKEN }}
-          RAILWAY_PROJECT: ${{ secrets.RAILWAY_PROJECT_ID }}

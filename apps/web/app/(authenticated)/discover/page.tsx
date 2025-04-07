@@ -64,7 +64,7 @@ const DiscoverEvents = () => {
         if (selectedTag) queryParams.append('category', selectedTag);
 
         const response = await fetch(
-          `http://localhost:8000/v1/event/filter?${queryParams.toString()}`
+          `${process.env.NEXT_PUBLIC_API_URL}/event/filter?${queryParams.toString()}`
         );
 
         const data = await response.json();

@@ -20,19 +20,18 @@ const ReleasePage = () => {
   const selectedChangelog = changelogs[parseInt(selectedIndex || '0')];
   return (
     <Container asChild>
-      <section>
+      <section className="text-secondary">
         <main className="max-w-6xl" id="about">
-          <header className="flex flex-col items-start justify-between gap-8 pb-20 pt-20 md:flex-row md:items-end">
+          <header className="dark flex prose text-secondary dark:prose-invert prose-h2:text-[1.75rem]">
             <div className="space-y-4">
-              <h2 className="text-4xl font-semibold">About</h2>
-              <p className="text-lg text-secondary md:text-xl">
+              <h2 className="text-3xl font-semibold">About</h2>
+              <p>
                 RSVP is is your go-to platform for creating, managing, and attending events with
                 ease. Designed for both individuals and organizations, RSVP simplifies the entire
                 event planning process, ensuring your events are nothing short of spectacular
-                events!
+                events! RSVP helps you to:
               </p>
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-primary">RSVP helps you to:</h3>
                 <ol className="list-none space-y-4">
                   <li className="flex items-start gap-3">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">

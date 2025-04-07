@@ -97,5 +97,7 @@ export const me = catchAsync(async (req: AuthenticatedRequest, res, next) => {
 
   if (!user) return res.status(401).json({ message: 'Invalid or expired token' });
 
-  return res.status(200).json({ message: 'success', data: user });
+  const { magicToken, refreshToken, ...safeUser } = user;
+
+  return res.status(200).json({ message: 'success', data: safeUser });
 });

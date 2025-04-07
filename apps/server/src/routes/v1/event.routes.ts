@@ -19,6 +19,7 @@ import {
   updateAttendeeAllowStatus,
   updateEvent,
   verifyQrToken,
+  getUpcomingEventsByUser
 } from '@/controllers/event.controller';
 
 import {
@@ -27,6 +28,7 @@ import {
   idParamsSchema,
   qrTokenSchema,
   verifyQrTokenParamsSchema,
+  upcomingEventsQuerySchema,
 } from '@/validations/attendee.validation';
 import {
   attendeesQuerySchema,
@@ -72,6 +74,13 @@ eventRouter.post(
   validate({ body: CreateEventSchema }),
   createEvent
 );
+eventRouter.get(
+  '/upcoming',
+  apiLimiter,
+  authMiddleware,
+  validate({ query: upcomingEventsQuerySchema }),
+  getUpcomingEventsByUser
+);
 
 eventRouter.get('/popular', apiLimiter, validate({ query: eventLimitSchema }), getPopularEvents);
 
@@ -111,14 +120,6 @@ eventRouter.delete(
   validate({ params: eventAttendeeReqSchema }),
   eventManageMiddleware([Role.Creator]),
   deleteEvent
-);
-
-eventRouter.get(
-  '/user',
-  apiLimiter,
-  authMiddleware,
-  validate({ query: eventsPlannedByUserReqSchema }),
-  plannedByUser
 );
 
 eventRouter.patch(
@@ -196,8 +197,7 @@ eventRouter.get(
   eventManageMiddleware([Role.Creator, Role.Manager]),
   getAttendeeByQrToken
 );
-
-eventRouter.patch(
+eventRouter.get(
   '/:eventId/attendee/:userId/allowStatus',
   apiLimiter,
   authMiddleware,

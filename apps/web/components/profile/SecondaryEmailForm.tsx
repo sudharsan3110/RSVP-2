@@ -2,7 +2,7 @@ import { useProfileUpdate } from '@/lib/react-query/user';
 import { secondaryEmailFormSchema, SecondaryEmailFormType } from '@/lib/zod/profile';
 import { IUser } from '@/types/user';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
@@ -14,7 +14,7 @@ type Props = {
 };
 
 const SecondaryEmailForm = ({ user }: Props) => {
-  const { mutate } = useProfileUpdate();
+  const { mutate, isPending } = useProfileUpdate();
   const form = useForm<SecondaryEmailFormType>({
     resolver: zodResolver(secondaryEmailFormSchema),
     defaultValues: {
@@ -101,8 +101,15 @@ const SecondaryEmailForm = ({ user }: Props) => {
           >
             Reset
           </Button>
-          <Button type="submit" radius="sm" disabled={!form.formState.isDirty}>
-            Save
+          <Button type="submit" radius="sm" disabled={!form.formState.isDirty || isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving
+              </>
+            ) : (
+              'Save'
+            )}
           </Button>
         </div>
       </ProfileSection>

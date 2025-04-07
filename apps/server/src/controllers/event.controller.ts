@@ -134,6 +134,33 @@ export const filterEvents = catchAsync(async (req, res) => {
   }
 });
 
+export const getUpcomingEventsByUser = catchAsync(
+  async (req: AuthenticatedRequest<{}, {}, {}>, res) => {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
+    const { startDate, endDate, page, limit } = req.query;
+
+    const filters = {
+      userId,
+      startDate: startDate ? new Date(startDate as string) : undefined,
+      endDate: endDate ? new Date(endDate as string) : undefined,
+      page: page ? parseInt(page as string, 10) : 1,
+      limit: limit ? parseInt(limit as string, 10) : 10,
+    };
+
+    const registeredEvents = await Attendees.findRegisteredEventsByUser(filters);
+
+    return res.status(200).json({
+      message: 'Registered events retrieved successfully',
+      data: registeredEvents.events,
+      metadata: registeredEvents.metadata,
+    });
+  }
+);
+
 export const createEvent = catchAsync(
   async (req: AuthenticatedRequest<{}, {}, createEventBody>, res) => {
     const data = req.body;
@@ -142,7 +169,6 @@ export const createEvent = catchAsync(
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
     const getUserData = await Users.findById(userId);
-
     if (!getUserData) return res.status(404).json({ message: 'User not found' });
     if (!getUserData.is_completed)
       return res
@@ -194,16 +220,28 @@ export const deleteEvent = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
     const { eventId } = req.params;
     const { userId } = req;
+    
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
-
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const event = await Events.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.isDeleted) {
+      return res.status(400).json({ message: 'Event already deleted' });
+    }
 
     const deletedEvent = await Events.delete(eventId, userId);
 
-    return res.status(200).json({ data: deletedEvent, success: true });
+    return res.status(200).json({ 
+      data: deletedEvent, 
+      message: 'Event deleted successfully',
+      success: true 
+    });
   }
 );
-
 export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {}, {}>, res) => {
   const { search, category, fromDate, toDate, venueType, page, limit, sortBy, sortOrder } =
     eventsPlannedByUserReqSchema.parse(req.query);
@@ -295,9 +333,8 @@ export const createAttendee = catchAsync(
 
     const newAttendee = await Attendees.create(attendeeData);
     const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
-    logger.info('URL to be sent via email:', url);
 
-    if (config.env !== 'production') {
+    if (config.env !== 'development') {
       await EmailService.send({
         id: 5,
         subject: 'Event Registration Confirmation',
@@ -307,6 +344,9 @@ export const createAttendee = catchAsync(
           qrLink: url,
         },
       });
+    }
+    else{
+      logger.info('URL to be sent via email:', url);
     }
 
     return res.status(201).json(newAttendee);
@@ -423,20 +463,13 @@ export const checkAllowStatus = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
     const { eventId } = req.params;
     const userId = req.userId;
-
     if (!eventId)
       return res.status(400).json({ message: API_MESSAGES.ALLOW_GUEST.EVENTID_REQUIRED });
     if (!userId) return res.status(401).json({ message: API_MESSAGES.ALLOW_GUEST.INVALID_TOKEN });
 
-    const hasAccess = await CohostRepository.checkHostForEvent(userId, eventId);
-
-    if (!hasAccess) {
-      return res.status(403).json({ message: API_MESSAGES.ALLOW_GUEST.UNAUTHORIZED_ACCESS });
-    }
-
     return res.status(200).json({
       message: API_MESSAGES.ALLOW_GUEST.SUCCESS,
-      data: { hasAccess },
+      data: { success: true },
     });
   }
 );
