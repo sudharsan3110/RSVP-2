@@ -13,9 +13,10 @@ import { Button } from '../ui/button';
 type GetTicketsButtonProps = {
   eventId: string;
   isPermissionRequired: boolean;
+  creatorId: string;
 };
 
-const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonProps) => {
+const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess } = useCreateAttendee();
   const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
@@ -39,6 +40,16 @@ const GetTicketsButton = ({ eventId, isPermissionRequired }: GetTicketsButtonPro
       <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2" disabled>
         Loading...
       </Button>
+    );
+  }
+
+  if (userData?.data?.data?.id === creatorId) {
+    return (
+      <Link href={`/events/${eventId}/manage`} className="mt-4 w-full rounded-full px-4 py-2">
+        <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2">
+          Manage Events
+        </Button>
+      </Link>
     );
   }
 

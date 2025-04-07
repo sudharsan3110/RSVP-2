@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils.ts';
 import { IEvent } from '@/types/event.ts';
 import { locationName, NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
 import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { Loader2 } from 'lucide-react';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
 interface HandleSearchEvent {
@@ -53,7 +54,13 @@ const Events = () => {
     setSearchText(e.target.value);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
+
   if (error) return <div>{error.message}</div>;
 
   return events?.length != 0 ? (

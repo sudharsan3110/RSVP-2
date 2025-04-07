@@ -11,8 +11,10 @@ export class Events {
     });
   }
 
-  static async findAllEvents() {
+  static async findAllEvents(userId?: string) {
+    const where = userId ? { creatorId: userId } : {};
     return await prisma.event.findMany({
+      where,
       include: {
         creator: {
           select: {
@@ -170,7 +172,7 @@ export class Events {
   static async cancel(eventId: string, creatorId: string) {
     return await prisma.event.update({
       where: { id: eventId, creatorId },
-      data: { isCancelled: true, isActive:false },
+      data: { isCancelled: true, isActive: false },
     });
   }
   static async delete(eventId: string, creatorId: string) {

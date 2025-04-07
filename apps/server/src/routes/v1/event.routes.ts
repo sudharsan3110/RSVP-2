@@ -19,7 +19,7 @@ import {
   updateAttendeeAllowStatus,
   updateEvent,
   verifyQrToken,
-  getUpcomingEventsByUser
+  getUpcomingEventsByUser,
 } from '@/controllers/event.controller';
 
 import {
@@ -65,7 +65,7 @@ eventRouter.get(
   validate({ params: getEventBySlugSchema }),
   getEventBySlug
 );
-eventRouter.get('/', apiLimiter, allPlannedEvents);
+eventRouter.get('/', authMiddleware, apiLimiter, allPlannedEvents);
 
 eventRouter.post(
   '/',

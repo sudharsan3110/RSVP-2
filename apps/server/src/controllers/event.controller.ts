@@ -81,8 +81,11 @@ export const getPopularEvents = catchAsync(async (req, res) => {
   else return res.status(200).json({ data: [] });
 });
 
-export const allPlannedEvents = catchAsync(async (req, res) => {
-  const getEventsData = await Events.findAllEvents();
+export const allPlannedEvents = catchAsync(async (req: AuthenticatedRequest<{}, {}, {}>, res) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
+
+  const getEventsData = await Events.findAllEvents(userId);
   if (getEventsData.length != 0) {
     return res.status(200).json({ message: 'All Events Data', data: getEventsData });
   } else {
@@ -220,7 +223,7 @@ export const deleteEvent = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
     const { eventId } = req.params;
     const { userId } = req;
-    
+
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
@@ -235,10 +238,10 @@ export const deleteEvent = catchAsync(
 
     const deletedEvent = await Events.delete(eventId, userId);
 
-    return res.status(200).json({ 
-      data: deletedEvent, 
+    return res.status(200).json({
+      data: deletedEvent,
       message: 'Event deleted successfully',
-      success: true 
+      success: true,
     });
   }
 );
@@ -344,8 +347,7 @@ export const createAttendee = catchAsync(
           qrLink: url,
         },
       });
-    }
-    else{
+    } else {
       logger.info('URL to be sent via email:', url);
     }
 
