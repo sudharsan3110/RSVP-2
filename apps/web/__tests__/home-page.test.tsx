@@ -1,6 +1,6 @@
 import GuestLayout from '@/app/(guest)/layout';
 import Home from '@/app/(guest)/page';
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQueryClient } from './utils/tanstack-query';
 
@@ -38,7 +38,7 @@ describe('Unauthenticated User Home Page', () => {
     expect(screen.getByText('Get Started')).toBeDefined();
     expect(screen.getByText('Help')).toBeDefined();
     expect(screen.getByText('About')).toBeDefined();
-    expect(screen.getByText('RSVP')).toBeDefined();
+    expect(within(screen.getByRole('navigation')).getByAltText('Logo')).toBeInTheDocument();
 
     //  Ensure that authenticated-only links are NOT present
     expect(screen.queryByText('Create Event')).toBeNull();
