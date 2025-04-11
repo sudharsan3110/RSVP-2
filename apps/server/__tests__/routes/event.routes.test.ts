@@ -79,7 +79,6 @@ beforeEach(() => {
   currentTestRole = null;
 });
 
-
 describe('Event Router Endpoints', () => {
   describe('GET /slug/:slug', () => {
     it('should return event details and attendee count when a valid slug is provided', async () => {
@@ -254,7 +253,7 @@ describe('Event Router Endpoints', () => {
 
     it('should deny unauthenticated requests from checking allow status', async () => {
       isAuthenticated = false;
-      currentTestRole = Role.Creator; 
+      currentTestRole = Role.Creator;
       const res = await request(app).get(endpoint);
       expect(res.status).toBe(401);
       expect(res.body).toHaveProperty('message', 'Invalid or expired tokens');
@@ -364,17 +363,16 @@ describe('Event Router Endpoints', () => {
       currentTestRole = Role.Creator;
 
       const fakeSlugReq = {
-        name: "Test Event",
-        slug: "test-slug",
+        name: 'Test Event',
+        slug: 'test-slug',
         id: eventId,
-        creatorId: TEST_USER_ID
-      }
-
+        creatorId: TEST_USER_ID,
+      };
 
       vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
-        eventId: eventId
+        eventId: eventId,
       });
 
       expect(res.status).toBe(HTTP_OK);
@@ -392,17 +390,16 @@ describe('Event Router Endpoints', () => {
       currentTestRole = Role.Manager;
 
       const fakeSlugReq = {
-        name: "Test Event",
-        slug: "test-slug",
+        name: 'Test Event',
+        slug: 'test-slug',
         id: eventId,
-        creatorId: TEST_USER_ID
-      }
-
+        creatorId: TEST_USER_ID,
+      };
 
       vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
-        eventId: eventId
+        eventId: eventId,
       });
 
       expect(res.status).toBe(HTTP_OK);
@@ -420,7 +417,7 @@ describe('Event Router Endpoints', () => {
       currentTestRole = Role.ReadOnly;
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
-        eventId: eventId
+        eventId: eventId,
       });
       expect(res.status).toBe(403);
       expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
@@ -431,35 +428,133 @@ describe('Event Router Endpoints', () => {
       currentTestRole = Role.Celebrity;
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
-        eventId: eventId
+        eventId: eventId,
       });
       expect(res.status).toBe(403);
       expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
     });
-
 
     it('Should return 400 Bad Request if the provided slug is empty', async () => {
       isAuthenticated = true;
       currentTestRole = Role.Creator;
       const res = await request(app).patch(endpoint).send({
         slug: '',
-        eventId: eventId
+        eventId: eventId,
       });
 
       expect(res.status).toBe(HTTP_BAD_REQUEST);
-      expect(res.body).toHaveProperty('errors[0].message', 'String must contain at least 1 character(s)');
+      expect(res.body).toHaveProperty(
+        'errors[0].message',
+        'String must contain at least 1 character(s)'
+      );
     });
 
     it('Should return 400 Bad Request if the provided slug is missing', async () => {
       isAuthenticated = true;
       currentTestRole = Role.Creator;
       const res = await request(app).patch(endpoint).send({
-        eventId: eventId
+        eventId: eventId,
       });
 
       expect(res.status).toBe(HTTP_BAD_REQUEST);
       expect(res.body).toHaveProperty('errors[0].message', 'Required');
     });
 
+    describe('PATCH /:eventId/cancel (CancelEvent)', () => {
+      const eventId = 'event-123';
+      const endpoint = `/${eventId}/cancel`;
+
+      it('should allow authenticated creator role to cancel an event', async () => {
+        isAuthenticated = true;
+        currentTestRole = Role.Creator;
+
+        const fakeEvent = {
+          id: eventId,
+          name: 'Event to cancel',
+          isCancelled: false,
+          creatorId: TEST_USER_ID,
+        };
+
+        const cancelledEvent = {
+          ...fakeEvent,
+          isCancelled: true,
+          cancelledAt: new Date(),
+        };
+
+        vi.spyOn(Events as any, 'findById').mockResolvedValue(fakeEvent);
+        vi.spyOn(Events as any, 'cancel').mockResolvedValue(cancelledEvent);
+
+        const res = await request(app).patch(endpoint);
+
+        expect(res.status).toBe(HTTP_OK);
+        expect(res.body).toHaveProperty('success', true);
+        expect(res.body.data).toHaveProperty('id', eventId);
+        expect(res.body.data).toHaveProperty('name', 'Event to cancel');
+        expect(res.body.data).toHaveProperty('isCancelled', true);
+        expect(res.body.data).toHaveProperty('creatorId', TEST_USER_ID);
+        expect(res.body.data).toHaveProperty('cancelledAt');
+      });
+
+      it('should deny unauthenticated requests from cancelling an event', async () => {
+        isAuthenticated = false;
+        currentTestRole = Role.Creator;
+
+        const res = await request(app).patch(endpoint);
+
+        expect(res.status).toBe(401);
+        expect(res.body).toHaveProperty('message', 'Invalid or expired tokens');
+      });
+
+      it('should deny authenticated Manager role from cancelling an event', async () => {
+        isAuthenticated = true;
+        currentTestRole = Role.Manager;
+
+        const res = await request(app).patch(endpoint);
+
+        expect(res.status).toBe(403);
+        expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+      });
+
+      it('should deny authenticated ReadOnly role from cancelling an event', async () => {
+        isAuthenticated = true;
+        currentTestRole = Role.ReadOnly;
+
+        const res = await request(app).patch(endpoint);
+
+        expect(res.status).toBe(403);
+        expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
+      });
+
+      it('should return 404 if the event does not exist', async () => {
+        isAuthenticated = true;
+        currentTestRole = Role.Creator;
+
+        vi.spyOn(Events as any, 'findById').mockResolvedValue(null);
+
+        const res = await request(app).patch(endpoint);
+
+        expect(res.status).toBe(HTTP_NOT_FOUND);
+        expect(res.body).toHaveProperty('message', 'Event not found');
+      });
+
+      it('should return 400 if the event is already cancelled', async () => {
+        isAuthenticated = true;
+        currentTestRole = Role.Creator;
+
+        const alreadyCancelledEvent = {
+          id: eventId,
+          name: 'Already Cancelled Event',
+          isCancelled: true,
+          creatorId: TEST_USER_ID,
+        };
+
+        vi.spyOn(Events as any, 'findById').mockResolvedValue(alreadyCancelledEvent);
+
+        const res = await request(app).patch(endpoint);
+
+        expect(res.status).toBe(HTTP_BAD_REQUEST);
+        expect(res.body).toHaveProperty('message', 'Event already cancelled');
+      });
+    });
   });
 });

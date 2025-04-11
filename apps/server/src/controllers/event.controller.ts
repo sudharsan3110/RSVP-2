@@ -212,6 +212,14 @@ export const cancelEvent = catchAsync(
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+    const event = await Events.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.isCancelled) {
+      return res.status(400).json({ message: 'Event already cancelled' });
+    }
 
     const cancelEvent = await Events.cancel(eventId, userId);
 
