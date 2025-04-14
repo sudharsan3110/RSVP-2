@@ -20,7 +20,7 @@ const NoResults = ({
   title,
   message,
   image,
-  altText,
+  altText = '',
   imgWidth,
   imgHeight,
   showBtn,
@@ -45,13 +45,7 @@ const NoResults = ({
         <Link href={btnLink || ''}>
           <Button variant="default" className="w-full mt-4">
             {btnIcon && (
-              <Image
-                src={btnIcon}
-                alt="add-icon"
-                width={16.5}
-                height={16.5}
-                className="mr-2"
-              />
+              <Image src={btnIcon} alt="add-icon" width={16.5} height={16.5} className="mr-2" />
             )}
             {btnText}
           </Button>
