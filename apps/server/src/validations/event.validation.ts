@@ -1,5 +1,6 @@
 import z from 'zod';
 import { paginationParamsSchema } from './pagination.validation';
+import { Status } from '@prisma/client';
 
 export enum PAGINATION_ORDER {
   ASC = 'asc',
@@ -118,4 +119,26 @@ export const attendeesQuerySchema = z.object({
     if (val === 'true') return true;
     return undefined;
   }, z.boolean().optional()),
+  search: z.string().optional(),
+  status: z.union([
+    z.string(),
+    z.array(z.string())
+  ])
+  .optional()
+  .transform(val => {
+    if (typeof val === 'string') {
+      return val.split(',');
+    }
+    return val;
+  })
+  .refine(
+    (statuses) => {
+      if (!statuses) return true;
+      const validStatusValues = Object.values(Status);
+      return statuses.every(status => validStatusValues.includes(status as Status));
+    },
+    {
+      message: `One or more status values are invalid. Valid statuses are: ${Object.values(Status).join(', ')}`,
+    }
+  ),
 });

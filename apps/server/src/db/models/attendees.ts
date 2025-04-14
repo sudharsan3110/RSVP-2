@@ -1,11 +1,12 @@
 import { IPaginationParams } from '@/interface/pagination';
 import { Paginator } from '@/utils/pagination';
-import { Attendee, Prisma } from '@prisma/client';
+import { Attendee, Prisma, Status } from '@prisma/client';
 import { prisma } from '../connection';
 import { API_MESSAGES } from '@/constants/apiMessages';
 interface AttendeesByEvent extends IPaginationParams {
   eventId: string;
   hasAttended?: boolean;
+  status?: string[];
 }
 export class Attendees {
   static attendeePaginator = new Paginator('attendee');
@@ -149,6 +150,7 @@ export class Attendees {
       },
     };
   }
+
   
   static async findAttendeesByEventId({
     eventId,
@@ -158,6 +160,7 @@ export class Attendees {
     sortBy = 'registrationTime',
     sortOrder = 'desc',
     search,
+    status,
   }: AttendeesByEvent) {
     const whereClause: Prisma.AttendeeWhereInput = {
       eventId,
@@ -183,8 +186,13 @@ export class Attendees {
           }
         : undefined,
       hasAttended: hasAttended,
+      ...(status && status.length > 0 && {
+        status: {
+          in: status.map(s => s as Status),
+        },
+      }),
     };
-
+  
     return await this.attendeePaginator.paginate(
       { page, limit, sortBy, sortOrder },
       { where: whereClause, include: { user: true } }

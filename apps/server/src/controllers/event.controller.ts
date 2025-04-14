@@ -378,6 +378,11 @@ export const getAttendees = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
     const eventId = req.params.eventId;
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+    
+    const event = await Events.findById(eventId as string);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
 
     const pagination = await attendeesQuerySchema.parseAsync(req.query);
     const attendees = await Attendees.findAttendeesByEventId({ eventId, ...pagination });
