@@ -32,15 +32,19 @@ export class Attendees {
       where: { id },
       data: {
         deleted: true,
+        status: 'NotGoing',
+        allowedStatus: false,
       },
     });
   }
 
-  static async restoreAttendee(id: string) {
+  static async restoreAttendee(id: string, AttendeeStatus:any) {
     return await prisma.attendee.update({
       where: { id },
       data: {
         deleted: false,
+        status: AttendeeStatus.status,
+        allowedStatus: AttendeeStatus.allowedStatus,  
       },
     });
   }

@@ -245,12 +245,14 @@ describe('Event Router Endpoints', () => {
     it('should allow authenticated Creator role to check allow status', async () => {
       isAuthenticated = true;
       currentTestRole = Role.Manager;
+      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });   
+      vi.spyOn(CohostRepository as any, 'checkHostForEvent').mockResolvedValue(true);
       const res = await request(app).get(endpoint);
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'Success');
       expect(res.body.data).toHaveProperty('success', true);
     });
-
+  
     it('should deny unauthenticated requests from checking allow status', async () => {
       isAuthenticated = false;
       currentTestRole = Role.Creator;
@@ -258,10 +260,12 @@ describe('Event Router Endpoints', () => {
       expect(res.status).toBe(401);
       expect(res.body).toHaveProperty('message', 'Invalid or expired tokens');
     });
-
+  
     it('should allow authenticated Manager role to check allow status', async () => {
       isAuthenticated = true;
       currentTestRole = Role.Manager;
+      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
+      vi.spyOn(CohostRepository as any, 'checkHostForEvent').mockResolvedValue(true);
       const res = await request(app).get(endpoint);
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'Success');
@@ -368,7 +372,7 @@ describe('Event Router Endpoints', () => {
         id: eventId,
         creatorId: TEST_USER_ID,
       };
-
+      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
       vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
@@ -395,7 +399,7 @@ describe('Event Router Endpoints', () => {
         id: eventId,
         creatorId: TEST_USER_ID,
       };
-
+      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
       vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',

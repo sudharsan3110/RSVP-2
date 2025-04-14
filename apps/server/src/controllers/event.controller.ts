@@ -67,6 +67,11 @@ export const editEventSlug = catchAsync(
 
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
+    const event = await Events.findById(eventId as string);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
     const slug = req.body.slug;
 
     const updatedSlug = await Events.updateSlug(eventId, userId, slug);
@@ -199,6 +204,11 @@ export const updateEvent = catchAsync(
 
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
+    const event = await Events.findById(eventId as string);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
     const updatedEvent = await Events.update(eventId, data);
 
     return res.status(200).json({ message: 'success', event: updatedEvent });
@@ -287,7 +297,7 @@ export const plannedByUser = catchAsync(async (req: AuthenticatedRequest<{}, {},
 // Attendee routes
 export const createAttendee = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, CreateAttendeeBody>, res) => {
-    let AttendeeStatus = {};
+    let AttendeeStatus: { allowedStatus: boolean; status: string } = { allowedStatus: false, status: '' };
     const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ message: 'Invalid or expired token' });
@@ -315,11 +325,17 @@ export const createAttendee = catchAsync(
       return res.status(400).json({ message: 'Event has expired' });
     }
 
+    if (!event.hostPermissionRequired) {
+      AttendeeStatus = { allowedStatus: true, status: 'Going' };
+    } else {
+      AttendeeStatus = { allowedStatus: false, status: 'Waiting' };
+    }
+
     const existingAttendee = await Attendees.findByUserIdAndEventId(userId, eventId);
     if (existingAttendee) {
       const deleted_user = existingAttendee.deleted;
       if (deleted_user) {
-        await Attendees.restoreAttendee(existingAttendee.id);
+        await Attendees.restoreAttendee(existingAttendee.id, AttendeeStatus);
         return res.status(200).json({ message: 'Attendee restored successfully' });
       }
       return res.status(400).json({ message: 'User already registered for this event' });
@@ -329,11 +345,6 @@ export const createAttendee = catchAsync(
     const hash = createHash('sha256').update(uuid).digest('base64');
     const qrToken = hash.slice(0, 6);
 
-    if (!event.hostPermissionRequired) {
-      AttendeeStatus = { allowedStatus: true, status: 'Going' };
-    } else {
-      AttendeeStatus = { allowedStatus: false, status: 'Waiting' };
-    }
 
     const attendeeData = {
       qrToken: qrToken,
@@ -379,6 +390,11 @@ export const getAttendeesExcelSheet = catchAsync(
   async (req: AuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
     const eventId = req.params.eventId;
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
+
+    const event = await Events.findById(eventId as string);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
 
     const attendees = await Attendees.findAllAttendees(eventId);
     // Transform data for Excel export
@@ -454,6 +470,10 @@ export const getAttendeeDetails = catchAsync(
     const attendee = await Attendees.findByUserIdAndEventId(userId, eventId);
 
     if (!attendee) {
+      const event = await Events.findById(eventId as string);
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }  
       return res.status(404).json({ message: 'Attendee not found' });
     }
 
@@ -477,6 +497,16 @@ export const checkAllowStatus = catchAsync(
       return res.status(400).json({ message: API_MESSAGES.ALLOW_GUEST.EVENTID_REQUIRED });
     if (!userId) return res.status(401).json({ message: API_MESSAGES.ALLOW_GUEST.INVALID_TOKEN });
 
+    const hasAccess = await CohostRepository.checkHostForEvent(userId, eventId);
+
+    if (!hasAccess) {
+      const event = await Events.findById(eventId as string);
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+      return res.status(403).json({ message: API_MESSAGES.ALLOW_GUEST.UNAUTHORIZED_ACCESS });
+    }
+
     return res.status(200).json({
       message: API_MESSAGES.ALLOW_GUEST.SUCCESS,
       data: { success: true },
@@ -497,6 +527,10 @@ export const updateAttendeeAllowStatus = catchAsync(
     if (!eventId)
       return res.status(400).json({ message: API_MESSAGES.ALLOW_GUEST.EVENTID_REQUIRED });
 
+    const event = await Events.findById(eventId as string);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
     const updatedAttendee = await Attendees.updateAllowStatus(eventId, userId, allowedStatus);
 
     return res.status(200).json({
@@ -514,6 +548,10 @@ export const getAttendeeByQrToken = catchAsync(
 
     const attendee = await Attendees.findByQrToken(qrToken, eventId);
     if (!attendee) {
+      const event = await Events.findById(eventId as string);
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
       return res.status(404).json({ message: 'Attendee not found' });
     }
 
