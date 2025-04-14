@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import useDebounce from '@/hooks/useDebounce';
 import { useGetAttendeeByEventId } from '@/lib/react-query/event';
 import { cn } from '@/lib/utils';
 import { Attendee } from '@/types/attendee';
@@ -25,6 +26,8 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
   const [isCohostSelectionDialogOpen, setIsCohostSelectionDialogOpen] = useState(false);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   const { id } = useParams();
   const { data } = useGetAttendeeByEventId({
     eventId: id as string,
@@ -46,10 +49,14 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
     setIsConfirmationDialogOpen(true);
   };
 
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const filteredAttendees =
-    searchQuery !== ''
+    debouncedSearchQuery !== ''
       ? usersData?.filter((attendee: Attendee) =>
-          attendee.user.primary_email.toLowerCase().includes(searchQuery.toLowerCase())
+          attendee.user.primary_email.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
         )
       : usersData;
 
@@ -69,6 +76,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
               Search your host with email or name
             </DialogDescription>
           </DialogHeader>
+
           <div className="grid gap-3">
             <div className="relative flex w-full items-center">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -79,8 +87,10 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                 className="block w-full rounded-md border border-dark-500 bg-dark-500 py-2 pl-10 pr-3 text-sm leading-5 text-white placeholder-secondary-dark focus:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500"
                 placeholder="Search email."
                 onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchQuery}
               />
             </div>
+
             <ScrollArea className="h-72">
               <div className="flex flex-col gap-3 text-center">
                 {filteredAttendees?.length > 0 ? (
@@ -115,19 +125,33 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                     </div>
                   ))
                 ) : (
-                  <NoResults
-                    title="No User found"
-                    message="Please confirm that if user is registered on the platform."
-                  />
+                  <>
+                    <NoResults
+                      title="No User found"
+                      message="Please confirm that if user is registered on the platform."
+                    />
+                    {isValidEmail(searchQuery) && (
+                      <Button
+                        onClick={() => {
+                          setIsCohostSelectionDialogOpen(false);
+                          setIsConfirmationDialogOpen(true);
+                        }}
+                        className="mt-4"
+                      >
+                        Invite {searchQuery} as Co-host
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </ScrollArea>
           </div>
         </DialogContent>
       </Dialog>
-      {selectedCoHost && (
+
+      {isValidEmail(searchQuery) && (
         <ConfirmCoHost
-          selectedCoHost={selectedCoHost}
+          selectedCoHost={searchQuery}
           isConfirmationDialogOpen={isConfirmationDialogOpen}
           setIsConfirmationDialogOpen={setIsConfirmationDialogOpen}
         />

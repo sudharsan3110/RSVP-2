@@ -9,15 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Check, LoaderCircle } from 'lucide-react';
-import { useState } from 'react';
-import { Separator } from '../ui/separator';
-import { Attendee } from '@/types/attendee';
 import { useAddEventCohost } from '@/lib/react-query/event';
+import { Check, LoaderCircle } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { Separator } from '../ui/separator';
 
 type ConfirmCoHostProps = {
-  selectedCoHost: Attendee;
+  selectedCoHost: string;
   isConfirmationDialogOpen: boolean;
   setIsConfirmationDialogOpen: (isOpen: boolean) => void;
 };
@@ -26,15 +24,14 @@ const ConfirmCoHost = ({
   isConfirmationDialogOpen,
   setIsConfirmationDialogOpen,
 }: ConfirmCoHostProps) => {
-  const [loading] = useState(false);
-  const { mutate: mAddCohost } = useAddEventCohost();
+  const { mutate: mAddCohost, isPending } = useAddEventCohost();
   const { id } = useParams();
 
   const submitCoHostRequest = () => {
     try {
       mAddCohost({
         eventId: id as string,
-        cohostEmail: selectedCoHost.user.primary_email,
+        cohostEmail: selectedCoHost,
         role: 'Manager',
       });
     } finally {
@@ -50,7 +47,7 @@ const ConfirmCoHost = ({
         <DialogHeader className="p-6 pb-0 text-left">
           <DialogTitle>Please Confirm Co-host</DialogTitle>
           <DialogDescription className="text-xs text-secondary">
-            Are you sure you want to grant co-host permissions to {selectedCoHost?.user.full_name}?
+            Are you sure you want to grant co-host permissions to {selectedCoHost}?
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 px-6">
@@ -94,33 +91,20 @@ const ConfirmCoHost = ({
             </div>
           </div>
         </div>
+
         <Separator />
 
-        {loading ? (
-          <DialogFooter className="flex flex-row gap-2 px-6 pb-4">
-            <DialogClose asChild>
-              <Button disabled className="w-full rounded-md" variant="tertiary">
-                Cancel
-              </Button>
-            </DialogClose>
-
-            <Button disabled className="w-full rounded-md">
-              <LoaderCircle className="animate-spin" />
+        <DialogFooter className="flex flex-row gap-2 px-6 pb-4">
+          <DialogClose asChild>
+            <Button className="w-full rounded-md" variant="tertiary" disabled={isPending}>
+              Cancel
             </Button>
-          </DialogFooter>
-        ) : (
-          <DialogFooter className="flex flex-row gap-2 px-6 pb-4">
-            <DialogClose asChild>
-              <Button className="w-full rounded-md" variant="tertiary">
-                Cancel
-              </Button>
-            </DialogClose>
+          </DialogClose>
 
-            <Button onClick={submitCoHostRequest} className="w-full rounded-md">
-              Add Co-Host
-            </Button>
-          </DialogFooter>
-        )}
+          <Button className="w-full rounded-md" onClick={submitCoHostRequest} disabled={isPending}>
+            {isPending ? <LoaderCircle className="animate-spin" /> : 'Add Co-Host'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

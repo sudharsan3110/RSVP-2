@@ -25,6 +25,14 @@ export class Event {
     username: string;
     profile_icon: string;
   };
+  Cohost?: {
+    role: string;
+    user: {
+      profile_icon: string;
+      full_name: string;
+      username: string;
+    };
+  }[];
 
   constructor(data: Partial<Event>) {
     this.id = data.id ?? '';
@@ -47,5 +55,6 @@ export class Event {
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
     if (data.creator) this.creator = data.creator;
+    if (data.Cohost) this.Cohost = data.Cohost;
   }
 }

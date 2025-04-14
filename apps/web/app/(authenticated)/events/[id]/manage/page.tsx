@@ -37,7 +37,11 @@ const ManageEventPage = () => {
   if (!isSuccess) return <div>Something went wrong</div>;
   const { event } = data;
 
-  if (event.creatorId !== userData?.data?.data?.id) return notFound();
+  const isCoHost = event.Cohost?.find(
+    (host) => host.user.username === userData?.data?.data?.username
+  );
+
+  if (!isCoHost) return notFound();
 
   return (
     <Container className="min-h-screen space-y-8 py-8">
