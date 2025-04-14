@@ -14,7 +14,7 @@ export default function AvatarGroup({ additionalCount = 0, limit = 4 }: AvatarGr
       {avatarsToShow.map((avatar, index) => (
         <Image
           key={index}
-          className="rounded-full ring-2 ring-white"
+          className="rounded-full ring-2 ring-primary"
           src={avatar.src}
           width={24}
           height={24}

@@ -92,7 +92,7 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
                     alt="Host Avatar"
                     width={48}
                     height={48}
-                    className="rounded-full"
+                    className="rounded-full border-primary border-2 object-cover"
                   />
                   <p className="ml-3 text-sm font-medium capitalize text-secondary">
                     {cohost.user.full_name}
