@@ -41,6 +41,7 @@ const RecentRegistrations = ({ className }: PropsWithClassName) => {
         data={recentRegistrations}
         loading={isLoading}
         emptyStateText="No registrations yet"
+        skeletonRows={3}
       />
     </section>
   );

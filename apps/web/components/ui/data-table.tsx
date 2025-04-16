@@ -14,6 +14,7 @@ import { Skeleton } from './skeleton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
+  skeletonRows?: number;
   data: TData[];
   loading?: boolean;
   emptyStateText?: string;
@@ -24,6 +25,7 @@ export function DataTable<TData, TValue>({
   data,
   loading = false,
   emptyStateText = 'No results.',
+  skeletonRows = 10,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -51,7 +53,7 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {loading &&
-            Array.from({ length: 10 }).map((_, index) => (
+            Array.from({ length: skeletonRows }).map((_, index) => (
               <TableRow key={index}>
                 {columns.map((_, index) => (
                   <TableCell key={index}>
@@ -61,23 +63,24 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
 
-          {!loading && table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+          {!loading &&
+            (table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  {emptyStateText}
+                </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                {emptyStateText}
-              </TableCell>
-            </TableRow>
-          )}
+            ))}
         </TableBody>
       </Table>
     </div>
