@@ -1,12 +1,14 @@
 import { Attendee } from '@/types/attendee';
 import { Event } from '@/types/Events';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   eventAPI,
+  EventParams,
   GetAttendeeByEventIdParams,
+  PaginationMetadata,
   UpdateEventSubmissionType,
 } from '../axios/event-API';
 import { CreateEventSubmissionType } from '../zod/event';
@@ -27,10 +29,26 @@ export const useEventQuery = (id: string) => {
   });
 };
 
-export const useGetEvent = (params: any) => {
+export const useGetEvent = (params: EventParams ) => {
   return useQuery({
     queryKey: [EVENTS_QUERY_KEY, params],
     queryFn: () => eventAPI.getEvent(params),
+  });
+};
+
+export const useGetDiscoverEvents = (params: EventParams) => {
+  return useInfiniteQuery({
+    queryKey: [EVENTS_QUERY_KEY, params],
+    queryFn: ({ pageParam }) => eventAPI.getEvent({ ...params, page: Number(pageParam ?? '1') }),
+    getNextPageParam: (lastPage: { metadata?: PaginationMetadata}) => lastPage.metadata?.hasMore ? lastPage.metadata?.page + 1 : undefined,
+    initialPageParam: 1,
+  });
+};
+
+export const useGetMyEvents = ( filters: EventParams ) => {
+  return useQuery({
+    queryKey: [EVENTS_QUERY_KEY, 'my-events', filters],
+    queryFn: () => eventAPI.getMyEvents(filters),
   });
 };
 
@@ -106,9 +124,9 @@ export const useGetEventById = (eventId?: string) => {
   return useQuery<{ event: Event; totalAttendees: number }, AxiosError<ErrorResponse>>({
     queryFn: eventId
       ? async () => {
-          const response = await eventAPI.getEventById(eventId);
-          return { event: response.event, totalAttendees: response.totalAttendees };
-        }
+        const response = await eventAPI.getEventById(eventId);
+        return { event: response.event, totalAttendees: response.totalAttendees };
+      }
       : undefined,
     enabled: !!eventId,
     queryKey: [EVENTS_QUERY_KEY, eventId],

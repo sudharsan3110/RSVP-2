@@ -64,6 +64,7 @@ function FormImageUpload<
       setUploadProgress(0);
     }
   };
+
   return (
     <FormField
       control={control}
@@ -73,10 +74,10 @@ function FormImageUpload<
           {label && <FormLabel className={cn('text-white', labelClassName)}>{label}</FormLabel>}
           <FormControl>
             <div className="mt-4 space-y-4">
-              {value.file && (
+              {value.file && 
                 <div className="relative aspect-square w-full rounded-lg bg-secondary">
                   <img
-                    src={value.file}
+                    src={value.file || value.url}
                     alt="Uploaded Image"
                     className="aspect-square rounded-lg bg-white object-cover"
                   />
@@ -91,6 +92,7 @@ function FormImageUpload<
                   </Button>
                 </div>
               )}
+
               {!value.file && (
                 <div className="flex flex-col items-center gap-4">
                   <input

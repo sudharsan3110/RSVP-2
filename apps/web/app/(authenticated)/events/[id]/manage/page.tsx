@@ -22,7 +22,7 @@ const ManageEventPage = () => {
   const { data: userData } = useCurrentUser();
   const queryParams = useQueryParams({ defaultValues: { tab: 'overview' } });
 
-  const tabValue = queryParams.get('tab', 'overview');
+  const tabValue = queryParams.get('tab', 'overview') as string | null;
 
   const { data, isLoading, isSuccess, status } = useGetEventById(id);
 
@@ -37,9 +37,7 @@ const ManageEventPage = () => {
   if (!isSuccess) return <div>Something went wrong</div>;
   const { event } = data;
 
-  const isCoHost = event.Cohost?.find(
-    (host) => host.user.username === userData?.data?.data?.username
-  );
+  const isCoHost = event.checkCohost(userData?.data?.data?.username);
 
   if (!isCoHost) return notFound();
 

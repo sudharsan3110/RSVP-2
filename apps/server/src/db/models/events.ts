@@ -3,6 +3,7 @@ import { Paginator } from '@/utils/pagination';
 import { CreateEventDto, IEventFilters } from '@/interface/event';
 import { IPaginationParams } from '@/interface/pagination';
 import { Event, Prisma, VenueType } from '@prisma/client';
+import { EventFilter } from '@/validations/event.validation';
 
 export class Events {
   static async create(eventDetails: CreateEventDto) {
@@ -68,11 +69,11 @@ export class Events {
       ...(category && { category: category }),
       ...(fromDate &&
         toDate && {
-          AND: [
-            { startTime: { gte: fromDate, lte: toDate } },
-            { endTime: { gte: fromDate, lte: toDate } },
-          ],
-        }),
+        AND: [
+          { startTime: { gte: fromDate, lte: toDate } },
+          { endTime: { gte: fromDate, lte: toDate } },
+        ],
+      }),
       ...(search && {
         OR: [
           { name: { contains: search } },
@@ -126,6 +127,7 @@ export class Events {
     });
     return event;
   }
+
   static async getPopularEvents(take: number) {
     const events = await prisma.event.findMany({
       where: {
@@ -175,6 +177,7 @@ export class Events {
       data: { isCancelled: true, isActive: false },
     });
   }
+
   static async delete(eventId: string, creatorId: string) {
     return await prisma.event.update({
       where: { id: eventId, creatorId },
@@ -186,82 +189,57 @@ export class Events {
     page,
     limit,
     category,
-    sortby,
-    venueAddress,
-    query,
-    order,
     startDate,
     endDate,
-  }: {
-    page: number;
-    limit: number;
-    category?: string;
-    sortby?: string;
-    venueAddress?: string;
-    query?: string;
-    order?: 'asc' | 'desc';
-    startDate?: string;
-    endDate?: string;
-  }) {
-    if (limit <= 0) {
-      return [];
+    location,
+    sortOrder,
+    search,
+    sortBy,
+  }: EventFilter) {
+    const eventsPaginator = new Paginator('event');
+
+    const where: Prisma.EventWhereInput = {
+      ...(location && { location: location }),
+      ...(category && { category: category }),
+      ...(endDate && { eventDate: { lte: endDate } }),
+      ...(startDate && { eventDate: { gte: startDate } }),
+    };
+
+
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } },
+        { category: { contains: search } },
+      ];
     }
 
-    if (page <= 0) {
-      page = 1;
-    }
+    const { data, metadata } = await eventsPaginator.paginate(
 
-    const filters: any = {};
-
-    if (category) {
-      filters.category = category;
-    }
-
-    if (venueAddress) {
-      filters.venueAddress = venueAddress;
-    }
-
-    if (query) {
-      filters.name = {
-        contains: query,
-      };
-    }
-
-    try {
-      const totalEvents = await prisma.event.count({ where: filters });
-
-      const totalPages = Math.ceil(totalEvents / limit);
-
-      if (totalPages === 0 || page > totalPages) {
-        return [];
-      }
-
-      if (sortby == undefined) {
-        sortby = 'createdAt';
-      }
-
-      const events = await prisma.event.findMany({
-        where: filters,
-        include: {
+      {
+        page,
+        limit,
+        sortOrder,
+        sortBy,
+      },
+      {
+        where: where, include: {
           creator: {
             select: {
-              id: true,
-              full_name: true,
               profile_icon: true,
+              full_name: true,
+              username: true,
             },
-          }
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: {
-          [sortby]: 'desc',
-        },
-      });
+          },
+        }
+      }
+    );
 
-      return events;
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      throw new Error('Failed to fetch events. Please try again later.');
-    }
+    return {
+      events: data,
+      metadata,
+    };
+
   }
 }

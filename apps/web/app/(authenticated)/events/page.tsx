@@ -14,7 +14,7 @@ import {
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import useDebounce from '@/hooks/useDebounce';
-import { useGetEvent } from '@/lib/react-query/event.ts';
+import { useGetEvent, useGetMyEvents } from '@/lib/react-query/event.ts';
 import { cn } from '@/lib/utils.ts';
 import { IEvent } from '@/types/event.ts';
 import { locationName, NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
@@ -41,7 +41,7 @@ const Events = () => {
     },
     { history: 'push' }
   );
-  const { data: events, isLoading, error } = useGetEvent(filters);
+  const { data: events, isLoading, error } = useGetMyEvents(filters);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [isFilterOpen] = useState(true);

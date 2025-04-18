@@ -34,6 +34,7 @@ import {
 import {
   attendeesQuerySchema,
   CreateEventSchema,
+  eventFilterSchema,
   eventLimitSchema,
   eventParamsSchema,
   getEventBySlugSchema,
@@ -66,7 +67,10 @@ eventRouter.get(
   validate({ params: getEventBySlugSchema }),
   getEventBySlug
 );
-eventRouter.get('/', authMiddleware, apiLimiter, allPlannedEvents);
+
+eventRouter.get('/planned', authMiddleware, apiLimiter, allPlannedEvents);
+
+eventRouter.get('/', apiLimiter, filterEvents);
 
 eventRouter.post(
   '/',
@@ -85,15 +89,6 @@ eventRouter.get(
 
 eventRouter.get('/popular', apiLimiter, validate({ query: eventLimitSchema }), getPopularEvents);
 
-eventRouter.get('/filter', apiLimiter, filterEvents);
-
-eventRouter.get(
-  '/user',
-  apiLimiter,
-  authMiddleware,
-  validate({ query: eventsPlannedByUserReqSchema }),
-  plannedByUser
-);
 eventRouter.get('/:eventId', apiLimiter, authMiddleware, getEventById);
 
 eventRouter.patch(
@@ -121,6 +116,22 @@ eventRouter.delete(
   validate({ params: eventAttendeeReqSchema }),
   eventManageMiddleware([Role.Creator]),
   deleteEvent
+);
+
+eventRouter.get(
+  '/user',
+  apiLimiter,
+  authMiddleware,
+  validate({ query: eventsPlannedByUserReqSchema }),
+  plannedByUser
+);
+
+eventRouter.get(
+  '/user/upcoming',
+  apiLimiter,
+  authMiddleware,
+  validate({ query: eventsPlannedByUserReqSchema }),
+  plannedByUser
 );
 
 eventRouter.patch(

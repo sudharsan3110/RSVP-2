@@ -13,11 +13,23 @@ export interface GetAttendeeByEventIdParams extends PaginationParams {
 }
 export type UpdateEventSubmissionType = CreateEventSubmissionType & { id: string };
 
-type EventParams = {
+export type PaginationMetadata = {
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+};
+
+export type EventParams = {
   page: number;
   status: string;
   sort: string;
   search: string;
+  limit?: number;
+  location?: string;
+  category?: string;
+  startDate?: Date;
+  sortBy?: string;
 };
 
 export const eventAPI = {
@@ -78,8 +90,13 @@ export const eventAPI = {
     return api.post(`event/${eventId}/attendees`);
   },
 
-  getEvent: async (params?: EventParams): Promise<IEvent[]> => {
+  getEvent: async (params?: EventParams): Promise<{ events: IEvent[], metadata: PaginationMetadata }> => {
     const response = await api.get('/event', { params });
+    return response.data.data;
+  },
+
+  getMyEvents: async (params?: EventParams): Promise<IEvent[]> => {
+    const response = await api.get('/event/planned', { params });
     return response.data.data;
   },
 

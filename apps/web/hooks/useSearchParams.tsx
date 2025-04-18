@@ -1,8 +1,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 interface UseQueryParamsOptions {
-  defaultValues?: Record<string, string>;
+  defaultValues?: Record<string, string | number | boolean | null>;
 }
 
 const useQueryParams = <T extends string = string>(options: UseQueryParamsOptions = {}) => {
@@ -42,7 +42,11 @@ const useQueryParams = <T extends string = string>(options: UseQueryParamsOption
     [searchParams, defaultValues]
   );
 
-  return { get, set };
+  const values = useMemo(() => {
+    return Object.fromEntries(searchParams.entries());
+  }, [searchParams]);
+
+  return { get, set, values };
 };
 
 export default useQueryParams;

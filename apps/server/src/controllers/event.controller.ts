@@ -17,8 +17,10 @@ import {
 import {
   attendeesQuerySchema,
   CreateEventSchema,
+  eventFilterSchema,
   eventLimitSchema,
   eventsPlannedByUserReqSchema,
+  PAGINATION_ORDER,
 } from '@/validations/event.validation';
 import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
@@ -100,39 +102,12 @@ export const allPlannedEvents = catchAsync(async (req: AuthenticatedRequest<{}, 
 
 export const filterEvents = catchAsync(async (req, res) => {
   try {
-    const { category, sortBy, location, searchParam, page, limit, order } = req.query;
-    const pageNumber = page && !isNaN(Number(page)) ? parseInt(page as string, 10) : 1;
-    const limitNumber = limit && !isNaN(Number(limit)) ? parseInt(limit as string, 10) : 10;
-    const events = await Events.findEvents({
-      page: pageNumber,
-      limit: limitNumber,
-      category: category as string,
-      sortby: sortBy as string,
-      venueAddress: location as string,
-      query: searchParam as string,
-      order: order as 'asc' | 'desc',
-    });
-
-    const total_events = await Events.findAllEvents();
-    const total_page = Math.ceil(total_events.length / limitNumber);
-    const metadata = {
-      page: pageNumber,
-      page_count: total_page,
-      current_page_count: events.length,
-      links: {
-        self: `/events?page=${pageNumber}&limit=${limitNumber}`,
-        next:
-          pageNumber < total_page ? `/events?page=${pageNumber + 1}&limit=${limitNumber}` : null,
-        previous: pageNumber > 1 ? `/events?page=${pageNumber - 1}&limit=${limitNumber}` : null,
-        first: `/events?page=1&limit=${limitNumber}`,
-        last: `/events?page=${total_page}&limit=${limitNumber}`,
-      },
-    };
-
+    const  filters = eventFilterSchema.parse(req.query);
+    const events = await Events.findEvents(filters);
+    
     return res.status(200).json({
       message: 'Filtered Events Data',
       data: events,
-      metadata,
     });
   } catch (e: any) {
     return res.status(502).json({

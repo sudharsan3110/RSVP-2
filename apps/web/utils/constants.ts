@@ -70,24 +70,41 @@ export const evenTimeOptions: FormSelectOption[] = [
 ];
 
 export const eventCategoryOptions: FormSelectOption[] = [
-  { value: 'meetup', label: 'Meetup' },
-  { value: 'hangout', label: 'Hangout' },
+  { value: 'meetup', label: 'Meetup', },
   { value: 'birthday', label: 'Birthday' },
-  { value: 'concert', label: 'Concert' },
+  { value: 'entertainment', label: 'Entertainment' },
   { value: 'conference', label: 'Conference' },
   { value: 'workshop', label: 'Workshop' },
-  { value: 'party', label: 'Party' },
   { value: 'sports', label: 'Sports' },
   { value: 'networking', label: 'Networking' },
   { value: 'exhibition', label: 'Exhibition' },
-  { value: 'festival', label: 'Festival' },
   { value: 'charity', label: 'Charity' },
-  { value: 'food', label: 'Food & Dining' },
   { value: 'art', label: 'Art & Culture' },
   { value: 'education', label: 'Education' },
-  { value: 'gaming', label: 'Gaming' },
   { value: 'others', label: 'Others...' },
 ];
+
+export const eventCategoryColors = {
+  "all": 'bg-[#F2F2F2]',
+  'meetup': 'bg-[#EDE9FF]',
+  'hangout': 'bg-[#FFF5D7]',
+  'birthday': 'bg-[#FFECEC]',
+  'concert': 'bg-[#E4FFEA]',
+  'conference': 'bg-[#E0F7FF]',
+  'workshop': 'bg-[#FFE6FB]',
+  'party': 'bg-[#FFD6D6]',
+  'sports': 'bg-[#D6FFEE]',
+  'networking': 'bg-[#D6E4FF]',
+  'exhibition': 'bg-[#F0E6FF]',
+  'festival': 'bg-[#FFF0D6]',
+  'charity': 'bg-[#FFE0E0]',
+  'food': 'bg-[#DAFFD6]',
+  'art': 'bg-[#D6FEFF]',
+  'education': 'bg-[#E6EAFF]',
+  'gaming': 'bg-[#FFECD6]',
+  'others': 'bg-[#F2F2F2]',
+};
+
 
 export const NO_PLANNED_EVENTS_TITLE = 'No Upcoming Events';
 export const NO_PLANNED_EVENTS_MESSAGE =
@@ -97,6 +114,10 @@ export const NO_EVENT_TITLE = 'No Events Planned';
 export const NO_EVENTS_MESSAGE =
   'You have no events planned yet. Why not host one?';
 export const locationName = [
+  {
+    value: 'all',
+    label: 'All',
+  },
   {
     value: 'delhi',
     label: 'Delhi',

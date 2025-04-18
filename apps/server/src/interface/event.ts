@@ -25,4 +25,5 @@ export interface IEventFilters {
   fromDate: Date;
   toDate: Date;
   venueType?: string;
+  status?: string;
 }

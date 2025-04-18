@@ -22,7 +22,7 @@ const PlannedEvents = () => {
     isLoading,
     isError,
   } = useQuery<IEvent[] | null>({
-    queryKey: ['events', params],
+    queryKey: ['planned-events', params],
     queryFn: () => eventAPI.getEventsBySearchParams(params),
   });
 

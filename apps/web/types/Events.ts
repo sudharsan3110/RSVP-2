@@ -1,3 +1,4 @@
+import { eventAPI } from '@/lib/axios/event-API';
 import { VenueType } from './event';
 
 export class Event {
@@ -21,6 +22,7 @@ export class Event {
   createdAt: Date;
   updatedAt: Date;
   creator?: {
+    id: string;
     full_name: string;
     username: string;
     profile_icon: string;
@@ -28,6 +30,7 @@ export class Event {
   Cohost?: {
     role: string;
     user: {
+      id: string;
       profile_icon: string;
       full_name: string;
       username: string;
@@ -56,5 +59,13 @@ export class Event {
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
     if (data.creator) this.creator = data.creator;
     if (data.Cohost) this.Cohost = data.Cohost;
+  }
+
+  async checkCohost(cohostId: string) {
+    return this.Cohost?.find((cohost) => cohost.user.id === cohostId);
+  }
+
+  async checkCreator(creatorId: string) {
+    return this.creator?.id === creatorId;
   }
 }

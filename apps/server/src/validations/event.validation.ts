@@ -142,3 +142,19 @@ export const attendeesQuerySchema = z.object({
     }
   ),
 });
+
+
+export const eventFilterSchema = z.object({
+  page: z.coerce.number().positive().default(1),
+  limit: z.coerce.number().positive().default(10),
+  location: z.string().optional(),
+  category: z.string().optional(),
+  sortOrder: z.enum([PAGINATION_ORDER.ASC, PAGINATION_ORDER.DESC]).optional(),
+  search: z.string().optional(),
+  sortBy: z.string().optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
+
+
+export type EventFilter = z.infer<typeof eventFilterSchema>;

@@ -12,6 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -21,7 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/hooks/useDebounce';
+import { useGetDiscoverEvents, useGetEvent } from '@/lib/react-query/event';
 import { cn } from '@/lib/utils';
 import { locationName } from '@/utils/constants';
 import {
@@ -31,61 +34,62 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
+import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
+import { useEffect, useRef, useState } from 'react';
+
 
 const DiscoverEvents = () => {
+  const pageEndRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(true);
 
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSort, setSelectedSort] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [page] = useState(1);
-  const [limit] = useState(10);
-  const debouncedSearchQuery = useDebounce(searchQuery, 600);
+  const [filters, setFilters] = useQueryStates(
+    {
+      page: parseAsInteger.withDefault(1),
+      status: parseAsString.withDefault(''),
+      sort: parseAsString.withDefault(''),
+      search: parseAsString.withDefault(''),
+      location: parseAsString.withDefault(''),
+      category: parseAsString.withDefault(''),
+    },
+    { history: 'push' }
+  );
+  const debouncedSearchQuery = useDebounce(filters.search, 600);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useGetDiscoverEvents({
+    page: filters.page,
+    search: debouncedSearchQuery,
+    sort: filters.sort,
+    location: filters.location === 'all' ? '' : filters.location,
+    status: '',
+    limit: 10,
+    category: filters.category,
+    startDate: dayjs().startOf('day').toDate(),
+  })
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      try {
-        const queryParams = new URLSearchParams();
-
-        queryParams.append('page', page.toString());
-        queryParams.append('limit', limit.toString());
-
-        if (debouncedSearchQuery) queryParams.append('searchParam', debouncedSearchQuery);
-        if (selectedSort) {
-          queryParams.append('sortBy', selectedSort);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
-        if (selectedLocation) queryParams.append('location', selectedLocation);
-        if (selectedTag) queryParams.append('category', selectedTag);
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '500px'
+      }
+    );
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/event/filter?${queryParams.toString()}`
-        );
+    if (pageEndRef.current) {
+      observer.observe(pageEndRef.current);
+    }
 
-        const data = await response.json();
-
-        if (response.ok) {
-          setEvents(data.data);
-        } else {
-          console.error('Error fetching events:', data.message);
-          setEvents([]);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        setEvents([]);
-      } finally {
-        setLoading(false);
+    return () => {
+      if (pageEndRef.current) {
+        observer.unobserve(pageEndRef.current);
       }
     };
-
-    fetchEvents();
-  }, [debouncedSearchQuery, selectedSort, selectedLocation, page, limit, selectedTag]);
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   return (
     <Container asChild>
@@ -101,12 +105,12 @@ const DiscoverEvents = () => {
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
                 </div>
-                <input
+                <Input
                   type="text"
-                  className="block w-full rounded-md border border-dark-500 bg-dark-500 py-2 pl-10 pr-3 leading-5 text-white placeholder-white focus:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500 sm:text-sm"
+                  className="block w-full rounded-md bg-dark-500 py-2 pl-10 pr-3 leading-5 "
                   placeholder="Search Events"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={filters.search}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
                 />
               </div>
 
@@ -128,7 +132,6 @@ const DiscoverEvents = () => {
                 </Button>
               </div>
             </div>
-
             <div
               className={cn(
                 'mt-6 md:mt-0',
@@ -146,8 +149,8 @@ const DiscoverEvents = () => {
                     className="w-[90vw] justify-between rounded-[8px] border md:w-[200px]"
                     data-testid="locationButton"
                   >
-                    {selectedLocation
-                      ? locationName.find((location) => location.value === selectedLocation)?.label
+                    {filters.location
+                      ? locationName.find((location) => location.value === filters.location)?.label
                       : 'Location'}
                     <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -162,7 +165,7 @@ const DiscoverEvents = () => {
                             key={location.value}
                             value={location.value}
                             onSelect={() => {
-                              setSelectedLocation(location.value);
+                              setFilters((prev) => ({ ...prev, location: location.value }));
                               setOpen(false);
                             }}
                             className="cursor-pointer"
@@ -170,7 +173,7 @@ const DiscoverEvents = () => {
                             <CheckIcon
                               className={cn(
                                 'mr-2 h-4 w-4',
-                                selectedLocation === location.value ? 'opacity-100' : 'opacity-0'
+                                filters.location === location.value ? 'opacity-100' : 'opacity-0'
                               )}
                             />
                             {location.label}
@@ -182,7 +185,7 @@ const DiscoverEvents = () => {
                 </PopoverContent>
               </Popover>
 
-              <Select onValueChange={(value) => setSelectedSort(value)}>
+              <Select onValueChange={(value) => setFilters((prev) => ({ ...prev, sort: value }))}>
                 <SelectTrigger className="w-[90vw] hover:rounded-[8px] md:w-[200px]">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
@@ -198,23 +201,38 @@ const DiscoverEvents = () => {
           </section>
 
           <section className="mt-1">
-            <Tags selectedTag={selectedTag} setSelectedTag={setSelectedTag} />
+            <Tags selectedTag={filters.category} setSelectedTag={(value) => setFilters((prev) => ({ ...prev, category: value }))} />
           </section>
 
           <section className="mt-6">
-            {loading ? (
-               <div className="flex items-center justify-center">
-               <Loader2 data-testid="loader" className="h-10 w-10 animate-spin" />
-             </div>
-            ) : events.length > 0 ? (
-              <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.map((event: any) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
-            ) : (
-              <NoResults title="No Events found" message="Try adjusting your search filters." />
-            )}
+            <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {isLoading ? (
+                Array.from({ length: 10 }).map((_, index) => (
+                  <Skeleton key={index} className="w-full min-h-[20rem] rounded-md" />
+                ))
+              ) : data?.pages.flatMap((page) => page.events).length && data?.pages.flatMap((page) => page.events).length > 0 ? (
+                <>
+                  {data?.pages.flatMap((page) => page.events).map((event: any) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                  {isFetchingNextPage && (
+                    Array.from({ length: 10 }).map((_, index) => (
+                      <Skeleton key={index} className="w-full" />
+                    ))
+                  )}
+
+                </>
+              ) : (
+                <div className="flex flex-col col-span-full items-center justify-center">
+                  <NoResults title="No Events found" message="Try adjusting your search filters." />
+                </div>
+              )}
+            </div>
+            <div
+              ref={pageEndRef}
+              className="h-4 w-full"
+            />
+
           </section>
         </section>
       </main>

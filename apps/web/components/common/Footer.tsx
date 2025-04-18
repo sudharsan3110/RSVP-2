@@ -66,6 +66,7 @@ const Footer = ({ className }: PropsWithClassName) => {
           </div>
         </Container>
       </div>
+
     </footer>
   );
 };
