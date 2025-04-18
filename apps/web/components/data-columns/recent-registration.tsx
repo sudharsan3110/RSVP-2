@@ -17,7 +17,7 @@ export const recentRegistrationColumns: ColumnDef<Attendee>[] = [
           <AvatarImage src={getProfilePictureUrl(row.original?.user?.profile_icon ?? 0)} />
           <AvatarFallback>{row.original?.user?.full_name?.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="ml-3 flex items-center">
+        <div className="ml-3">
           <p className="font-medium text-white">{row.original?.user?.full_name}</p>
           <p className="text-xs text-foreground">@{row.original?.user?.username}</p>
         </div>
