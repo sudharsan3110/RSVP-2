@@ -19,9 +19,12 @@ interface ChangelogProps {
 
 const ChangelogList: React.FC<ChangelogProps> = ({ title, features, className }) => {
   return (
-    <div className={cn('mt-4', className)}>
-      <h2 className="mb-4 text-xl font-semibold">{title}</h2>
-      <ul className="ml-5 list-disc space-y-2 leading-8">
+    <div className={cn('mt-4' , className)}>
+    <h2 className="mb-4 text-[1.25rem] font-semibold">{title}</h2>
+      <ul className={cn(
+        "ml-5 list-disc leading-8",
+        className === "features-section" ? "space-y-0" : "space-y-2"
+      )}>
         {features.map((feature, index) => (
           <li key={index}>
             {feature.summary} (By{' '}
@@ -43,7 +46,7 @@ const ChangelogList: React.FC<ChangelogProps> = ({ title, features, className })
 
 const ChangelogCard = ({ changelog }: Props) => {
   return (
-    <div className="group flex sm:space-x-8">
+    <div className=" group flex sm:space-x-8">
       <span className="relative -top-2 hidden whitespace-nowrap sm:block">
         {dayjs(changelog.releaseDate).format('MMM D, YYYY')}
       </span>
@@ -68,7 +71,7 @@ const ChangelogCard = ({ changelog }: Props) => {
             height={500}
           />
           <div className="mt-8">
-            <h2 className="mb-4 text-xl font-semibold"> Contributors </h2>
+            <h2 className="mb-4 text-[1.75rem] font-semibold"> Contributors </h2>
             <ul className="flex items-end space-x-2">
               {changelog.contributors.map((contributor) => (
                 <li key={contributor} className="inline-block h-8 w-8">
@@ -79,7 +82,7 @@ const ChangelogCard = ({ changelog }: Props) => {
           </div>
 
           {changelog.sections?.map((section, index) => (
-            <ChangelogList key={index} title={section.title} features={section.items} />
+            <ChangelogList key={index} title={section.title} features={section.items} className="features-section " />
           ))}
 
           {changelog.improvements?.length > 0 && (

@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Dialog,
   DialogContent,
@@ -9,8 +11,7 @@ import {
 import { useSignInMutation } from '@/lib/react-query/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Icons } from '../common/Icon';
@@ -24,6 +25,7 @@ const signInFormSchema = z.object({
 });
 
 export type SignInFormType = z.infer<typeof signInFormSchema>;
+
 interface SigninDialogProps {
   children: React.ReactNode;
   variant: 'signin' | 'signup';
@@ -33,8 +35,8 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
   const { mutate, isPending } = useSignInMutation();
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
-
-  const router = useRouter();
+  const [countdown, setCountdown] = useState(120); 
+  const timerRef = useRef<NodeJS.Timeout | null>(null); 
 
   const form = useForm<SignInFormType>({
     resolver: zodResolver(signInFormSchema),
@@ -44,15 +46,35 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
     mode: 'onSubmit',
   });
 
-  let timer: NodeJS.Timeout;
+  
+  const email = form.getValues('email');
+
+  const startCountdown = () => {
+    setIsResendDisabled(true); 
+    setCountdown(120);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current as NodeJS.Timeout);
+          setIsResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   useEffect(() => {
     if (isEmailSent) {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        setIsResendDisabled(false);
-      }, 120000);
+      startCountdown(); 
     }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [isEmailSent]);
 
   async function onSubmit(values: SignInFormType) {
@@ -64,12 +86,26 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
   }
 
   const handleClose = (open: boolean) => {
-    if (!open) setIsEmailSent(false);
+    if (!open) {
+      setIsEmailSent(false);
+      form.reset();
+      setCountdown(120);
+      setIsResendDisabled(true);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
   };
 
   const handleResend = () => {
     if (!isResendDisabled) {
-      router.push('/');
+      mutate({ email }, {
+        onSuccess: () => {
+          setIsEmailSent(true); 
+          startCountdown(); 
+        },
+      });
     }
   };
 
@@ -78,8 +114,6 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
     variant === 'signin'
       ? 'Please provide the email so we can send the magic link'
       : 'Create an account to get started';
-
-  const email = form.getValues('email');
 
   return (
     <Dialog onOpenChange={handleClose}>
@@ -138,7 +172,11 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
               data-testid="resend-btn"
               onClick={handleResend}
             >
-              {isResendDisabled ? 'Please wait 2 minutes...' : 'Click to resend'}
+             {isResendDisabled
+  ? `Resend in ${Math.floor(countdown / 60)}:${(countdown % 60)
+      .toString()
+      .padStart(2, '0')}`
+  : 'Click to resend'}
             </Button>
           </div>
         )}

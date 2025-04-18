@@ -21,78 +21,51 @@ const ReleasePage = () => {
   return (
     <Container asChild>
       <section className="text-secondary">
-        <main className="max-w-6xl" id="about">
-          <header className="dark flex prose text-secondary dark:prose-invert prose-h2:text-[1.75rem]">
-            <div className="space-y-4">
-              <h2 className="text-3xl font-semibold">About</h2>
+        <main className="max-w-full" id="about">
+          <header className="dark prose max-w-full marker:text-white text-secondary dark:prose-invert prose-h2:text-[1.75rem] prose-p:tracking-wide">
+            <div className="space-y-0">
+              <h2 className="text-[2.25rem] font-semibold">About</h2>
               <p>
-                RSVP is is your go-to platform for creating, managing, and attending events with
+                RSVP is  your go-to platform for creating, managing, and attending events with
                 ease. Designed for both individuals and organizations, RSVP simplifies the entire
                 event planning process, ensuring your events are nothing short of spectacular
                 events! RSVP helps you to:
               </p>
-              <div className="space-y-6">
-                <ol className="list-none space-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
-                      1
+              <div className="space-y-0">
+                <ul className="ml-5 list-disc space-y-1">
+                  <li>
+                    <span className="font-semibold">Create Memorable Events:</span>{' '}
+                    <span className="text-secondary">
+                    Design captivating event pages using customizable templates and detailed information fields.
                     </span>
-                    <div>
-                      <span className="font-semibold">Create Events:</span>{' '}
-                      <span className="text-secondary">
-                        Craft engaging event pages with customizable templates and comprehensive
-                        details.
-                      </span>
-                    </div>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
-                      2
+                  <li>
+                    <span className="font-semibold">Manage Attendees Seamlessly:</span>{' '}
+                    <span className="text-secondary">
+                    Keep track of RSVPs, send real-time updates, and organize your guest list with ease.
                     </span>
-                    <div>
-                      <span className="font-semibold">Manage Attendees:</span>{' '}
-                      <span className="text-secondary">
-                        Effortlessly track RSVPs, send updates, and manage your guest list.
-                      </span>
-                    </div>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
-                      3
+                  <li>
+                    <span className="font-semibold">Promote Like a Pro:</span>{' '}
+                    <span className="text-secondary">
+                    Leverage powerful marketing tools to expand your reach and boost attendance.
                     </span>
-                    <div>
-                      <span className="font-semibold">Promote Events:</span>{' '}
-                      <span className="text-secondary">
-                        Utilize our advanced marketing tools to reach a wider audience and maximize
-                        attendance.
-                      </span>
-                    </div>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
-                      4
+                  <li>
+                    <span className="font-semibold">Ticketing & Registration:</span>{' '}
+                    <span className="text-secondary">
+                      Streamline the ticketing process with secure online registration and payment
+                      options.
                     </span>
-                    <div>
-                      <span className="font-semibold">Ticketing & Registration:</span>{' '}
-                      <span className="text-secondary">
-                        Streamline the ticketing process with secure online registration and payment
-                        options.
-                      </span>
-                    </div>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
-                      5
+                  <li>
+                    <span className="font-semibold">Engage Attendees:</span>{' '}
+                    <span className="text-secondary">
+                      Foster community with interactive features like chat rooms, live Q&A, and
+                      surveys.
                     </span>
-                    <div>
-                      <span className="font-semibold">Engage Attendees:</span>{' '}
-                      <span className="text-secondary">
-                        Foster community with interactive features like chat rooms, live Q&A, and
-                        surveys.
-                      </span>
-                    </div>
                   </li>
-                </ol>
+                </ul>
               </div>
             </div>
           </header>
@@ -100,9 +73,9 @@ const ReleasePage = () => {
 
         <main className="max-w-6xl" id="changelog">
           <header className="flex flex-col items-start justify-between gap-8 pb-20 pt-20 md:flex-row md:items-end">
-            <div className="max-w-xl space-y-4">
-              <h2 className="text-4xl font-semibold">Changelog</h2>
-              <p className="text-lg text-secondary md:text-xl">
+            <div className="max-w-fill 00 space-y-4">
+              <h2 className="text-[1.75rem]  font-semibold">Changelog</h2>
+              <p className="text-[1rem]  text-secondary md:text-[1rem]">
                 A latest-to-greatest list of our releases,packed with new features, improvements,
                 and bug fixes.
               </p>
