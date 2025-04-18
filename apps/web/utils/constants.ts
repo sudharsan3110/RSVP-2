@@ -86,6 +86,7 @@ export const eventCategoryOptions: FormSelectOption[] = [
 
 export const eventCategoryColors = {
   "all": 'bg-[#F2F2F2]',
+  "entertainment": 'bg-[#F2F2F2]',
   'meetup': 'bg-[#EDE9FF]',
   'hangout': 'bg-[#FFF5D7]',
   'birthday': 'bg-[#FFECEC]',
