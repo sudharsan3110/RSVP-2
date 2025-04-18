@@ -1,5 +1,4 @@
-import { eventAPI } from '@/lib/axios/event-API';
-import { VenueType } from './event';
+import { ICohost, IEvent, VenueType } from './event';
 
 export class Event {
   id: string;
@@ -27,17 +26,9 @@ export class Event {
     username: string;
     profile_icon: string;
   };
-  Cohost?: {
-    role: string;
-    user: {
-      id: string;
-      profile_icon: string;
-      full_name: string;
-      username: string;
-    };
-  }[];
+  Cohost?: ICohost[];
 
-  constructor(data: Partial<Event>) {
+  constructor(data: IEvent) {
     this.id = data.id ?? '';
     this.creatorId = data.creatorId ?? '';
     this.name = data.name ?? '';
@@ -54,7 +45,6 @@ export class Event {
     this.hostPermissionRequired = data.hostPermissionRequired ?? false;
     this.capacity = data.capacity;
     this.isActive = data.isActive ?? true;
-    this.isCancelled = data.isCancelled;
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
     if (data.creator) this.creator = data.creator;

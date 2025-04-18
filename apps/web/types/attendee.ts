@@ -9,6 +9,7 @@ export enum AttendeeStatus {
   Invited = 'Invited',
 }
 
+
 export class Attendee {
   id: string;
   userId: string;

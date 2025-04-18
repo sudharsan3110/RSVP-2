@@ -91,8 +91,7 @@ function FormImageUpload<
                     <X size={18} />
                   </Button>
                 </div>
-              )}
-
+              }
               {!value.file && (
                 <div className="flex flex-col items-center gap-4">
                   <input

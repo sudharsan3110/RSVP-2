@@ -1,7 +1,7 @@
 import { IUser } from '@/types/user';
 import { IEvent, ICohost } from '@/types/event';
 import { Attendee, AttendeeStatus } from '@/types/attendee';
-
+import { Event } from '@/types/Events';
 export const PHONE_NUMBER_LABEL = /phone number/i;
 export const SAVE_BUTTON_LABEL = /save/i;
 export const RESET_BUTTON_LABEL = /reset/i;
@@ -45,6 +45,7 @@ export const TEST_COHOSTS: ICohost[] = [
   {
     role: 'Manager',
     user: {
+      id: '1',
       profile_icon: 'icon1',
       full_name: 'John Doe',
       username: 'johndoe',
@@ -53,6 +54,7 @@ export const TEST_COHOSTS: ICohost[] = [
   {
     role: 'Manager',
     user: {
+      id: '2',
       profile_icon: 'icon2',
       full_name: 'Jane Smith',
       username: 'janesmith',
@@ -60,7 +62,7 @@ export const TEST_COHOSTS: ICohost[] = [
   },
 ];
 
-export const TEST_EVENT: IEvent = {
+export const  TEST_EVENT: IEvent = {
   id: 'event-123',
   creatorId: '1',
   name: 'Tech Conference 2024',
@@ -79,6 +81,7 @@ export const TEST_EVENT: IEvent = {
   createdAt: new Date(),
   updatedAt: new Date(),
   creator: {
+    id: '1',
     full_name: 'Event Creator',
     username: 'eventcreator',
     profile_icon: 'creator-icon',
@@ -123,7 +126,7 @@ export const TEST_ATTENDEES_RECENT_REG = [
     allowedStatus: true,
     deleted: false,
     updatedAt: new Date(),
-    event: TEST_EVENT,
+    event: new Event(TEST_EVENT),
     isActive: true,
   }),
   new Attendee({
@@ -140,7 +143,7 @@ export const TEST_ATTENDEES_RECENT_REG = [
     allowedStatus: true,
     deleted: false,
     updatedAt: new Date(),
-    event: TEST_EVENT,
+    event: new Event(TEST_EVENT),
     isActive: true,
   }),
 ];

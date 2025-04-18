@@ -24,6 +24,7 @@ export interface IEvent {
 }
 
 export interface Creator {
+  id: string;
   full_name: string;
   username: string;
   profile_icon: string;
@@ -32,6 +33,7 @@ export interface Creator {
 export interface ICohost {
   role: string;
   user: {
+    id: string;
     profile_icon: string;
     full_name: string;
     username: string;
