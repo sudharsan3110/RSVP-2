@@ -16,6 +16,11 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   console.log(pathname);
 
+  if (pathname === '/' && token) {
+    const url = new URL('/events', request.url);
+    return NextResponse.redirect(url);
+  }
+
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (isProtectedRoute && !token) {
