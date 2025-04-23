@@ -1,14 +1,14 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AttendeeStatus } from '@/types/attendee';
-import { IEvent } from '@/types/event';
+import { Event, VenueType } from '@/types/events';
 import { userAvatarOptions } from '@/utils/constants';
-export const venueDisplay = (event: IEvent | null) => {
+export const venueDisplay = (event: Event | null) => {
   switch (event?.venueType) {
-    case 'physical':
+    case VenueType.Physical:
       return trimText(event?.venueAddress || '');
-    case 'virtual':
+    case VenueType.Virtual:
       return trimText(event?.venueUrl || '');
-    case 'later':
+    case VenueType.Later:
       return 'You will be notified once host updates the details';
     default:
       return '';

@@ -44,7 +44,7 @@ export const getEventBySlugController = catchAsync(
     if (!event) return res.status(404).json({ message: 'Event not found' });
     const totalAttendees = await AttendeeRepository.countAttendees(event.id);
 
-    return res.status(200).json({ event, totalAttendees });
+    return res.status(200).json({ message: 'Event retrieved successfully', data: { event, totalAttendees } });
   }
 );
 
@@ -100,9 +100,9 @@ export const getPopularEventController = catchAsync(async (req, res) => {
   const { limit } = eventLimitSchema.parse(req.query);
 
   logger.info('Getting popular events in getPopularEventController ...')
-  const PopularEvents = await EventRepository.findAllPopularEvents(limit);
-  if (PopularEvents.length != 0) return res.status(200).json({ data: PopularEvents });
-  else return res.status(200).json({ data: [] });
+  const popularEvents = await EventRepository.findAllPopularEvents(limit);
+
+  return res.status(200).json({ data: popularEvents, message: 'Popular events retrieved successfully' });
 });
 
 /**

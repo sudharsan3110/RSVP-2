@@ -1,9 +1,8 @@
+import SigninDialog from '@/components/auth/SigninDialog.tsx';
 import Container from '@/components/common/Container';
 import EventCard from '@/components/common/EventCard';
 import { usePopularEvents } from '@/lib/react-query/event';
-import { IEvent } from '@/types/event';
 import Link from 'next/link';
-import SigninDialog from '@/components/auth/SigninDialog.tsx';
 
 const PopularSection = () => {
   const { data: events, isLoading } = usePopularEvents(3);
@@ -21,8 +20,8 @@ const PopularSection = () => {
         </Link>
       </header>
       <div className="grid grid-cols-4 gap-10 sm:grid-cols-8 xl:grid-cols-12">
-        {events?.map((event: IEvent) => (
-          <EventCard key={event.id} className="col-span-4" event={event} />
+        {events?.map((event) => (
+          <EventCard key={event.id} className="col-span-4" event={event} type="guest" />
         ))}
       </div>
       <SigninDialog variant={'signup'}>

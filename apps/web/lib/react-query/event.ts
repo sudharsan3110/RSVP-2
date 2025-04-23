@@ -1,5 +1,5 @@
 import { Attendee } from '@/types/attendee';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
@@ -49,6 +49,13 @@ export const useGetMyEvents = ( filters: EventParams ) => {
   return useQuery({
     queryKey: [EVENTS_QUERY_KEY, 'my-events', filters],
     queryFn: () => eventAPI.getMyEvents(filters),
+  });
+};
+
+export const useGetUpcomingEvents = ( filters: EventParams ) => {
+  return useQuery({
+    queryKey: [EVENTS_QUERY_KEY, 'upcoming-events', filters],
+    queryFn: () => eventAPI.getUpcomingEvents(filters),
   });
 };
 

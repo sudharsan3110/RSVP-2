@@ -56,7 +56,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
   const filteredAttendees =
     debouncedSearchQuery !== ''
       ? usersData?.filter((attendee: Attendee) =>
-          attendee.user.primary_email.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+          attendee.user?.primaryEmail.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
         )
       : usersData;
 
@@ -103,16 +103,16 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                         <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={`https://avatar.vercel.sh/${attendee.id}.png`}
-                            alt={attendee.user.full_name}
+                            alt={attendee.user?.fullName}
                           />
                           <AvatarFallback>
-                            {attendee.user?.full_name?.charAt(0) || 'R'}
+                            {attendee.user?.initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="ml-3 text-left">
-                          <p className="text-sm font-medium">{attendee.user.full_name}</p>
+                          <p className="text-sm font-medium">{attendee.user?.fullName}</p>
                           <p className="text-xs text-muted-foreground">
-                            {attendee.user.primary_email}
+                            {attendee.user?.primaryEmail}
                           </p>
                         </div>
                       </div>

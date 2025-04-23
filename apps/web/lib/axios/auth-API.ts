@@ -1,3 +1,4 @@
+import { User } from '@/types/user';
 import api from './instance';
 
 export type SigninPayload = {
@@ -17,7 +18,11 @@ export const authAPI = {
 
   verifySignin: (payload: VerifySigninPayload) => api.post('/auth/verify-signin', payload),
 
-  currentUser: () => api.get('/auth/me'),
+  currentUser: async () => {
+    const response = await api.get('/auth/me');
+    console.log(response.data, 'response.data');
+    return new User(response.data.data);
+  },
 
   signout: (payload: SignoutPayload) => api.post('/auth/logout', payload),
 };

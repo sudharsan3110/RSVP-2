@@ -14,9 +14,8 @@ import {
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import useDebounce from '@/hooks/useDebounce';
-import { useGetEvent, useGetMyEvents } from '@/lib/react-query/event.ts';
+import { useGetMyEvents } from '@/lib/react-query/event.ts';
 import { cn } from '@/lib/utils.ts';
-import { IEvent } from '@/types/event.ts';
 import { locationName, NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
 import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Loader2 } from 'lucide-react';
@@ -188,7 +187,7 @@ const Events = () => {
           <section className="mt-1"></section>
         </section>
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="events-list">
-          {data?.events?.map((eventData: IEvent) => (
+          {data?.events?.map((eventData) => (
             <EventCard event={eventData} key={eventData.id} type="manage" />
           ))}
         </div>

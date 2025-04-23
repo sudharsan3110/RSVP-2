@@ -2,16 +2,16 @@
 
 import SigninDialog from '@/components/auth/SigninDialog';
 import AutheticatedHeader from '@/components/common/header/AutheticatedHeader.tsx';
+import { useCurrentUser } from '@/lib/react-query/auth';
 import useScroll from '@/hooks/useScroll';
 import Link from 'next/link';
 import { Button } from '../../ui/button';
 import Container from '../Container';
 import Logo from '../Logo';
-import { useLoggedInUser } from '@/hooks/useLoggedInUser';
 
 const Guest = () => {
   const isScrolled = useScroll();
-  const { loginedUser } = useLoggedInUser();
+  const { data: loginedUser } = useCurrentUser();
 
   if (loginedUser) return <AutheticatedHeader />;
 

@@ -1,4 +1,4 @@
-import { VenueType } from '@/types/event';
+import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
 import { z } from 'zod';
 
@@ -23,7 +23,7 @@ export const createEventFormSchema = z
       required_error: 'To time is required',
     }),
     description: z.string(),
-    venueType: z.enum(['physical', 'virtual', 'later'] as const),
+    venueType: z.nativeEnum(VenueType),
     location: z.string().optional(),
     hostPermissionRequired: z.boolean(),
     capacity: z.coerce

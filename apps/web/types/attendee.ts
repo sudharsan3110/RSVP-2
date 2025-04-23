@@ -1,5 +1,5 @@
-import { Event } from './Events';
-import { IUser } from './user';
+import { Event } from './events';
+import { User } from './user';
 
 export enum AttendeeStatus {
   Going = 'Going',
@@ -20,7 +20,7 @@ export class Attendee {
   feedback: string | null;
   qrToken: string;
   status: AttendeeStatus;
-  user: IUser;
+  user: User | null;
   allowedStatus: boolean;
   deleted: boolean;
   updatedAt: Date;
@@ -34,7 +34,7 @@ export class Attendee {
     this.hasAttended = data.hasAttended;
     this.checkInTime = data.checkInTime;
     this.feedback = data.feedback;
-    this.user = data.user;
+    this.user = data.user ? new User(data.user) : null;
     this.qrToken = data.qrToken;
     this.status = data.status;
     this.allowedStatus = data.allowedStatus;

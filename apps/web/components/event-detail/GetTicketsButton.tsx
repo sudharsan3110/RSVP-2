@@ -43,7 +43,7 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
     );
   }
 
-  if (userData?.data?.data?.id === creatorId) {
+  if (userData?.id === creatorId) {
     return (
       <Link href={`/events/${eventId}/manage`} className="w-full">
         <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2 text-center">
@@ -72,7 +72,7 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
     );
   }
 
-  if (!userData?.data?.data) {
+  if (!userData?.id) {
     return (
       <SigninDialog variant="signin">
         <Button className="mt-4 w-full rounded-full px-4 py-2">Get Tickets</Button>

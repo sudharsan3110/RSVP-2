@@ -20,7 +20,7 @@ const TicketPage = () => {
 
   const qrToken = attendeeData?.qrToken || '';
   const confirmationCode = `${qrToken?.slice(0, 3)} - ${qrToken?.slice(3, 6)}`;
-  const attendeeName = userData?.data?.full_name || 'Guest';
+  const attendeeName = userData?.fullName || 'Guest';
   const eventName = eventData?.event?.name || 'Event';
   const eventDescription = eventData?.event?.description || '';
   const eventDate = eventData?.event?.startTime

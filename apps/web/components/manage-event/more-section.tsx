@@ -10,7 +10,7 @@ import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
 import FormProvider from '../ui/form-provider';
 import { Separator } from '../ui/separator';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 
 const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
   const { id: eventId, isCancelled } = event;

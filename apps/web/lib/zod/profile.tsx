@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const secondaryEmailFormSchema = z
   .object({
     email: z.string().email().optional(),
-    secondary_email: z
+    secondaryEmail: z
       .string()
       .email()
       .nullable()
@@ -12,12 +12,12 @@ export const secondaryEmailFormSchema = z
   })
   .refine(
     (data) => {
-      if (!data.secondary_email || !data.email) return true;
-      return data.secondary_email.toLowerCase() !== data.email.toLowerCase();
+      if (!data.secondaryEmail || !data.email) return true;
+      return data.secondaryEmail.toLowerCase() !== data.email.toLowerCase();
     },
     {
       message: "Secondary email can't be the same as primary email",
-      path: ['secondary_email'],
+      path: ['secondaryEmail'],
     }
   );
 
@@ -33,7 +33,7 @@ export const phoneNumberFormSchema = z.object({
 export type PhoneNumberFormType = z.infer<typeof phoneNumberFormSchema>;
 
 export const profileFormSchema = z.object({
-  full_name: z
+  fullName: z
     .string()
     .min(1)
     .refine((val) => !/^[\d\s]+$/.test(val.trim()), 'Cannot contain only numbers'),
@@ -41,11 +41,11 @@ export const profileFormSchema = z.object({
     .string()
     .refine((val) => !val || !/^[\d\s]+$/.test(val.trim()), 'Cannot contain only numbers'),
   bio: z.string().default(''),
-  profile_icon: z.string().optional(),
+  profileIcon: z.coerce.number().optional(),
   twitter: z.string().optional(),
   instagram: z.string().optional(),
   website: z.string().optional(),
-  secondary_email: z.string().email().optional(),
+  secondaryEmail: z.string().email().optional(),
 });
 
 export type ProfileFormType = z.infer<typeof profileFormSchema>;

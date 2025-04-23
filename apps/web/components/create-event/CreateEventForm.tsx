@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
 import { useState } from 'react';
-
+import { VenueType } from '@/types/events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -17,7 +17,7 @@ const defaultValues: CreateEventFormType = {
   name: '',
   category: '',
   description: '',
-  venueType: 'physical',
+  venueType: VenueType.Physical,
   location: '',
   hostPermissionRequired: false,
   fromTime: '17:00',
@@ -33,7 +33,7 @@ const defaultValues: CreateEventFormType = {
 };
 
 const CreateEventForm = () => {
-  const { mutate, isPending } = useCreateEvent();
+  const { mutate } = useCreateEvent();
   const [isLoading, setIsLoading] = useState(false);
   async function onSubmit(data: CreateEventFormType) {
     const {

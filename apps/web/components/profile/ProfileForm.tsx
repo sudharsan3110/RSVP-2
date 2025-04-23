@@ -10,12 +10,12 @@ import FormTextArea from '../common/form/FormTextArea';
 import { useMemo } from 'react';
 import { userAvatarOptions } from '@/utils/constants';
 import { useProfileUpdate } from '@/lib/react-query/user';
-import { IUser } from '@/types/user';
+import { User } from '@/types/user';
 import { profileFormSchema, ProfileFormType } from '@/lib/zod/profile';
 import { Loader2 } from 'lucide-react';
 
 type Props = {
-  user: IUser;
+      user: User;
 };
 
 const ProfileForm = ({ user }: Props) => {
@@ -23,10 +23,10 @@ const ProfileForm = ({ user }: Props) => {
   const form = useForm<ProfileFormType>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      full_name: user.full_name ?? '',
+      fullName: user.fullName ?? '',
       location: user.location ?? '',
       bio: user?.bio ?? '',
-      profile_icon: user?.profile_icon ?? '',
+      profileIcon: user?.profileIcon  ?? 1,
       twitter: user?.twitter ?? '',
       website: user?.website ?? '',
       instagram: user?.instagram ?? '',
@@ -34,7 +34,7 @@ const ProfileForm = ({ user }: Props) => {
   });
 
   const bio = form.watch('bio');
-  const profileIcon = form.watch('profile_icon');
+  const profileIcon = form.watch('profileIcon');
 
   const resetForm = () => {
     form.reset();
@@ -49,7 +49,7 @@ const ProfileForm = ({ user }: Props) => {
   };
 
   const profilePictureUrl = useMemo(() => {
-    const profileUrl = userAvatarOptions.find((option) => option.id === profileIcon);
+    const profileUrl = userAvatarOptions.find((option) => option.id === profileIcon?.toString());
     return profileUrl?.src ?? userAvatarOptions[0]?.src!;
   }, [profileIcon]);
 
@@ -72,7 +72,7 @@ const ProfileForm = ({ user }: Props) => {
           />
           <ProfilePictureEditPopover control={form.control} />
         </div>
-        <FormInput control={form.control} name="full_name" label="Full name" type="text" />
+        <FormInput control={form.control} name="fullName" label="Full name" type="text" />
         <FormInput control={form.control} name="location" label="Location" type="text" />
         <div className="space-y-1.5">
           <FormTextArea control={form.control} name="bio" label="Bio" />

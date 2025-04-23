@@ -1,66 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import eventImageSrc from '@/public/images/demo-event-image.png';
-import { IEvent } from '@/types/event';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Icons } from '../common/Icon';
+import { Event } from '@/types/events';
+import dayjs from 'dayjs';
+import { getDateGroups } from '@/lib/utils';
 
-interface Event {
-  title: string;
-  category: string;
-  time: string;
-  location: string;
-  attendees: string;
-  isFree: boolean;
-  slug: string;
-}
-
-interface DateGroup {
-  date: string;
-  events: Event[];
-}
-
-const transformEventsToTimelineData = (events: IEvent[]) => {
-  const groupedEvents = events.reduce((acc: { [key: string]: Event[] }, event) => {
-    const date = new Date(event.startTime).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-
-    const formattedEvent: Event = {
-      title: event.name,
-      category: `${event.category}`,
-      slug: event.slug,
-      time: `${new Date(event.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}, 
-        ${new Date(event.startTime).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        })}`,
-      location:
-        event.venueType === 'physical'
-          ? event.venueAddress || 'Location TBD'
-          : event.venueUrl || 'Virtual Event',
-      attendees: `${event.capacity} going`,
-      isFree: !event.hostPermissionRequired,
-    };
-
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(formattedEvent);
-    return acc;
-  }, {});
-
-  const timelineData = Object.keys(groupedEvents).map((date) => ({
-    date,
-    events: groupedEvents[date],
-  }));
-  return timelineData;
-};
-
-const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
+const Timeline = ({ events }: { events?: Event[] }) => {
   if (!events || events.length === 0) {
     return (
       <div className="py-8 text-center">
@@ -72,8 +19,9 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
       </div>
     );
   }
+  
 
-  const timelineData = events ? transformEventsToTimelineData(events) : [];
+  const timelineData = getDateGroups(events);
 
   return (
     <div className="bg- mx-auto max-w-[70rem] text-white md:w-[90%]">
@@ -88,14 +36,14 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
 
             {/* Event Date - Laptop View*/}
             <div className="absolute left-[2rem] top-0 hidden pr-4 text-right text-sm font-medium md:left-[-6rem] md:block">
-              {dateGroup.date}
+              {dayjs(dateGroup.date).format('DD MMM YYYY')}
             </div>
 
             {/* Container for each day */}
             <div className="pl-4 md:pl-6">
               {/* Event Date - Mobile View */}
               <div className="block pb-4 text-left text-sm font-medium md:hidden">
-                {dateGroup.date}
+                  {dayjs(dateGroup.date).format('DD MMM YYYY')}
               </div>
 
               {dateGroup?.events?.map((event, eventIndex) => (
@@ -109,7 +57,7 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
                       <div className="flex flex-col gap-2">
                         <CardHeader className="flex flex-col items-start justify-between space-y-1.5 border-b-0 py-0 pl-0">
                           <CardTitle className="text-xl font-bold leading-[25.2px] tracking-tight">
-                            {event.title}
+                            {event.name}
                           </CardTitle>
                           <p className="text-base font-semibold leading-[19.6px]">
                             {event.category}
@@ -117,8 +65,8 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
                         </CardHeader>
 
                         <CardContent className="flex flex-col gap-1 p-0 pt-2">
-                          <p className="text-base font-bold leading-[19.6px]">{event.time}</p>
-                          <p className="text-sm font-medium leading-[19.6px]">{event.location}</p>
+                          <p className="text-base font-bold leading-[19.6px]">{dayjs(event.startTime).format('HH:mm A, DD MMM YYYY')}</p>
+                          <p className="text-sm font-medium leading-[19.6px]">{event.venueAddress}</p>
                         </CardContent>
                       </div>
                       <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
@@ -126,7 +74,7 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
                           {/* Tick */}
                           <Icons.tick />
                           <span className="text-[14px] font-semibold leading-[16.8px]">
-                            {event.attendees}
+                            {event.totalAttendees}
                           </span>
                         </div>
 
@@ -142,7 +90,7 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
                       <div className="w-full overflow-hidden rounded-md">
                         <Image
                           src={eventImageSrc}
-                          alt={event.title}
+                          alt={event.name}
                           fill
                           style={{ objectFit: 'cover' }}
                           className="rounded-md"
@@ -160,4 +108,4 @@ const ComicConTimeline = ({ events }: { events?: IEvent[] }) => {
   );
 };
 
-export default ComicConTimeline;
+export default Timeline;

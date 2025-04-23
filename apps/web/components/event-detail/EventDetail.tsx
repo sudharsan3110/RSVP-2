@@ -1,21 +1,25 @@
-import Image from 'next/image';
-import { MapPinIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { Event } from '@/types/events';
+import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
+import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
-import { IEvent } from '@/types/event';
 import dayjs from 'dayjs';
-import GetTicketsButton from './GetTicketsButton';
-import AvatarGroup from './AvatarGroup';
 import { ClockIcon, LinkIcon } from 'lucide-react';
+import Image from 'next/image';
 import { Badge } from '../ui/badge';
-import { venueDisplay, getProfilePictureUrl } from '@/utils/event';
+import AvatarGroup from './AvatarGroup';
+import GetTicketsButton from './GetTicketsButton';
 
-const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees: number } }) => {
+const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees: number } }) => {
   const { event, totalAttendees } = eventData;
   const formattedStartDate = dayjs(event.startTime).format('dddd, MMMM D');
   const formattedStartTime = dayjs(event.startTime).format('h:mm A');
   const formattedEndTime = dayjs(event.endTime).format('h:mm A');
   const additionalCount = totalAttendees > 4 ? totalAttendees - 4 : 0;
   const userAvatarLimit = totalAttendees > 4 ? 4 : totalAttendees;
+
+
+  const cohosts = event.cohosts?.length ?? 0;
+  const capacity = event.capacity ?? 0;
 
   return (
     <main>
@@ -77,19 +81,19 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
             </article>
           </section>
           <section className="mt-6 p-3 pl-0">
-            <p className="font-semibold">Hosted {event?.Cohost.length > 1 && '& Cohosted'} By</p>
-            {event?.Cohost.length > 0 &&
-              event?.Cohost?.map((cohost, index) => (
+            <p className="font-semibold">Hosted {cohosts > 1 && '& Cohosted'} By</p>
+            {cohosts > 0 &&
+              event?.cohosts?.map((cohost, index) => (
                 <div className="mt-3 flex items-center" key={index}>
                   <Image
-                    src={getProfilePictureUrl(cohost.user.profile_icon)}
+                    src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
                     alt="Host Avatar"
                     width={48}
                     height={48}
                     className="rounded-full border-primary border-2 object-cover"
                   />
                   <p className="ml-3 text-sm font-medium capitalize text-secondary">
-                    {cohost.user.full_name}
+                    {cohost.user?.fullName}
                   </p>
                 </div>
               ))}
@@ -110,7 +114,7 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
           <section className="w-full rounded-lg bg-dark-900 p-6 shadow-lg md:w-[481px]">
             <h2 className="text-xl font-bold">Registration</h2>
             <p className="mt-2 font-semibold">
-              {event?.capacity - totalAttendees} Seats are Remaining.
+              {capacity - totalAttendees} Seats are Remaining.
             </p>
             {totalAttendees > 0 && (
               <div className="flex items-center pb-2 pt-4">

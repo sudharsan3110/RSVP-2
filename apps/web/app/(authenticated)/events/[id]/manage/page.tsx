@@ -19,7 +19,7 @@ import { notFound, useParams } from 'next/navigation';
 const ManageEventPage = () => {
   const { id } = useParams();
   if (typeof id !== 'string') notFound();
-  const { data: userData } = useCurrentUser();
+    const { data: userData } = useCurrentUser();
   const queryParams = useQueryParams({ defaultValues: { tab: 'overview' } });
 
   const tabValue = queryParams.get('tab', 'overview') as string | null;
@@ -37,7 +37,7 @@ const ManageEventPage = () => {
   if (!isSuccess) return <div>Something went wrong</div>;
   const { event } = data;
 
-  const isCoHost = event.checkCohost(userData?.data?.data?.username);
+  const isCoHost = event.checkCohost(userData?.userName || '');
 
   if (!isCoHost) return notFound();
 

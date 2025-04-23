@@ -1,7 +1,7 @@
 import { IUser } from '@/types/user';
 import { IEvent, ICohost } from '@/types/event';
 import { Attendee, AttendeeStatus } from '@/types/attendee';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 export const PHONE_NUMBER_LABEL = /phone number/i;
 export const SAVE_BUTTON_LABEL = /save/i;
 export const RESET_BUTTON_LABEL = /reset/i;

@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import { useParams } from 'next/navigation';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
-
+import { VenueType } from '@/types/events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -75,7 +75,7 @@ const EditEventForm = () => {
     name: event?.name ?? '',
     category: event?.category ?? '',
     description: event?.description ?? '',
-    venueType: event?.venueType ?? 'physical',
+    venueType: event?.venueType ?? VenueType.Physical,
     location: event?.venueAddress ?? '',
     hostPermissionRequired: event?.hostPermissionRequired ?? false,
     fromTime: dayjs(event?.startTime).format('HH:mm'),

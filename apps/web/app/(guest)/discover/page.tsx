@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/hooks/useDebounce';
 import { useGetDiscoverEvents, useGetEvent } from '@/lib/react-query/event';
 import { cn } from '@/lib/utils';
+import { Event } from '@/types/events';
 import { locationName } from '@/utils/constants';
 import {
   CheckIcon,
@@ -56,6 +57,7 @@ const DiscoverEvents = () => {
     { history: 'push' }
   );
   const debouncedSearchQuery = useDebounce(filters.search, 600);
+
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useGetDiscoverEvents({
     page: filters.page,
     search: debouncedSearchQuery,
@@ -212,8 +214,8 @@ const DiscoverEvents = () => {
                 ))
               ) : data?.pages.flatMap((page) => page.events).length && data?.pages.flatMap((page) => page.events).length > 0 ? (
                 <>
-                  {data?.pages.flatMap((page) => page.events).map((event: any) => (
-                    <EventCard key={event.id} event={event} />
+                  {data?.pages.flatMap((page) => page.events).map((event: Event) => (
+                    <EventCard key={event.id} event={event} type="guest" />
                   ))}
                   {isFetchingNextPage && (
                     Array.from({ length: 10 }).map((_, index) => (

@@ -1,4 +1,10 @@
-import { ICohost, IEvent, VenueType } from './event';
+import { Cohost } from "./cohost";
+
+export enum VenueType {
+  Physical = 'physical',
+  Virtual = 'virtual',
+  Later = 'later',
+}
 
 export class Event {
   id: string;
@@ -20,15 +26,16 @@ export class Event {
   isCancelled?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  totalAttendees?: number;
   creator?: {
     id: string;
     full_name: string;
     username: string;
     profile_icon: string;
   };
-  Cohost?: ICohost[];
+  cohosts?: Cohost[];
 
-  constructor(data: IEvent) {
+  constructor(data: Partial<Event>) {
     this.id = data.id ?? '';
     this.creatorId = data.creatorId ?? '';
     this.name = data.name ?? '';
@@ -47,12 +54,13 @@ export class Event {
     this.isActive = data.isActive ?? true;
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
+    this.totalAttendees = data.totalAttendees;
     if (data.creator) this.creator = data.creator;
-    if (data.Cohost) this.Cohost = data.Cohost;
+    if (data.cohosts) this.cohosts = data.cohosts;
   }
 
   async checkCohost(cohostId: string) {
-    return this.Cohost?.find((cohost) => cohost.user.id === cohostId);
+    return this.cohosts?.find((cohost) => cohost.user?.id === cohostId);
   }
 
   async checkCreator(creatorId: string) {

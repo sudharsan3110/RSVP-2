@@ -11,15 +11,12 @@ const AttendeeDetailsContent = ({ attendee }: Props) => {
       <div className="flex gap-4">
         <div className="space-y-2">
           <h3 className="text-sm text-secondary">ATTENDEE NAME</h3>
-          <p className="text-xl">{attendee?.user.full_name}</p>
+          <p className="text-xl">{attendee?.user?.fullName}</p>
         </div>
         <Avatar className="h-[60px] w-[60px]">
-          <AvatarImage src={attendee?.user.profile_icon} alt={attendee?.user.full_name} />
+          <AvatarImage src={attendee?.user?.profileIconUrl} alt={attendee?.user?.fullName} />
           <AvatarFallback>
-            {attendee?.user.full_name
-              ?.split(' ')
-              .map((n) => n[0])
-              .join('')}
+            {attendee?.user?.initials}
           </AvatarFallback>
         </Avatar>
       </div>

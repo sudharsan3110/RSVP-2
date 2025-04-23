@@ -9,16 +9,18 @@ import SecondaryEmailForm from '@/components/profile/SecondaryEmailForm';
 import PhoneNumberForm from '@/components/profile/ContactForm';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useMemo } from 'react';
-import { IUser } from '@/types/user';
+import { User } from '@/types/user';
 import ProfileFormSkeleton from '@/components/profile/ProfileFormLoading';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 
 const ProfilePage = () => {
   const { data, isSuccess, isLoading } = useCurrentUser();
 
+  console.log(data);
+
   const user = useMemo(() => {
     if (!isSuccess) return null;
-    return data.data.data as IUser;
+    return data;
   }, [isSuccess, data]);
 
   return (
@@ -28,7 +30,7 @@ const ProfilePage = () => {
         <p className="font-medium text-secondary">Manage your profile settings</p>
       </section>
 
-      {user && !user.is_completed && (
+      {user && !user.isCompleted && (
         <Alert className="mt-6 w-fit" variant="warning">
           <TriangleAlert
             className="-mt-[3px] me-3 inline-flex !text-amber-600 opacity-70"

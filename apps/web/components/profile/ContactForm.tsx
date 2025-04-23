@@ -1,16 +1,16 @@
 import { useProfileUpdate } from '@/lib/react-query/user';
 import { phoneNumberFormSchema, PhoneNumberFormType } from '@/lib/zod/profile';
-import { IUser } from '@/types/user';
+import { User } from '@/types/user';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
 import FormProvider from '../ui/form-provider';
 import ProfileSection from './ProfileSection';
-import { Loader2 } from 'lucide-react';
 
 type Props = {
-  user: IUser;
+  user: User;
 };
 
 const PhoneNumberForm = ({ user }: Props) => {

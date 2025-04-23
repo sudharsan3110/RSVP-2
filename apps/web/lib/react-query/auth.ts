@@ -1,15 +1,15 @@
 'use client';
 
-import { IUser } from '@/types/user';
-import { useMutation, useQuery, UseQueryResult, useQueryClient } from '@tanstack/react-query';
+import { User } from '@/types/user';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authAPI, SigninPayload, VerifySigninPayload } from '../axios/auth-API';
-import { AxiosResponse } from 'axios';
 
 interface VerifySignInResponse {
   success: boolean;
-  data: { user: IUser };
+  data: { user: User };
 }
 
 export const useSignInMutation = () => {
@@ -29,7 +29,7 @@ export const useVerifySignin = () => {
   return useMutation<AxiosResponse<VerifySignInResponse>, Error, VerifySigninPayload>({
     mutationFn: authAPI.verifySignin,
     onSuccess: ({ data }) => {
-      if (data.data.user.is_completed) {
+      if (data.data.user.isCompleted) {
         router.push('/events');
       } else {
         router.push('/profile');
@@ -41,8 +41,8 @@ export const useVerifySignin = () => {
   });
 };
 
-export const useCurrentUser = (): UseQueryResult<AxiosResponse, any> => {
-  return useQuery({
+export const useCurrentUser = () => {
+  return useQuery<User, Error>({
     queryKey: ['me'],
     queryFn: authAPI.currentUser,
     retry: 0,
