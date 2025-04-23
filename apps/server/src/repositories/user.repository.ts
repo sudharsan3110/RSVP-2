@@ -126,4 +126,16 @@ export class UserRepository {
       data: { refreshToken },
     });
   }
+
+  /**
+   * Soft deletes a user by setting its `isDeleted` status to true.
+   * @param userId - The unique ID of the user.
+   * @returns The updated user object.
+   */
+  static async delete(userId: string) {
+    return await prisma.users.update({
+      where: { id: userId },
+      data: { isDeleted: true },
+    });
+  }
 }

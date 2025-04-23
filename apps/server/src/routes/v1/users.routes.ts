@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import authMiddleware from '@/middleware/authMiddleware';
 import { validate } from '@/middleware/validate';
-import { profilePayloadSchema } from '@/validations/users.validation';
+import { profilePayloadSchema, userParamsSchema } from '@/validations/users.validation';
 import {
   getUserPublicController,
   updateUserProfileController,
+  deleteUserController,
 } from '@/controllers/user.controller';
 
 const userRouter: Router = Router();
@@ -17,5 +18,12 @@ userRouter.post(
 );
 
 userRouter.get('/:username', authMiddleware, getUserPublicController);
+
+userRouter.delete(
+  '/:userId',
+  authMiddleware,
+  validate({ params: userParamsSchema }),
+  deleteUserController
+);
 
 export { userRouter };
