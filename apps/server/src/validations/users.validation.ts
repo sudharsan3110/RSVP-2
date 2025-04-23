@@ -27,3 +27,7 @@ export const profilePayloadSchema = z.union([
 export const usernameSchema = z.object({
   userName: z.string(),
 });
+
+export const userParamsSchema = z.object({
+  userId: z.string().uuid(),
+});

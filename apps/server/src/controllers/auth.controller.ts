@@ -29,6 +29,7 @@ export const signinController = catchAsync(
 
     logger.info('Creating token in signinController ...')
     const token = await UserRepository.createToken(user.id);
+    logger.info(`${config.CLIENT_URL}?token=${token}`);
     const emailData = {
       id: 4,
       subject: 'Sign in to your account',

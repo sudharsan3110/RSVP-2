@@ -1,8 +1,8 @@
 export const userAvatarOptions = [
-  { id: '1', src: '/images/user-avatar-afro-female.svg' },
-  { id: '2', src: '/images/user-avatar-bald-beard.svg' },
-  { id: '3', src: '/images/user-avatar-curly-hair-beard.svg' },
-  { id: '4', src: '/images/user-avatar-short-hair-beard.svg' },
+  { id: 1, src: '/images/user-avatar-afro-female.svg' },
+  { id: 2, src: '/images/user-avatar-bald-beard.svg' },
+  { id: 3, src: '/images/user-avatar-curly-hair-beard.svg' },
+  { id: 4, src: '/images/user-avatar-short-hair-beard.svg' },
 ];
 
 export const EMAIL_IMAGE_FILES: EmailAttachmentOptions[] = [

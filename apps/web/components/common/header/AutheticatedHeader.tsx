@@ -34,7 +34,7 @@ const AutheticatedHeader = () => {
   const pathname = usePathname();
 
   const profileIcon = userAvatarOptions.find(
-      (option) => option.id === userData?.profileIcon.toString()
+      (option) => option.id === userData?.profileIcon
   );
   const getActiveClass = (path: string) => {
     return pathname === path ? 'text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white';
