@@ -1,17 +1,17 @@
 import z from 'zod';
 
 const secondaryEmailSchema = z
-  .object({ secondary_email: z.string().email().or(z.null()) })
+  .object({ secondaryEmail: z.string().email().or(z.null()) })
   .strict();
 
 const contactNumberSchema = z.object({ contact: z.string() }).strict();
 
 const fullProfileSchema = z
   .object({
-    full_name: z.string().min(1),
+    fullName: z.string().min(1),
     location: z.string(),
     bio: z.string(),
-    profile_icon: z.string().default('1'),
+    profileIcon: z.coerce.number().default(1),
     twitter: z.string().optional(),
     instagram: z.string().optional(),
     website: z.string().optional(),
@@ -25,7 +25,7 @@ export const profilePayloadSchema = z.union([
 ]);
 
 export const usernameSchema = z.object({
-  username: z.string(),
+  userName: z.string(),
 });
 
 export const userParamsSchema = z.object({

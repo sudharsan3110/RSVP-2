@@ -2,9 +2,10 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { IEventHost } from '@/types/event';
+import { Cohost, Role } from '@/types/cohost';
+import { useDeleteCohost } from '@/lib/react-query/event';
 import { VERCEL_AVATAR_BASE_URL } from '@/utils/constants';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, Row } from '@tanstack/react-table';
 
 // Define the shape of your data
 export type EventHost = {
@@ -14,49 +15,51 @@ export type EventHost = {
   status: 'Active' | 'Inactive';
 };
 
-export const eventHostColumns = (
-  handleRemoveCohost: (cohostId: string) => void
-): ColumnDef<IEventHost>[] => [
-    {
-      accessorKey: 'name',
-      header: 'Host',
-      cell: ({ row }) => (
-        <div className="flex items-center">
-          <Avatar className="h-9 w-9">
-            <AvatarImage
-              src={`${VERCEL_AVATAR_BASE_URL}/${row.original.user.id}.png`}
-              alt={row.original.user.full_name}
-            />
-            <AvatarFallback>{row.original.user.full_name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div className="ml-3">
-            <p className="text-sm font-medium">{row.original.user.full_name}</p>
-            <p className="text-xs text-muted-foreground">{row.original.user.primary_email}</p>
-          </div>
+export const eventHostColumns: ColumnDef<Cohost>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Host',
+    cell: ({ row }) => (
+      <div className="flex items-center">
+        <Avatar className="h-9 w-9">
+          <AvatarImage
+            src={`${VERCEL_AVATAR_BASE_URL}/${row.original.user?.id}.png`}
+            alt={row.original.user?.fullName}
+          />
+          <AvatarFallback>{row.original.user?.initials}</AvatarFallback>
+        </Avatar>
+        <div className="ml-3">
+          <p className="text-sm font-medium">{row.original.user?.fullName}</p>
+          <p className="text-xs text-muted-foreground">{row.original.user?.primaryEmail}</p>
         </div>
-      ),
-    },
-    {
-      accessorKey: 'role',
-      header: 'Role',
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const host = row.original;
-        if (row.original.role === 'Creator') return <></>;
-        return (
-          <Button
-            variant="destructive"
-            radius="sm"
-            size="sm"
-            onClick={() => {
-              if (host?.user?.id) handleRemoveCohost(host.user.id);
-            }}
-          >
-            Remove Host
-          </Button>
-        );
-      },
-    },
-  ];
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'role',
+    header: 'Role',
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <ActionColumn row={row} />
+  },
+];
+
+
+const ActionColumn = ({ row }: { row: Row<Cohost> }) => {
+  const host = row.original;
+  const { mutate: deleteCohostMutate } = useDeleteCohost();
+  if (host.role === Role.CREATOR) return <></>;
+  const handleRemoveCohost = () => {
+    deleteCohostMutate({ eventId: host.eventId, cohostId: host.id });
+  };
+  return (
+    <Button
+      variant="destructive"
+      radius="sm"
+      size="sm"
+      onClick={handleRemoveCohost}
+    >
+      Remove Host
+    </Button>);
+};

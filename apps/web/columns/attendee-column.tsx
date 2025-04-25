@@ -17,11 +17,11 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
       return (
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src={getProfilePictureUrl(guest.user.profile_icon ?? 0)} />
-            <AvatarFallback>{guest.user.full_name?.charAt(0)}</AvatarFallback>
+            <AvatarImage src={getProfilePictureUrl(guest.user?.profileIcon ?? 1)} />
+            <AvatarFallback>{guest.user?.fullName?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{guest.user.full_name}</div>
+            <div className="font-medium">{guest.user?.fullName}</div>
           </div>
         </div>
       );

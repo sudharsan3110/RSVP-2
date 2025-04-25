@@ -1,4 +1,10 @@
-import { ICohost, IEvent, VenueType } from './event';
+import { Cohost } from "./cohost";
+
+export enum VenueType {
+  Physical = 'PHYSICAL',
+  Virtual = 'VIRTUAL',
+  Later = 'LATER',
+}
 
 export class Event {
   id: string;
@@ -9,8 +15,8 @@ export class Event {
   startTime: Date;
   endTime: Date;
   eventDate: Date;
-  description?: string;
-  eventImageId?: string;
+  description: string;
+  eventImageUrl: string;
   venueType?: VenueType;
   venueAddress?: string;
   venueUrl?: string;
@@ -20,15 +26,16 @@ export class Event {
   isCancelled?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  totalAttendees?: number;
   creator?: {
     id: string;
     full_name: string;
     username: string;
     profile_icon: string;
   };
-  Cohost?: ICohost[];
+  cohosts?: Cohost[];
 
-  constructor(data: IEvent) {
+  constructor(data: Partial<Event>) {
     this.id = data.id ?? '';
     this.creatorId = data.creatorId ?? '';
     this.name = data.name ?? '';
@@ -37,8 +44,8 @@ export class Event {
     this.startTime = data.startTime ? new Date(data.startTime) : new Date();
     this.endTime = data.endTime ? new Date(data.endTime) : new Date();
     this.eventDate = data.eventDate ? new Date(data.eventDate) : new Date();
-    this.description = data.description;
-    this.eventImageId = data.eventImageId;
+    this.description = data.description ?? '';
+    this.eventImageUrl = data.eventImageUrl ?? '/images/demo-event-image.png';
     this.venueType = data.venueType;
     this.venueAddress = data.venueAddress;
     this.venueUrl = data.venueUrl;
@@ -47,15 +54,35 @@ export class Event {
     this.isActive = data.isActive ?? true;
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
+    this.totalAttendees = data.totalAttendees;
     if (data.creator) this.creator = data.creator;
-    if (data.Cohost) this.Cohost = data.Cohost;
+    if (data.cohosts) this.cohosts = data.cohosts;
   }
 
-  async checkCohost(cohostId: string) {
-    return this.Cohost?.find((cohost) => cohost.user.id === cohostId);
+  checkCohost(cohostId?: string) {
+    if (!cohostId) return false;
+    return this.cohosts?.find((cohost) => cohost.user?.id === cohostId);
   }
 
-  async checkCreator(creatorId: string) {
+  checkCohostByUserName(userName?: string) {
+    if (!userName) return false;
+    return this.cohosts?.find((cohost) => cohost.user?.userName?.toLowerCase() === userName.toLowerCase());
+  }
+
+
+  checkCreator(creatorId: string) {
     return this.creator?.id === creatorId;
+  }
+
+  get isPhysical() {
+    return this.venueType === VenueType.Physical;
+  }
+
+  get isVirtual() {
+    return this.venueType === VenueType.Virtual;
+  }
+
+  get isLater() {
+    return this.venueType === VenueType.Later;
   }
 }

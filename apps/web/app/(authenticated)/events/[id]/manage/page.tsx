@@ -1,6 +1,7 @@
 'use client';
 
 import Container from '@/components/common/Container';
+import ErrorScreen from '@/components/common/ErrorScreen';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import Communication from '@/components/manage-event/Communication';
 import GuestManageSection from '@/components/manage-event/guest-manage-section';
@@ -10,36 +11,28 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useQueryParams from '@/hooks/useSearchParams';
-import { useCurrentUser } from '@/lib/react-query/auth';
 import { useGetEventById } from '@/lib/react-query/event';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 const ManageEventPage = () => {
-  const { id } = useParams();
-  if (typeof id !== 'string') notFound();
-  const { data: userData } = useCurrentUser();
+  const { id } = useParams<{ id: string }>();
   const queryParams = useQueryParams({ defaultValues: { tab: 'overview' } });
-
   const tabValue = queryParams.get('tab', 'overview') as string | null;
 
-  const { data, isLoading, isSuccess, status } = useGetEventById(id);
+  const { data, isLoading, isError } = useGetEventById(id);
 
   const handleTabChange = (value: string) => {
     queryParams.set('tab', value);
   };
 
-  if (isLoading) return <LoadingScreen className="min-h-screen" />;
+  if (isError || !data) return <ErrorScreen message="Something went wrong" />;
 
-  if (status === 'error') return notFound();
+  if (isLoading || !data) return <LoadingScreen className="min-h-screen" />;
 
-  if (!isSuccess) return <div>Something went wrong</div>;
   const { event } = data;
 
-  const isCoHost = event.checkCohost(userData?.data?.data?.username);
-
-  if (!isCoHost) return notFound();
 
   return (
     <Container className="min-h-screen space-y-8 py-8">

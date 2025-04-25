@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
 import { useState } from 'react';
-
+import { VenueType } from '@/types/events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -17,7 +17,7 @@ const defaultValues: CreateEventFormType = {
   name: '',
   category: '',
   description: '',
-  venueType: 'physical',
+  venueType: VenueType.Physical,
   location: '',
   hostPermissionRequired: false,
   fromTime: '17:00',
@@ -25,7 +25,7 @@ const defaultValues: CreateEventFormType = {
   toTime: '20:00',
   toDate: allowedDate,
   capacity: 20,
-  eventImageId: {
+  eventImageUrl: {
     signedUrl: '',
     file: '',
     url: '',
@@ -33,14 +33,14 @@ const defaultValues: CreateEventFormType = {
 };
 
 const CreateEventForm = () => {
-  const { mutate, isPending } = useCreateEvent();
+  const { mutate } = useCreateEvent();
   const [isLoading, setIsLoading] = useState(false);
   async function onSubmit(data: CreateEventFormType) {
     const {
       name,
       category,
       description,
-      eventImageId,
+      eventImageUrl,
       venueType,
       hostPermissionRequired,
       capacity,
@@ -55,10 +55,10 @@ const CreateEventForm = () => {
       name,
       category,
       description,
-      eventImageId: eventImageId.url ?? '',
+      eventImageUrl:data.eventImageUrl.url ?? '',
       venueType,
-      venueAddress: venueType === 'physical' ? location : undefined,
-      venueUrl: venueType === 'virtual' ? location : undefined,
+      venueAddress: venueType === VenueType.Physical ? location : undefined,
+      venueUrl: venueType === VenueType.Virtual ? location : undefined,
       hostPermissionRequired,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
@@ -66,10 +66,10 @@ const CreateEventForm = () => {
       eventDate: fromDate,
     };
 
-    if (eventImageId.file && eventImageId.signedUrl) {
+    if (data.eventImageUrl.file && data.eventImageUrl.signedUrl) {
       setIsLoading(true)
-      const imageFile = await fileFromUrl(eventImageId.file, 'event-image');
-      await axios.put(eventImageId.signedUrl, imageFile);
+      const imageFile = await fileFromUrl(data.eventImageUrl.file, 'event-image');
+      await axios.put(data.eventImageUrl.signedUrl, imageFile);
       mutate(submissionData);
       setIsLoading(false)
     }

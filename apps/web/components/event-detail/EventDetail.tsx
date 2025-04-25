@@ -1,15 +1,16 @@
-import Image from 'next/image';
-import { MapPinIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { Event } from '@/types/events';
+import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
+import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
-import { IEvent } from '@/types/event';
 import dayjs from 'dayjs';
-import GetTicketsButton from './GetTicketsButton';
-import AvatarGroup from './AvatarGroup';
 import { ClockIcon, LinkIcon } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { Badge } from '../ui/badge';
-import { venueDisplay, getProfilePictureUrl } from '@/utils/event';
+import AvatarGroup from './AvatarGroup';
+import GetTicketsButton from './GetTicketsButton';
 
-const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees: number } }) => {
+const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees: number } }) => {
   const { event, totalAttendees } = eventData;
   const formattedStartDate = dayjs(event.startTime).format('dddd, MMMM D');
   const formattedStartTime = dayjs(event.startTime).format('h:mm A');
@@ -17,11 +18,15 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
   const additionalCount = totalAttendees > 4 ? totalAttendees - 4 : 0;
   const userAvatarLimit = totalAttendees > 4 ? 4 : totalAttendees;
 
+
+  const cohosts = event.cohosts?.length ?? 0;
+  const capacity = event.capacity ?? 0;
+
   return (
     <main>
       <div className="relative w-full overflow-hidden">
         <Image
-          src={event.eventImageId ?? '/images/event-detail-mobile.svg'}
+          src={event.eventImageUrl}
           objectFit="cover"
           width={200}
           height={200}
@@ -31,7 +36,7 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
         />
         <div className="relative mx-auto h-[300px] w-full object-cover sm:h-[350px] sm:w-[600px] md:h-[400px] md:w-[800px] lg:h-[600px] lg:w-[970px]">
           <Image
-            src={event.eventImageId ?? '/images/event-detail-mobile.svg'}
+            src={event.eventImageUrl}
             width={1920}
             height={1080}
             priority
@@ -42,7 +47,7 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
       </div>
       <article className="my-6 flex flex-col items-start md:my-12">
         {event.category ? (
-          <Badge className="mb-2 px-4 py-2 text-sm font-normal capitalize text-white">
+          <Badge className="mb-4 text-sm font-medium tracking-wide capitalize text-white">
             {event?.category}
           </Badge>
         ) : null}
@@ -63,33 +68,43 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
           </section>
           <section className="flex items-center">
             <div className="mr-[20px] rounded-[8px] bg-dark-500 p-3">
-              {event?.venueType === 'physical' && <MapPinIcon className="h-[24px] w-[24px]" />}
-              {event?.venueType === 'virtual' && <LinkIcon className="h-[24px] w-[24px]" />}
-              {event?.venueType === 'later' && <ClockIcon className="h-[24px] w-[24px]" />}
+              {event?.isPhysical && <MapPinIcon className="h-[24px] w-[24px]" />}
+              {event?.isVirtual && <LinkIcon className="h-[24px] w-[24px]" />}
+              {event?.isLater && <ClockIcon className="h-[24px] w-[24px]" />}
             </div>
             <article className="font-bold">
               <p>
-                {event?.venueType === 'physical' && 'Location'}
-                {event?.venueType === 'virtual' && 'Event Link'}
-                {event?.venueType === 'later' && 'To be announced'}
+                {event?.isPhysical && 'Location'}
+                {event?.isVirtual && 'Event Link'}
+                {event?.isLater && 'To be announced'}
               </p>
-              <p className="text-sm text-secondary">{venueDisplay(event)}</p>
+              {event?.isPhysical && (
+                <p className="text-sm text-secondary">{venueDisplay(event)}</p>
+              )}
+
+              {event?.isVirtual && (
+                <Link href={event?.venueUrl ?? ''} target="_blank" className="text-sm text-secondary hover:underline hover:text-primary">
+                  <p>
+                    {venueDisplay(event)}
+                  </p>
+                </Link>
+              )}
             </article>
           </section>
           <section className="mt-6 p-3 pl-0">
-            <p className="font-semibold">Hosted {event?.Cohost.length > 1 && '& Cohosted'} By</p>
-            {event?.Cohost.length > 0 &&
-              event?.Cohost?.map((cohost, index) => (
+            <p className="font-semibold">Hosted {cohosts > 1 && '& Cohosted'} By</p>
+            {cohosts > 0 &&
+              event?.cohosts?.map((cohost, index) => (
                 <div className="mt-3 flex items-center" key={index}>
                   <Image
-                    src={getProfilePictureUrl(cohost.user.profile_icon)}
+                    src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
                     alt="Host Avatar"
                     width={48}
                     height={48}
                     className="rounded-full border-primary border-2 object-cover"
                   />
                   <p className="ml-3 text-sm font-medium capitalize text-secondary">
-                    {cohost.user.full_name}
+                    {cohost.user?.fullName}
                   </p>
                 </div>
               ))}
@@ -110,7 +125,7 @@ const EventDetail = ({ eventData }: { eventData: { event: IEvent; totalAttendees
           <section className="w-full rounded-lg bg-dark-900 p-6 shadow-lg md:w-[481px]">
             <h2 className="text-xl font-bold">Registration</h2>
             <p className="mt-2 font-semibold">
-              {event?.capacity - totalAttendees} Seats are Remaining.
+              {capacity - totalAttendees} Seats are Remaining.
             </p>
             {totalAttendees > 0 && (
               <div className="flex items-center pb-2 pt-4">

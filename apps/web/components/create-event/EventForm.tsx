@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { createEventFormSchema, CreateEventFormType } from '@/lib/zod/event';
+import { VenueType } from '@/types/events';
 import { eventCategoryOptions, evenTimeOptions } from '@/utils/constants';
 import { BuildingOfficeIcon, LinkIcon } from '@heroicons/react/16/solid';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +19,6 @@ import FormImageUpload from '../common/form/FormUploadImage';
 import Tiptap from '../ui/tiptap';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import EventPreview from './EventPreview';
-
 type Props = {
   defaultValues: CreateEventFormType;
   isLoading: boolean;
@@ -46,7 +46,7 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
         >
           <FormImageUpload
             control={form.control}
-            name="eventImageId"
+            name="eventImageUrl"
             className="md:hidden"
             label="Event Image"
           />
@@ -156,11 +156,11 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
                 </FormItem>
               )}
             />
-            {venueType !== 'later' && (
+            {venueType !== VenueType.Later && (
               <FormInput
                 name="location"
                 control={form.control}
-                placeholder={venueType === 'physical' ? 'Address' : 'Event Link'}
+                placeholder={venueType === VenueType.Physical ? 'Address' : 'Event Link'}
                 className="mt-2"
               />
             )}
@@ -191,9 +191,9 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
               <EventPreview />
             </DrawerContent>
           </Drawer>
-          {form.formState.errors.eventImageId && (
+          {form.formState.errors.eventImageUrl && (
             <p className="hidden text-sm font-medium text-destructive lg:block">
-              {form.formState.errors.eventImageId.message}
+              {form.formState.errors.eventImageUrl.message}
             </p>
           )}
           <Button

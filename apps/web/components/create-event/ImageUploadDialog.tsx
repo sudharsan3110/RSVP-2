@@ -54,7 +54,7 @@ const ImageUploadDialog = ({ children }: Props) => {
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      if (image && url) setValue('eventImageId', { file: image, url: url, signedUrl: signedUrl });
+      if (image && url) setValue('eventImageUrl', { file: image, url: url, signedUrl: signedUrl });
     }
   };
   return (
@@ -85,7 +85,7 @@ const ImageUploadDialog = ({ children }: Props) => {
           )}
           {!image && (
             <Controller
-              name="eventImageId"
+              name="eventImageUrl"
               control={control}
               render={() => (
                 <div className="flex flex-col items-center gap-4">

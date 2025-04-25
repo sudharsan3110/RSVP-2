@@ -1,7 +1,7 @@
-import { IUser } from '@/types/user';
-import { IEvent, ICohost } from '@/types/event';
 import { Attendee, AttendeeStatus } from '@/types/attendee';
-import { Event } from '@/types/Events';
+import { Cohost, Role } from '@/types/cohost';
+import { Event, VenueType } from '@/types/events';
+import { User } from '@/types/user';
 export const PHONE_NUMBER_LABEL = /phone number/i;
 export const SAVE_BUTTON_LABEL = /save/i;
 export const RESET_BUTTON_LABEL = /reset/i;
@@ -18,14 +18,21 @@ export const invalidPhoneNumberFormats = [
   { input: 'abcdefghij', error: 'Only numbers are allowed' },
 ];
 
-export const baseUser: IUser = {
-  id: 1,
-  primary_email: 'test@example.com',
+export const baseUser: User = new User({
+  id: "1",
+  primaryEmail: 'test@example.com',
   contact: '1234567890',
-  event_participation_enabled: true,
-  created_at: new Date(),
-  updated_at: new Date(),
-};
+  eventParticipationEnabled: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  isCompleted: true,
+  profileIcon: 1,
+  isDeleted: false,
+  isProfileComplete: true,
+  fullName: 'Test User',
+  userName: 'testuser',
+  initials: 'TU',
+});
 
 export const invalidEmailFormats = [
   'plainaddress',
@@ -41,28 +48,28 @@ export const TEST_EVENT_DATES = {
   eventDate: new Date('2024-04-15'),
 };
 
-export const TEST_COHOSTS: ICohost[] = [
-  {
-    role: 'Manager',
-    user: {
+export const TEST_COHOSTS: Cohost[] = [
+  new Cohost({
+    role: Role.MANAGER,
+    user: new User({
       id: '1',
-      profile_icon: 'icon1',
-      full_name: 'John Doe',
-      username: 'johndoe',
-    },
-  },
-  {
-    role: 'Manager',
-    user: {
+      profileIcon: 1,
+      fullName: 'John Doe',
+      userName: 'johndoe',
+    }),
+  }),
+  new Cohost({
+    role: Role.MANAGER,
+    user: new User({
       id: '2',
-      profile_icon: 'icon2',
-      full_name: 'Jane Smith',
-      username: 'janesmith',
-    },
-  },
+      profileIcon: 2,
+      fullName: 'Jane Smith',
+      userName: 'janesmith',
+    }),
+  }),
 ];
 
-export const  TEST_EVENT: IEvent = {
+export const  TEST_EVENT: Event = new Event({
   id: 'event-123',
   creatorId: '1',
   name: 'Tech Conference 2024',
@@ -72,8 +79,8 @@ export const  TEST_EVENT: IEvent = {
   endTime: TEST_EVENT_DATES.endTime,
   eventDate: TEST_EVENT_DATES.eventDate,
   category: 'Technology',
-  eventImageId: '/images/tech-conf.jpg',
-  venueType: 'physical',
+  eventImageUrl: '/images/tech-conf.jpg',
+  venueType: VenueType.Physical,
   venueAddress: 'Tech Hub',
   hostPermissionRequired: true,
   capacity: 100,
@@ -86,30 +93,24 @@ export const  TEST_EVENT: IEvent = {
     username: 'eventcreator',
     profile_icon: 'creator-icon',
   },
-  Cohost: TEST_COHOSTS.map((cohost) => ({
-    role: 'Manager',
-    user: {
-      ...cohost.user,
-      username: cohost.user.full_name.toLowerCase().replace(' ', ''),
-    },
-  })),
-};
+  cohosts: TEST_COHOSTS,
+});
 
 export const TEST_EVENT_DATA = {
   event: TEST_EVENT,
   totalAttendees: 5,
 };
 
-export const TEST_USER_RECENT_REG: IUser = {
-  id: 1,
-  primary_email: 'test@example.com',
-  full_name: 'Test User',
-  profile_icon: '1',
-  event_participation_enabled: true,
-  created_at: new Date(),
-  updated_at: new Date(),
+export const TEST_USER_RECENT_REG: User = new User({
+  id: "1",
+  primaryEmail: 'test@example.com',
+  fullName: 'Test User',
+  profileIcon: 1,
+  eventParticipationEnabled: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   contact: '1234567890',
-};
+});
 
 export const TEST_ATTENDEES_RECENT_REG = [
   new Attendee({
@@ -135,7 +136,7 @@ export const TEST_ATTENDEES_RECENT_REG = [
     eventId: TEST_EVENT.id,
     registrationTime: new Date(),
     status: AttendeeStatus.Waiting,
-    user: { ...TEST_USER_RECENT_REG, id: 2, full_name: 'Another User' },
+    user: new User({ ...TEST_USER_RECENT_REG, id: '2', fullName: 'Another User' }),
     hasAttended: false,
     checkInTime: null,
     feedback: null,

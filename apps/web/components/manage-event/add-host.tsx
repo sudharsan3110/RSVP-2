@@ -56,7 +56,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
   const filteredAttendees =
     debouncedSearchQuery !== ''
       ? usersData?.filter((attendee: Attendee) =>
-          attendee.user.primary_email.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+          attendee.user?.primaryEmail.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
         )
       : usersData;
 
@@ -69,7 +69,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
             Add host
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Add Co-host</DialogTitle>
             <DialogDescription className="text-xs text-secondary">
@@ -102,17 +102,17 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                       <div className="flex items-center">
                         <Avatar className="h-8 w-8">
                           <AvatarImage
-                            src={`https://avatar.vercel.sh/${attendee.id}.png`}
-                            alt={attendee.user.full_name}
+                            src={attendee.user?.profileIconUrl}
+                            alt={attendee.user?.fullName}
                           />
                           <AvatarFallback>
-                            {attendee.user?.full_name?.charAt(0) || 'R'}
+                            {attendee.user?.initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="ml-3 text-left">
-                          <p className="text-sm font-medium">{attendee.user.full_name}</p>
+                          <p className="text-sm font-medium">{attendee.user?.fullName}</p>
                           <p className="text-xs text-muted-foreground">
-                            {attendee.user.primary_email}
+                            {attendee.user?.primaryEmail}
                           </p>
                         </div>
                       </div>
@@ -127,6 +127,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                 ) : (
                   <>
                     <NoResults
+                    className='mt-10'
                       title="No User found"
                       message="Please confirm that if user is registered on the platform."
                     />
@@ -138,7 +139,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                         }}
                         className="mt-4"
                       >
-                        Invite {searchQuery} as Co-host
+                        Invite {searchQuery.slice(0, 10)}...  as Co-host
                       </Button>
                     )}
                   </>

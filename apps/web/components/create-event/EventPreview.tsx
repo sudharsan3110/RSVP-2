@@ -15,10 +15,10 @@ type EventPreviewProps = {
 
 const EventPreview = ({ className, children, venueType }: EventPreviewProps) => {
   const { watch, setValue } = useFormContext<CreateEventFormType>();
-  const image = watch('eventImageId');
+  const image = watch('eventImageUrl');
 
   const removeImage = () => {
-    setValue('eventImageId', {
+    setValue('eventImageUrl', {
       signedUrl: '',
       file: '',
       url: '',

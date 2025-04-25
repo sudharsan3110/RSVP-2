@@ -1,4 +1,4 @@
-import { VenueType } from '@/types/event';
+import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
 import { z } from 'zod';
 
@@ -23,7 +23,7 @@ export const createEventFormSchema = z
       required_error: 'To time is required',
     }),
     description: z.string(),
-    venueType: z.enum(['physical', 'virtual', 'later'] as const),
+    venueType: z.nativeEnum(VenueType),
     location: z.string().optional(),
     hostPermissionRequired: z.boolean(),
     capacity: z.coerce
@@ -35,7 +35,7 @@ export const createEventFormSchema = z
       .positive()
       .min(1, { message: 'Capacity should be at least 1' })
       .max(100, { message: 'Capacity should be at most 100' }),
-    eventImageId: z.object({
+    eventImageUrl: z.object({
       file: z.string().nullable(),
       url: z.string().nullable(),
       signedUrl: z.string().nullable(),
@@ -45,10 +45,10 @@ export const createEventFormSchema = z
   })
   .refine(
     (data) => {
-      if (data.venueType === 'physical') {
+      if (data.venueType === VenueType.Physical) {
         return data.location && data.location.length > 0;
       }
-      if (data.venueType === 'virtual') {
+      if (data.venueType === VenueType.Virtual) {
         try {
           new URL(data.location || '');
           return true;
@@ -69,12 +69,12 @@ export const createEventFormSchema = z
     const toDateTime = combineDateAndTime(data.toDate, data.toTime);
     const now = new Date();
 
-    const image = data.eventImageId.file || data.eventImageId.url;
+    const image = data.eventImageUrl.file || data.eventImageUrl.url;
     if (!image) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Event image is required',
-        path: ['eventImageId'],
+        path: ['eventImageUrl'],
       });
     }
 
@@ -101,7 +101,7 @@ export type CreateEventSubmissionType = {
   name: string;
   category: string;
   description: string;
-  eventImageId: string;
+  eventImageUrl: string;
   venueType: VenueType;
   venueAddress?: string;
   venueUrl?: string;

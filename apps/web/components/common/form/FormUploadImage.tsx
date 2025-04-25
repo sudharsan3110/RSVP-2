@@ -9,7 +9,6 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 import { Control, FieldPath, FieldValues, useController, useFormContext } from 'react-hook-form';
 import { Icons } from '../Icon';
-import { CreateEventFormType } from '@/lib/zod/event';
 
 function FormImageUpload<
   TFieldValues extends FieldValues = FieldValues,
@@ -35,14 +34,13 @@ function FormImageUpload<
   });
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const {  setValue } = useFormContext<CreateEventFormType>();
-
+  const { setValue } = useFormContext<TFieldValues>();
   const removeImage = () => {
-    setValue('eventImageId', {
+    setValue(name, {
       signedUrl: '',
       file: '',
       url: '',
-    });
+    } as TFieldValues[TName]);
   };
 
   const handleSave = async (file: File) => {
@@ -53,7 +51,7 @@ function FormImageUpload<
       const fileUrl = URL.createObjectURL(file);
       const url = signedUrl.split('?')[0];
 
-      if (fileUrl && url) setValue('eventImageId', { file: fileUrl, url: url, signedUrl: signedUrl });
+      if (fileUrl && url) setValue(name, { file: fileUrl, url: url, signedUrl: signedUrl } as TFieldValues[TName]);
 
       setUploadProgress(100);
     } catch (error) {
@@ -74,7 +72,7 @@ function FormImageUpload<
           {label && <FormLabel className={cn('text-white', labelClassName)}>{label}</FormLabel>}
           <FormControl>
             <div className="mt-4 space-y-4">
-              {value.file && 
+              {value.file &&
                 <div className="relative aspect-square w-full rounded-lg bg-secondary">
                   <img
                     src={value.file || value.url}

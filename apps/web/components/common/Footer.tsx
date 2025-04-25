@@ -5,11 +5,10 @@ import { cn } from '@/lib/utils';
 import Container from './Container';
 import Link from 'next/link';
 import SigninDialog from '../auth/SigninDialog';
-import { useLoggedInUser } from '@/hooks/useLoggedInUser';
-
+import { useCurrentUser } from '@/lib/react-query/auth';
 const Footer = ({ className }: PropsWithClassName) => {
   const currentYear = new Date().getFullYear();
-  const { loginedUser } = useLoggedInUser();
+  const { data: loginedUser } = useCurrentUser();
 
   return (
     <footer

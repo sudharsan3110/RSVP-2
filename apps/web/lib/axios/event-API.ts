@@ -1,9 +1,9 @@
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import { Attendee, AttendeeStatus } from '@/types/attendee';
-import { IEvent, IEventHost, IEventResponse } from '@/types/event';
 import { CommunicationForm } from '../zod/communication';
 import { CreateEventSubmissionType } from '../zod/event';
 import api from './instance';
+import { Cohost } from '@/types/cohost';
 
 export interface GetAttendeeByEventIdParams extends PaginationParams {
   eventId: string;
@@ -22,13 +22,14 @@ export type PaginationMetadata = {
 
 export type EventParams = {
   page: number;
-  status: string;
-  sort: string;
-  search: string;
+  status?: string;
+  sort?: string;
+  search?: string;
   limit?: number;
   location?: string;
   category?: string;
   startDate?: Date;
+  endDate?: Date;
   sortBy?: string;
 };
 
@@ -90,16 +91,23 @@ export const eventAPI = {
     return api.post(`event/${eventId}/attendees`);
   },
 
-  getEvent: async (params?: EventParams): Promise<{ events: IEvent[], metadata: PaginationMetadata }> => {
+  getEvent: async (params?: EventParams): Promise<{ events: Event[], metadata: PaginationMetadata }> => {
     const response = await api.get('/event', { params });
-    const events = response.data.data.events.map((event: IEvent) => new Event(event));
+    const events = response.data.data.events.map((event: Event) => new Event(event));
     const metadata = response.data.metadata;
     return { events, metadata };
   },
 
-  getMyEvents: async (params?: EventParams): Promise<{ events: IEvent[], metadata: PaginationMetadata }> => {
+  getMyEvents: async (params?: EventParams): Promise<{ events: Event[], metadata: PaginationMetadata }> => {
     const response = await api.get('/event/user', { params });
-    const events = response.data.data.events.map((event: IEvent) => new Event(event));
+    const events = response.data.data.events.map((event:Event) => new Event(event));
+    const metadata = response.data.metadata;
+    return { events, metadata };
+  },
+
+  getUpcomingEvents: async (params?: EventParams): Promise<{ events: Event[], metadata: PaginationMetadata }> => {
+    const response = await api.get('/event/upcoming', { params });
+    const events = response.data.data.map((event: Event) => new Event(event));
     const metadata = response.data.metadata;
     return { events, metadata };
   },
@@ -109,7 +117,7 @@ export const eventAPI = {
   },
 
   getAttendee: async (eventId: string) => {
-    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
+    return api.get(`event/${eventId}/attendees/ticket`).then((res) => new Attendee(res.data.data));
   },
 
   verifyAttendee: async (payload: { eventId: string; attendeeId: string }) => {
@@ -132,18 +140,9 @@ export const eventAPI = {
     return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
   },
 
-  getEventBySlug: async (slug: string): Promise<IEventResponse | undefined> => {
+  getEventBySlug: async (slug: string): Promise<{ event: Event, totalAttendees: number } | undefined> => {
     const response = await api.get(`/event/slug/${slug}`);
-    return response.data;
-  },
-
-  getEventsBySearchParams: async (
-    searchParams: Record<string, string | undefined>
-  ): Promise<IEvent[]> => {
-    const queryString = new URLSearchParams(searchParams as Record<string, string>).toString();
-    const url = queryString ? `/event/user?${queryString}` : `/event/user`;
-    const response = await api.get(url, { params: searchParams });
-    return response.data.data.events;
+    return { event: new Event(response.data.data.event), totalAttendees: response.data.data.totalAttendees };
   },
 
   cancelEventAttendee: async (eventId: string) => {
@@ -166,17 +165,17 @@ export const eventAPI = {
     });
   },
 
-  getPopularEvents: async (limit?: number) => {
+  getPopularEvents: async (limit?: number): Promise<Event[]> => {
     const response = await api.get('/event/popular', {
       params: { limit },
     });
-    return response.data.data;
+    return response.data.data.map((event: Event) => new Event(event));
   },
 
   /* Cohost API */
-  getEventCohosts: async (eventId: string): Promise<IEventHost[]> => {
+  getEventCohosts: async (eventId: string): Promise<Cohost[]> => {
     const hosts = await api.get(`/cohosts/events/${eventId}`);
-    return hosts.data.hosts;
+    return hosts.data.hosts.map((host: Cohost) => new Cohost(host));
   },
 
   createEventCohost: async (eventId: string, payload: { cohostEmail: string; role: string }) => {

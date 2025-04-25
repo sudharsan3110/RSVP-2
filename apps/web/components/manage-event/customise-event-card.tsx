@@ -53,7 +53,7 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
       <CardContent className="flex flex-col gap-12 md:flex-row">
         <Image
           priority
-          src={event.eventImageId ?? '/images/event-detail-mobile.svg'}
+          src={event.eventImageUrl}
           width={300}
           height={300}
           className="aspect-square w-full rounded-[8px] object-cover md:h-40 md:w-40"

@@ -108,6 +108,7 @@ export const eventCategoryColors = {
 
 
 export const NO_PLANNED_EVENTS_TITLE = 'No Upcoming Events';
+export const NO_PAST_EVENTS_TITLE = 'No Past Events';
 export const NO_PLANNED_EVENTS_MESSAGE =
   'You’re not attending any events yet. Click Below to navigate to discover events around you!.';
 

@@ -36,7 +36,7 @@ const ProfilePictureEditPopover = ({ control }: Props) => {
         <DialogDescription>Choose a profile icon</DialogDescription>
         <div className="my-4 grid grid-cols-3 gap-x-4 gap-y-6 md:grid-cols-4 md:gap-x-10">
           <Controller
-            name="profile_icon"
+            name="profileIcon"
             control={control}
             render={({ field }) => (
               <>

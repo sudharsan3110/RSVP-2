@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { IEventCard } from '@/types/event.ts';
 import { CheckCircleIcon } from '@heroicons/react/16/solid';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
 import dayjs from 'dayjs';
@@ -7,9 +6,15 @@ import Image from 'next/image';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { venueDisplay } from '@/utils/event';
+import { Event } from '@/types/events';
 
-const Card = ({ className, event, type }: IEventCard) => {
-  console.log(event);
+type CardProps = {
+  className?: string;
+  event: Event;
+  type: 'manage' | 'guest';
+}
+
+const Card = ({ className, event, type }: CardProps) => {
   return (
     <article
       className={cn('space-y-2.5 rounded-[10px] border border-dark-500 bg-dark-900 p-3 hover:scale-105 transition-transform duration-300 ease-in-out', className)}
@@ -17,7 +22,7 @@ const Card = ({ className, event, type }: IEventCard) => {
       <figure>
         <Image
           priority
-          src={event?.eventImageId || '/images/demo-event-image.png'}
+            src={event?.eventImageUrl}
           width={300}
           height={200}
           className="h-44 w-full rounded-[8px] object-cover"
@@ -32,12 +37,12 @@ const Card = ({ className, event, type }: IEventCard) => {
         </span>
         <span className="font-medium">{venueDisplay(event)}</span>
       </section>
-      {!!event?.numberOfAttendees && event?.numberOfAttendees > 0 && (
+      {/* {!!event?.numberOfAttendees && event?.numberOfAttendees > 0 && (
         <section className="flex items-center text-sm">
           <CheckCircleIcon className="mr-2 w-[18px]" />
           <span>{event?.numberOfAttendees} going</span>
         </section>
-      )}
+      )} */}
       {type === 'manage' && (
         <>
           <Link href={`/events/${event?.id}/manage`} passHref className="block">
@@ -56,14 +61,14 @@ const Card = ({ className, event, type }: IEventCard) => {
   );
 };
 
-const EventCard = ({ className, event, type }: IEventCard) => {
+const EventCard = ({ className, event, type }: CardProps) => {
   if (type === 'manage') {
     return <Card className={className} event={event} type={type} />;
   }
 
   return (
     <Link href={`/${event?.slug}`} className={className}>
-      <Card event={event} type={type} />
+      <Card event={event} type={type}  />
     </Link>
   );
 };

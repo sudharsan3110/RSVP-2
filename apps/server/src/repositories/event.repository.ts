@@ -209,6 +209,8 @@ export class EventRepository {
         creator: {
           select: {
             fullName: true,
+            profileIcon: true,
+            userName: true,
           },
         },
         attendees: true,

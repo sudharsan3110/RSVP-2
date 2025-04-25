@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import { useParams } from 'next/navigation';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
-
+import { VenueType } from '@/types/events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -25,7 +25,7 @@ const EditEventForm = () => {
       name,
       category,
       description,
-      eventImageId,
+      eventImageUrl,
       venueType,
       hostPermissionRequired,
       capacity,
@@ -41,10 +41,10 @@ const EditEventForm = () => {
       name,
       category,
       description,
-      eventImageId: eventImageId.url ?? '',
+      eventImageUrl: eventImageUrl.url ?? '',
       venueType,
-      venueAddress: venueType === 'physical' ? location : undefined,
-      venueUrl: venueType === 'virtual' ? location : undefined,
+      venueAddress: venueType === VenueType.Physical ? location : undefined,
+      venueUrl: venueType === VenueType.Virtual ? location : undefined,
       hostPermissionRequired,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
@@ -53,18 +53,18 @@ const EditEventForm = () => {
     };
 
     // Upload image if it's a new image
-    if (eventImageId.file && eventImageId.signedUrl) {
-      const imageFile = await fileFromUrl(eventImageId.file, 'event-image');
+    if (eventImageUrl.file && eventImageUrl.signedUrl) {
+      const imageFile = await fileFromUrl(eventImageUrl.file, 'event-image');
       try {
-        await axios.put(eventImageId.signedUrl, imageFile);
+        await axios.put(eventImageUrl.signedUrl, imageFile);
       } catch (error) {
         console.error('Error uploading image', error);
       }
     }
 
     // If the image is not changed, we don't need to upload it again
-    else if (eventImageId.file) {
-      submissionData.eventImageId = eventImageId.file;
+    else if (eventImageUrl.file) {
+      submissionData.eventImageUrl = eventImageUrl.file;
     }
     mutate(submissionData);
   }
@@ -75,7 +75,7 @@ const EditEventForm = () => {
     name: event?.name ?? '',
     category: event?.category ?? '',
     description: event?.description ?? '',
-    venueType: event?.venueType ?? 'physical',
+    venueType: event?.venueType ?? VenueType.Physical,
     location: event?.venueAddress ?? '',
     hostPermissionRequired: event?.hostPermissionRequired ?? false,
     fromTime: dayjs(event?.startTime).format('HH:mm'),
@@ -83,9 +83,9 @@ const EditEventForm = () => {
     toTime: dayjs(event?.endTime).format('HH:mm'),
     toDate: event?.endTime ?? allowedDate,
     capacity: event?.capacity ?? 0,
-    eventImageId: {
+    eventImageUrl: {
       signedUrl: '',
-      file: event?.eventImageId ?? '',
+      file: event?.eventImageUrl ?? '',
       url: '',
     },
   };

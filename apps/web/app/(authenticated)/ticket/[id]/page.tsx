@@ -1,10 +1,12 @@
 'use client';
+import ErrorScreen from '@/components/common/ErrorScreen';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useCancelEvent, useGetAttendeeDetails, useGetEventById } from '@/lib/react-query/event';
 import { MapPinIcon } from '@heroicons/react/24/solid';
-import { Presentation } from 'lucide-react';
+import dayjs from 'dayjs';
+import { Link, Presentation } from 'lucide-react';
 import { notFound, useParams } from 'next/navigation';
 import QRCode from 'react-qr-code';
 
@@ -13,19 +15,12 @@ const TicketPage = () => {
 
   if (typeof id !== 'string') notFound();
 
-  const { data: userData } = useCurrentUser();
-  const { data: attendeeData, isLoading: isAttendeeLoading } = useGetAttendeeDetails(id);
+  const { data: userData, isLoading: isUserLoading } = useCurrentUser();
+  const { data: attendee, isLoading: isAttendeeLoading } = useGetAttendeeDetails(id);
   const { data: eventData, isLoading: isEventLoading } = useGetEventById(id);
   const { mutate: cancelEvent } = useCancelEvent();
 
-  const qrToken = attendeeData?.qrToken || '';
-  const confirmationCode = `${qrToken?.slice(0, 3)} - ${qrToken?.slice(3, 6)}`;
-  const attendeeName = userData?.data?.full_name || 'Guest';
-  const eventName = eventData?.event?.name || 'Event';
-  const eventDescription = eventData?.event?.description || '';
-  const eventDate = eventData?.event?.startTime
-    ? new Date(eventData?.event?.startTime).toISOString().split('T')[0]
-    : 'TBD';
+  const event = eventData?.event;
 
   const handleEventCancel = () => {
     if (typeof id === 'string') {
@@ -33,27 +28,31 @@ const TicketPage = () => {
     }
   };
 
-  const loading = isAttendeeLoading || isEventLoading;
+  const loading = isAttendeeLoading || isEventLoading || isUserLoading;
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen className="min-h-screen" />;
+
+  if (!event || !attendee) return <ErrorScreen message="Event not found or attendee not found" className="min-h-screen" />;
 
   return (
     <div className="container-main my-10">
       <header className="text-4xl font-bold md:text-5xl md:leading-[67px]">
         <p>See you there on</p>
-        <span className="text-primary">{eventName}</span>
+        <span className="text-primary">{event?.name}</span>
       </header>
       <div className="my-6 flex flex-col items-center gap-x-10 md:flex-row">
         <div className="mb-6 w-full font-medium md:m-auto md:w-1/2">
-          <p dangerouslySetInnerHTML={{ __html: eventDescription }} />
+          <p dangerouslySetInnerHTML={{ __html: event?.description }} />
         </div>
         <div className="flex w-full flex-col items-center justify-between gap-x-10 gap-y-3 md:w-1/2 md:flex-row">
-          {eventData?.event?.venueType === 'virtual' ? (
-            <Button className="h-12 w-full rounded-[6px] md:w-1/2">
-              <Presentation className="mr-2 size-6" />
-              See Meeting
-            </Button>
-          ) : eventData?.event?.venueType === 'physical' ? (
+          {eventData?.event?.isVirtual ? (
+            <Link href={event?.venueUrl || ''} target="_blank">
+              <Button className="h-12 w-full rounded-[6px] md:w-1/2">
+                <Presentation className="mr-2 size-6" />
+                See Meeting
+              </Button>
+            </Link>
+          ) : eventData?.event?.isPhysical ? (
             <Button className="h-12 w-full rounded-[6px] md:w-1/2">
               <MapPinIcon className="mr-2 size-6" />
               Get Directions
@@ -73,7 +72,7 @@ const TicketPage = () => {
         <div className="relative flex items-center px-16 py-12 md:w-2/5 md:py-0">
           <div className="qr-border rounded-[2rem] p-8">
             <QRCode
-              value={qrToken}
+              value={attendee?.qrToken || ''}
               bgColor="#D0D0D0"
               size={224}
               level="Q"
@@ -89,17 +88,17 @@ const TicketPage = () => {
           <div className="flex flex-col gap-y-6 px-5 md:px-[70px]">
             <div>
               <p className="text-base font-bold">ATTENDEE NAME</p>
-              <p className="mt-2 text-4xl font-bold md:text-5xl">{attendeeName}</p>
+              <p className="mt-2 text-4xl font-bold md:text-5xl">{userData?.fullName}</p>
             </div>
             <div>
               <p className="font-bold">EVENT</p>
               <p className="mt-2 text-2xl font-bold">
-                {eventName}, {eventDate}
+                {event?.name}, {dayjs(event?.startTime).format('DD MMM YYYY')}
               </p>
             </div>
             <div>
               <p className="font-bold">CONFIRMATION CODE</p>
-              <p className="mt-3 text-4xl font-bold uppercase md:text-5xl">{confirmationCode}</p>
+              <p className="mt-3 text-4xl font-bold uppercase md:text-5xl">{attendee?.qrToken}</p>
             </div>
           </div>
         </div>

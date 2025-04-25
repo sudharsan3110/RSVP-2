@@ -1,6 +1,6 @@
 import { useProfileUpdate } from '@/lib/react-query/user';
 import { secondaryEmailFormSchema, SecondaryEmailFormType } from '@/lib/zod/profile';
-import { IUser } from '@/types/user';
+import { User } from '@/types/user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -10,7 +10,7 @@ import FormProvider from '../ui/form-provider';
 import ProfileSection from './ProfileSection';
 
 type Props = {
-  user: IUser;
+  user: User;
 };
 
 const SecondaryEmailForm = ({ user }: Props) => {
@@ -18,29 +18,29 @@ const SecondaryEmailForm = ({ user }: Props) => {
   const form = useForm<SecondaryEmailFormType>({
     resolver: zodResolver(secondaryEmailFormSchema),
     defaultValues: {
-      email: user?.primary_email || '',
-      secondary_email: user?.secondary_email || '',
+      email: user?.primaryEmail || '',
+      secondaryEmail: user?.secondaryEmail || '',
     },
   });
 
-  const hasSecondaryEmail = form.watch('secondary_email');
+  const hasSecondaryEmail = form.watch('secondaryEmail');
 
   const resetForm = () => {
     form.reset();
   };
 
   const addSecondaryEmail = () => {
-    form.setValue('secondary_email', ' ', { shouldDirty: true });
+    form.setValue('secondaryEmail', ' ', { shouldDirty: true });
   };
 
   const removeSecondaryEmail = () => {
-    form.setValue('secondary_email', null, { shouldDirty: true });
+    form.setValue('secondaryEmail', null, { shouldDirty: true });
   };
 
   const onSubmit = async (data: SecondaryEmailFormType) => {
-    let secondary_email = data.secondary_email;
+    let secondaryEmail = data.secondaryEmail;
     mutate(
-      { secondary_email },
+      { secondaryEmail },
       {
         onSuccess: () => {
           form.reset(form.getValues());
@@ -60,7 +60,7 @@ const SecondaryEmailForm = ({ user }: Props) => {
         {hasSecondaryEmail && (
           <FormInput
             control={form.control}
-            name="secondary_email"
+            name="secondaryEmail"
             label="Secondary Email"
             type="email"
           />

@@ -6,7 +6,6 @@ import { notFound } from 'next/navigation';
 
 const EventDetailPage = async ({ params }: { params: { slug: string } }) => {
   const slug = params.slug;
-
   try {
     const eventData = await eventAPI.getEventBySlug(slug);
     if (!eventData) notFound();
