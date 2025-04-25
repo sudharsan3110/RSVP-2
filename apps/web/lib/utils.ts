@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Event } from '@/types/events';
+import { Event } from '@/types/Events';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
 import { useState } from 'react';
-import { VenueType } from '@/types/events';
+import { VenueType } from '@/types/Events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);

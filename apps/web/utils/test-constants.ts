@@ -1,6 +1,6 @@
 import { Attendee, AttendeeStatus } from '@/types/attendee';
 import { Cohost, Role } from '@/types/cohost';
-import { Event, VenueType } from '@/types/events';
+import { Event, VenueType } from '@/types/Events';
 import { User } from '@/types/user';
 export const PHONE_NUMBER_LABEL = /phone number/i;
 export const SAVE_BUTTON_LABEL = /save/i;

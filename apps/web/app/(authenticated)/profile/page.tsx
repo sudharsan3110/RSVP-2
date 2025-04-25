@@ -16,8 +16,6 @@ import { Alert, AlertTitle } from '@/components/ui/alert';
 const ProfilePage = () => {
   const { data, isSuccess, isLoading } = useCurrentUser();
 
-  console.log(data);
-
   const user = useMemo(() => {
     if (!isSuccess) return null;
     return data;

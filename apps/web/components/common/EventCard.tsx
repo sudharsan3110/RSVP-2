@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { venueDisplay } from '@/utils/event';
-import { Event } from '@/types/events';
+import { Event } from '@/types/Events';
 
 type CardProps = {
   className?: string;

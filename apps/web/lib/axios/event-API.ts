@@ -1,4 +1,4 @@
-import { Event } from '@/types/events';
+import { Event } from '@/types/Events';
 import { Attendee, AttendeeStatus } from '@/types/attendee';
 import { CommunicationForm } from '../zod/communication';
 import { CreateEventSubmissionType } from '../zod/event';

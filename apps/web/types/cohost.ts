@@ -1,4 +1,4 @@
-import { Event } from './events';
+import { Event } from './Events';
 import { User } from './user';
 
 export enum Role {

@@ -3,7 +3,7 @@ import eventImageSrc from '@/public/images/demo-event-image.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Icons } from '../common/Icon';
-import { Event } from '@/types/events';
+import { Event } from '@/types/Events';
 import dayjs from 'dayjs';
 import { getDateGroups } from '@/lib/utils';
 import { Badge } from '../ui/badge';

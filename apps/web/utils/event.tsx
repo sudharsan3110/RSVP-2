@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AttendeeStatus } from '@/types/attendee';
-import { Event, VenueType } from '@/types/events';
+import { Event, VenueType } from '@/types/Events';
 import { userAvatarOptions } from '@/utils/constants';
 export const venueDisplay = (event: Event | null) => {
   switch (event?.venueType) {

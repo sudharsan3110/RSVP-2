@@ -26,7 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/hooks/useDebounce';
 import { useGetDiscoverEvents, useGetEvent } from '@/lib/react-query/event';
 import { cn } from '@/lib/utils';
-import { Event } from '@/types/events';
+import { Event } from '@/types/Events';
 import { locationName } from '@/utils/constants';
 import {
   CheckIcon,

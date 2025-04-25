@@ -1,4 +1,4 @@
-import { Event } from '@/types/events';
+import { Event } from '@/types/Events';
 import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';

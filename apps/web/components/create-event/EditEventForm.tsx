@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import { useParams } from 'next/navigation';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
-import { VenueType } from '@/types/events';
+import { VenueType } from '@/types/Events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
