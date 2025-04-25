@@ -25,7 +25,7 @@ export const EventSchema = z.object({
   name: z.string().max(256),
   category: z.string().max(256),
   description: z.string().max(512),
-  eventImageId: z.string().max(256),
+  eventImageUrl: z.string().max(256),
   venueType: z.enum(['physical', 'virtual', 'later']),
   venueAddress: z.string().max(256).optional(),
   venueUrl: z.string().url().max(256).optional(),

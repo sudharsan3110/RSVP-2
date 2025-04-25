@@ -117,7 +117,7 @@ describe('Event Router Endpoints', () => {
       name: 'Annual Conference',
       category: 'Conference',
       description: 'An event to discuss annual trends',
-      eventImageId: 'img-123',
+      eventImageUrl: 'img-123',
       venueType: 'physical',
       venueAddress: 'World Trade Center, Bengaluru',
       hostPermissionRequired: true,

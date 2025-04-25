@@ -2,7 +2,7 @@ import { ICreateEvent, IEventFilters } from '@/interface/event';
 import { IPaginationParams } from '@/interface/pagination';
 import { Paginator } from '@/utils/pagination';
 import { EventFilter } from '@/validations/event.validation';
-import { Event, Prisma, VenueType } from '@prisma/client';
+import { Event, Prisma, VenueType, Status } from '@prisma/client';
 import { prisma } from '@/utils/connection';
 
 /**
@@ -35,6 +35,11 @@ export class EventRepository {
       ...(startDate && { eventDate: { gte: startDate } }),
       isDeleted: false,
       isActive: true,
+      attendees:{
+        some:{
+          status: Status.GOING
+        }
+      }
     };
 
     if (search) {
@@ -89,6 +94,9 @@ export class EventRepository {
           },
         },
         cohosts: {
+          where: {
+            isDeleted: false,
+          },
           select: {
             role: true,
             user: {
@@ -199,7 +207,6 @@ export class EventRepository {
       where: {
         eventDate: {
           gte: new Date(),
-          lte: new Date(new Date().setDate(new Date().getDate() + 30)), // Next 30 days
         },
         isActive: true,
         isDeleted: false,

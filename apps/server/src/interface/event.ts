@@ -21,7 +21,7 @@ export interface ICreateEvent {
   endTime: Date;
   eventDate: Date;
   description?: string;
-  eventImageId?: string;
+  eventImageUrl?: string;
   venueType: VenueType;
   venueAddress?: string;
   venueUrl?: string;

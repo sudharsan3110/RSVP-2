@@ -22,7 +22,7 @@ import {
   eventLimitSchema,
   eventsPlannedByUserReqSchema,
 } from '@/validations/event.validation';
-import { VenueType } from '@prisma/client';
+import { Attendee, Prisma, Status, VenueType } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import { IAllowStatus } from '@/interface/event';
 import * as XLSX from 'xlsx';
@@ -312,12 +312,13 @@ export const createAttendeeController = catchAsync(
     req: IAuthenticatedRequest<{ eventId?: string }, {}, z.infer<typeof attendeePayloadSchema>>,
     res
   ) => {
-    let AttendeeStatus = {};
+    let attendeeStatus: Partial<Attendee> = {};
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
     const user = await UserRepository.findById(userId);
     if (!user || !user.isCompleted) return res.status(400).json({ message: 'User profile is not completed' });
+
     const eventId = req.params.eventId;
     if (!eventId) return res.status(400).json({ message: 'Event ID is required' });
 
@@ -325,6 +326,7 @@ export const createAttendeeController = catchAsync(
     const event = await EventRepository.findById(eventId as string);
     if (!event) return res.status(404).json({ message: 'Event not found' });
     if (!event.isActive) return res.status(400).json({ message: 'Event is not active' });
+
     const currentTime = new Date();
     if (event.endTime < currentTime) return res.status(400).json({ message: 'Event has expired' });
 
@@ -336,14 +338,14 @@ export const createAttendeeController = catchAsync(
     }
 
     if (!event.hostPermissionRequired) {
-      AttendeeStatus = { allowedStatus: true, status: 'Going' };
+      attendeeStatus = { allowedStatus: true, status: Status.GOING };
     } else {
-      AttendeeStatus = { allowedStatus: false, status: 'Waiting' };
+      attendeeStatus = { allowedStatus: false, status: Status.WAITING };
     }
 
-    const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
+    const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId, true);
     if (existingAttendee) {
-      const deleted_user = existingAttendee.isDeleted;
+      const deleted_user = existingAttendee.isDeleted && existingAttendee.status === Status.NOT_GOING;
       if (deleted_user) {
         await AttendeeRepository.restore(existingAttendee.id);
         return res.status(200).json({ message: 'Attendee restored successfully' });
@@ -355,11 +357,19 @@ export const createAttendeeController = catchAsync(
     const hash = createHash('sha256').update(uuid).digest('base64');
     const qrToken = hash.slice(0, 6);
 
-    const attendeeData = {
+    const attendeeData: Prisma.AttendeeCreateInput = {
       qrToken: qrToken,
-      userId: req.userId,
-      eventId: eventId,
-      ...AttendeeStatus,
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      event: {
+        connect: {
+          id: eventId,
+        },
+      },
+      status: attendeeStatus.status,
     };
 
     const newAttendee = await AttendeeRepository.create(attendeeData);
@@ -427,10 +437,10 @@ export const getExcelSheetController = catchAsync(
     const attendees = await AttendeeRepository.findAllAttendees(eventId);
     
     logger.info('Mapping attendee in getExcelSheetController ...')
-    const exportData = attendees.map((attendee: any, index) => ({
+    const exportData = attendees.map((attendee, index) => ({
       'Sr. No': index + 1,
-      'Full Name': attendee.user.full_name,
-      Email: attendee.user.primary_email,
+      'Full Name': attendee.user.fullName,
+      Email: attendee.user.primaryEmail,
       Contact: attendee.user.contact || '-',
       'Registration Time': new Date(attendee.registrationTime).toLocaleString(),
       Status: attendee.status,
@@ -494,7 +504,7 @@ export const getAttendeeTicketController = catchAsync(
     const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
     if (!attendee) return res.status(404).json({ message: 'Attendee not found' });
 
-    return res.status(200).json({attendee, message: 'Fetch ticket successfully'});
+    return res.status(200).json({data: attendee, message: 'Fetch ticket successfully'});
   }
 );
 
@@ -638,8 +648,8 @@ export const deleteAttendeeController = catchAsync(
     const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
     if (!attendee) return res.status(404).json({ message: 'Attendee record not found' });
 
-    if (attendee.userId.toString() === userId?.toString()) {
-      await AttendeeRepository.delete(attendee.id);
+    if (attendee.userId === userId) {
+      await AttendeeRepository.cancel(attendee.id);
       return res.status(200).json({
         message: 'Attendee removed successfully',
       });

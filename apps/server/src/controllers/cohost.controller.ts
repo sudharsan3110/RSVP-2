@@ -76,50 +76,16 @@ export const addEventHostController = catchAsync(
 export const removeEventCohostController = catchAsync(
   async (
     req: IAuthenticatedRequest<
-      { eventId?: string; cohostUserId?: string },
+      { eventId?: string; cohostId?: string },
       {},
       z.infer<typeof addCohostSchema>
     >,
     res
   ) => {
-    const userId = req.userId;
-    const { eventId, cohostUserId } = req.params;
-
-    if (!eventId || !cohostUserId) return res.status(400).json({ message: 'Event Id and cohost user is required' });
-    if (userId === cohostUserId) return res.status(400).json({ message: API_MESSAGES.COHOST.REMOVE.CANNOT_REMOVE_SELF });
-
-    const eventExists = await EventRepository.findById(eventId);
-    if (!eventExists) return res.status(400).json({ message: API_MESSAGES.EVENT.NOT_FOUND });
+    const { eventId, cohostId } = req.params;
+    if (!eventId || !cohostId) return res.status(400).json({ message: 'Event Id and cohost user is required' });
     
-    logger.info('Finding host or cohost in removeEventCohostController ...')
-    const isUserCreator = await CohostRepository.FindhostOrCohost(userId as string, eventId);
-    const isUserMod =
-      (await CohostRepository.FindhostOrCohost(userId as string, eventId, [Role.MANAGER])) ||
-      isUserCreator;
-
-    if (!isUserMod)
-      return res.status(400).json({
-        message: API_MESSAGES.COHOST.REMOVE.INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED,
-      });
-
-    const isCohostCreator = await CohostRepository.FindhostOrCohost(cohostUserId, eventId);
-    if (isCohostCreator) {
-      return res.status(400).json({
-        message: API_MESSAGES.COHOST.REMOVE.CANNOT_REMOVE_CREATOR,
-      });
-    }
-
-    const isCohostMod =
-      isCohostCreator ||
-      (await CohostRepository.FindhostOrCohost(cohostUserId, eventId, [Role.MANAGER]));
-
-    if (!isUserCreator && isCohostMod)
-      return res.status(400).json({
-        message: API_MESSAGES.COHOST.REMOVE.INSUFFICIENT_PERMS_CREATOR_REQUIRED,
-      });
-    
-    logger.info('Removing host or cohost in removeEventCohostController ...')
-    const deletedCohost = await CohostRepository.removeCoHost(cohostUserId, eventId);
+    const deletedCohost = await CohostRepository.removeCoHost(cohostId, eventId);
     if (!deletedCohost) {
       return res.status(400).json({
         message: API_MESSAGES.COHOST.REMOVE.FAILED,

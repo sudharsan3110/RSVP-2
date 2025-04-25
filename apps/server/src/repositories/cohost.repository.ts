@@ -41,9 +41,9 @@ export class CohostRepository {
   static async findAllByEventId(eventId: string) {
     return await prisma.cohost.findMany({
       where: { eventId, isDeleted: false },
-      select: {
-        role: true,
+      include: {
         user: true,
+        event: true,
       },
     });
   }
@@ -78,10 +78,10 @@ export class CohostRepository {
    * @param eventId - The unique ID of the event.
    * @returns A boolean indicating whether the cohost was successfully removed.
    */
-  static async removeCoHost(userId: string, eventId: string): Promise<boolean> {
+  static async removeCoHost(cohostId: string, eventId: string): Promise<boolean> {
     const removedCohost = await prisma.cohost.updateMany({
       where: {
-        userId,
+        id: cohostId,
         eventId,
         isDeleted: false,
       },

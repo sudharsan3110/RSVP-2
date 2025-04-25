@@ -159,7 +159,7 @@ eventRouter.get(
 );
 
 eventRouter.get(
-  '/:eventId/attendee/ticket',
+  '/:eventId/attendees/ticket',
   authMiddleware,
   validate({ params: attendeeParamsSchema }),
   getAttendeeTicketController

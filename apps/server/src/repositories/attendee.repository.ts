@@ -48,12 +48,12 @@ export class AttendeeRepository {
    * @param eventId - The unique ID of the event.
    * @returns The attendee object if found, otherwise null.
    */
-  static async findByUserIdAndEventId(userId: string, eventId: string) {
+  static async findByUserIdAndEventId(userId: string, eventId: string, isDeleted: boolean = false) {
     return await prisma.attendee.findFirst({
       where: {
         userId,
         eventId,
-        isDeleted: false,
+        isDeleted: isDeleted,
       },
     });
   }
@@ -84,29 +84,28 @@ export class AttendeeRepository {
     const whereClause: Prisma.AttendeeWhereInput = {
       userId,
       isDeleted: false,
-      event: {
-        ...(startDate &&
-          endDate && {
-            startTime: { gte: startDate },
-            endTime: { lte: endDate },
-          }),
-      },
     };
+
+    if (startDate) {
+      whereClause.event = {
+        eventDate: {
+          gte: startDate,
+        },
+      };
+    }
+
+    if (endDate) {
+      whereClause.event = {
+        eventDate: {
+          lte: endDate,
+        },
+      };
+    }
 
     const attendees = await prisma.attendee.findMany({
       where: whereClause,
       include: {
-        event: {
-          select: {
-            id: true,
-            name: true,
-            startTime: true,
-            endTime: true,
-            venueType: true,
-            venueAddress: true,
-            venueUrl: true,
-          },
-        },
+        event: true,
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -188,7 +187,7 @@ export class AttendeeRepository {
    * @param eventId - The unique ID of the event.
    * @returns An array of attendees with user details.
    */
-  static async findAllAttendees(eventId: string): Promise<Attendee[]> {
+  static async findAllAttendees(eventId: string){
     const attendees = await prisma.attendee.findMany({
       where: {
         eventId,
@@ -213,7 +212,7 @@ export class AttendeeRepository {
    * @param data - The data for the new attendee.
    * @returns The newly created attendee object.
    */
-  static async create(data: any) {
+  static async create(data: Prisma.AttendeeCreateInput) {
     return await prisma.attendee.create({
       data,
     });
@@ -225,7 +224,7 @@ export class AttendeeRepository {
    * @param data - The data to update.
    * @returns The updated attendee object.
    */
-  static async update(id: string, data: any) {
+  static async update(id: string, data: Prisma.AttendeeUpdateInput) {
     return await prisma.attendee.update({
       where: { id, isDeleted: false },
       data,
@@ -273,6 +272,23 @@ export class AttendeeRepository {
     });
   }
 
+
+  /** 
+   * Cancels an attendee record by ID.
+   * @param id - The unique ID of the attendee.
+   * @returns The updated attendee object with `status` set to `CANCELLED`.
+   */
+  static async cancel(id: string) {
+    return await prisma.attendee.update({
+      where: { id, isDeleted: false },
+      data: {
+        status: Status.NOT_GOING,
+        isDeleted: true,
+      },
+    });
+  }
+
+
   /**
    * Restores a soft-deleted attendee record by ID.
    * @param id - The unique ID of the attendee.
@@ -280,8 +296,9 @@ export class AttendeeRepository {
    */
   static async restore(id: string) {
     return await prisma.attendee.update({
-      where: { id, isDeleted: true },
+      where: { id, isDeleted: true, status: Status.NOT_GOING },
       data: {
+        status: Status.GOING,
         isDeleted: false,
       },
     });
