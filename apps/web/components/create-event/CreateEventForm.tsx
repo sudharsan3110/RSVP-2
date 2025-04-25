@@ -3,12 +3,12 @@
 import { useCreateEvent } from '@/lib/react-query/event';
 import { fileFromUrl } from '@/lib/utils';
 import { CreateEventFormType, CreateEventSubmissionType } from '@/lib/zod/event';
+import { VenueType } from '@/types/Events';
 import { combineDateAndTime } from '@/utils/time';
 import axios from 'axios';
+import { useState } from 'react';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
-import { useState } from 'react';
-import { VenueType } from '@/types/Events';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -55,7 +55,7 @@ const CreateEventForm = () => {
       name,
       category,
       description,
-      eventImageUrl:data.eventImageUrl.url ?? '',
+      eventImageUrl:eventImageUrl.url ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
       venueUrl: venueType === VenueType.Virtual ? location : undefined,

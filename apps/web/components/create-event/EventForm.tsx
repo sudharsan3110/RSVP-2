@@ -128,7 +128,7 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
                     className="flex-wrap justify-start gap-3 py-2"
                   >
                     <ToggleGroupItem
-                      value="physical"
+                      value={VenueType.Physical}
                       aria-label="Toggle physical"
                       className="h-6 items-center gap-1 rounded-[1.25rem] bg-gray-100 px-3 text-xs/[1.25rem] text-slate-800 data-[state=on]:bg-primary data-[state=on]:text-white"
                     >
@@ -136,7 +136,7 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
                       Venue
                     </ToggleGroupItem>
                     <ToggleGroupItem
-                      value="virtual"
+                      value={VenueType.Virtual}
                       aria-label="Toggle virtual"
                       className="h-6 items-center gap-1 rounded-[1.25rem] bg-gray-100 px-3 text-xs/[1.25rem] text-slate-800 data-[state=on]:bg-primary data-[state=on]:text-white"
                     >
@@ -144,7 +144,7 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
                       Online
                     </ToggleGroupItem>
                     <ToggleGroupItem
-                      value="later"
+                      value={VenueType.Later}
                       aria-label="Toggle decideLater"
                       className="h-6 items-center gap-1 rounded-[1.25rem] bg-gray-100 px-3 text-xs/[1.25rem] text-slate-800 data-[state=on]:bg-primary data-[state=on]:text-white"
                     >
