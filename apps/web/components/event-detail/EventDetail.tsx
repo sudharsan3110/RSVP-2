@@ -1,4 +1,4 @@
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
@@ -17,7 +17,6 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
   const formattedEndTime = dayjs(event.endTime).format('h:mm A');
   const additionalCount = totalAttendees > 4 ? totalAttendees - 4 : 0;
   const userAvatarLimit = totalAttendees > 4 ? 4 : totalAttendees;
-
 
   const cohosts = event.cohosts?.length ?? 0;
   const capacity = event.capacity ?? 0;
@@ -78,15 +77,15 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
                 {event?.isVirtual && 'Event Link'}
                 {event?.isLater && 'To be announced'}
               </p>
-              {event?.isPhysical && (
-                <p className="text-sm text-secondary">{venueDisplay(event)}</p>
-              )}
+              {event?.isPhysical && <p className="text-sm text-secondary">{venueDisplay(event)}</p>}
 
               {event?.isVirtual && (
-                <Link href={event?.venueUrl ?? ''} target="_blank" className="text-sm text-secondary hover:underline hover:text-primary">
-                  <p>
-                    {venueDisplay(event)}
-                  </p>
+                <Link
+                  href={event?.venueUrl ?? ''}
+                  target="_blank"
+                  className="text-sm text-secondary hover:underline hover:text-primary"
+                >
+                  <p>{venueDisplay(event)}</p>
                 </Link>
               )}
             </article>
@@ -124,9 +123,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
         <section className="w-full md:w-[481px]">
           <section className="w-full rounded-lg bg-dark-900 p-6 shadow-lg md:w-[481px]">
             <h2 className="text-xl font-bold">Registration</h2>
-            <p className="mt-2 font-semibold">
-              {capacity - totalAttendees} Seats are Remaining.
-            </p>
+            <p className="mt-2 font-semibold">{capacity - totalAttendees} Seats are Remaining.</p>
             {totalAttendees > 0 && (
               <div className="flex items-center pb-2 pt-4">
                 <AvatarGroup additionalCount={additionalCount} limit={userAvatarLimit} />

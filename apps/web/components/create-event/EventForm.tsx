@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { createEventFormSchema, CreateEventFormType } from '@/lib/zod/event';
-import { VenueType } from '@/types/Events';
+import { VenueType } from '@/types/events';
 import { eventCategoryOptions, evenTimeOptions } from '@/utils/constants';
 import { BuildingOfficeIcon, LinkIcon } from '@heroicons/react/16/solid';
 import { zodResolver } from '@hookform/resolvers/zod';

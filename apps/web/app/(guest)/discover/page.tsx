@@ -26,7 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/hooks/useDebounce';
 import { useGetDiscoverEvents, useGetEvent } from '@/lib/react-query/event';
 import { cn } from '@/lib/utils';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import { locationName } from '@/utils/constants';
 import {
   CheckIcon,
@@ -38,7 +38,6 @@ import {
 import dayjs from 'dayjs';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useRef, useState } from 'react';
-
 
 const DiscoverEvents = () => {
   const pageEndRef = useRef<HTMLDivElement>(null);
@@ -67,7 +66,7 @@ const DiscoverEvents = () => {
     limit: 10,
     category: filters.category,
     startDate: dayjs().startOf('day').toDate(),
-  })
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -78,7 +77,7 @@ const DiscoverEvents = () => {
       },
       {
         threshold: 0.1,
-        rootMargin: '500px'
+        rootMargin: '500px',
       }
     );
 
@@ -203,7 +202,10 @@ const DiscoverEvents = () => {
           </section>
 
           <section className="mt-1">
-            <Tags selectedTag={filters.category} setSelectedTag={(value) => setFilters((prev) => ({ ...prev, category: value }))} />
+            <Tags
+              selectedTag={filters.category}
+              setSelectedTag={(value) => setFilters((prev) => ({ ...prev, category: value }))}
+            />
           </section>
 
           <section className="mt-6">
@@ -212,17 +214,16 @@ const DiscoverEvents = () => {
                 Array.from({ length: 10 }).map((_, index) => (
                   <Skeleton key={index} className="w-full min-h-[20rem] rounded-md" />
                 ))
-              ) : data?.pages.flatMap((page) => page.events).length && data?.pages.flatMap((page) => page.events).length > 0 ? (
+              ) : data?.pages.flatMap((page) => page.events).length &&
+                data?.pages.flatMap((page) => page.events).length > 0 ? (
                 <>
-                  {data?.pages.flatMap((page) => page.events).map((event: Event) => (
-                    <EventCard key={event.id} event={event} type="guest" />
-                  ))}
-                  {isFetchingNextPage && (
+                  {data?.pages
+                    .flatMap((page) => page.events)
+                    .map((event: Event) => <EventCard key={event.id} event={event} type="guest" />)}
+                  {isFetchingNextPage &&
                     Array.from({ length: 10 }).map((_, index) => (
                       <Skeleton key={index} className="w-full" />
-                    ))
-                  )}
-
+                    ))}
                 </>
               ) : (
                 <div className="flex flex-col col-span-full items-center justify-center">
@@ -230,11 +231,7 @@ const DiscoverEvents = () => {
                 </div>
               )}
             </div>
-            <div
-              ref={pageEndRef}
-              className="h-4 w-full"
-            />
-
+            <div ref={pageEndRef} className="h-4 w-full" />
           </section>
         </section>
       </main>

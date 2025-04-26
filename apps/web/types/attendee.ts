@@ -1,4 +1,4 @@
-import { Event } from './Events';
+import { Event } from './events';
 import { User } from './user';
 
 export enum AttendeeStatus {
@@ -8,7 +8,6 @@ export enum AttendeeStatus {
   Pending = 'PENDING',
   Invited = 'INVITED',
 }
-
 
 export class Attendee {
   id: string;

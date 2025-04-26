@@ -1,4 +1,4 @@
-import { VenueType } from '@/types/Events';
+import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
 import { z } from 'zod';
 

@@ -1,5 +1,5 @@
 import { Attendee } from '@/types/attendee';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
@@ -40,7 +40,8 @@ export const useGetDiscoverEvents = (params: EventParams) => {
   return useInfiniteQuery({
     queryKey: [EVENTS_QUERY_KEY, params],
     queryFn: ({ pageParam }) => eventAPI.getEvent({ ...params, page: Number(pageParam ?? '1') }),
-    getNextPageParam: (lastPage: { metadata?: PaginationMetadata }) => lastPage.metadata?.hasMore ? lastPage.metadata?.page + 1 : undefined,
+    getNextPageParam: (lastPage: { metadata?: PaginationMetadata }) =>
+      lastPage.metadata?.hasMore ? lastPage.metadata?.page + 1 : undefined,
     initialPageParam: 1,
   });
 };
@@ -131,9 +132,9 @@ export const useGetEventById = (eventId?: string) => {
   return useQuery<{ event: Event; totalAttendees: number }, AxiosError<ErrorResponse>>({
     queryFn: eventId
       ? async () => {
-        const response = await eventAPI.getEventById(eventId);
-        return { event: response.event, totalAttendees: response.totalAttendees };
-      }
+          const response = await eventAPI.getEventById(eventId);
+          return { event: response.event, totalAttendees: response.totalAttendees };
+        }
       : undefined,
     enabled: !!eventId,
     queryKey: [EVENTS_QUERY_KEY, eventId],

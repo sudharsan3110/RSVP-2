@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -22,18 +22,18 @@ export const formatDateTime = (date: string) => {
 
 export const helpCenterUrl = process.env.NEXT_PUBLIC_HELP_CENTER_URL ?? '';
 
-
 export interface DateGroup {
   date: Date;
   events: Event[];
 }
 
-
 export const getDateGroups = (events: Event[]): DateGroup[] => {
   const dateGroups: DateGroup[] = [];
 
   events.forEach((event) => {
-    const existingDateGroup = dateGroups.find((group) => dayjs(group.date).isSame(event.eventDate, 'day'));
+    const existingDateGroup = dateGroups.find((group) =>
+      dayjs(group.date).isSame(event.eventDate, 'day')
+    );
 
     if (existingDateGroup) {
       existingDateGroup.events.push(event);
@@ -44,6 +44,3 @@ export const getDateGroups = (events: Event[]): DateGroup[] => {
 
   return dateGroups;
 };
-
-
-

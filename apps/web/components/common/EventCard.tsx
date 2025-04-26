@@ -6,23 +6,26 @@ import Image from 'next/image';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { venueDisplay } from '@/utils/event';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 
 type CardProps = {
   className?: string;
   event: Event;
   type: 'manage' | 'guest';
-}
+};
 
 const Card = ({ className, event, type }: CardProps) => {
   return (
     <article
-      className={cn('space-y-2.5 rounded-[10px] border border-dark-500 bg-dark-900 p-3 hover:scale-105 transition-transform duration-300 ease-in-out', className)}
+      className={cn(
+        'space-y-2.5 rounded-[10px] border border-dark-500 bg-dark-900 p-3 hover:scale-105 transition-transform duration-300 ease-in-out',
+        className
+      )}
     >
       <figure>
         <Image
           priority
-            src={event?.eventImageUrl}
+          src={event?.eventImageUrl}
           width={300}
           height={200}
           className="h-44 w-full rounded-[8px] object-cover"
@@ -68,7 +71,7 @@ const EventCard = ({ className, event, type }: CardProps) => {
 
   return (
     <Link href={`/${event?.slug}`} className={className}>
-      <Card event={event} type={type}  />
+      <Card event={event} type={type} />
     </Link>
   );
 };

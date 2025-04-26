@@ -1,6 +1,6 @@
 import { Attendee, AttendeeStatus } from '@/types/attendee';
 import { Cohost, Role } from '@/types/cohost';
-import { Event, VenueType } from '@/types/Events';
+import { Event, VenueType } from '@/types/events';
 import { User } from '@/types/user';
 export const PHONE_NUMBER_LABEL = /phone number/i;
 export const SAVE_BUTTON_LABEL = /save/i;
@@ -19,7 +19,7 @@ export const invalidPhoneNumberFormats = [
 ];
 
 export const baseUser: User = new User({
-  id: "1",
+  id: '1',
   primaryEmail: 'test@example.com',
   contact: '1234567890',
   eventParticipationEnabled: true,
@@ -69,7 +69,7 @@ export const TEST_COHOSTS: Cohost[] = [
   }),
 ];
 
-export const  TEST_EVENT: Event = new Event({
+export const TEST_EVENT: Event = new Event({
   id: 'event-123',
   creatorId: '1',
   name: 'Tech Conference 2024',
@@ -102,7 +102,7 @@ export const TEST_EVENT_DATA = {
 };
 
 export const TEST_USER_RECENT_REG: User = new User({
-  id: "1",
+  id: '1',
   primaryEmail: 'test@example.com',
   fullName: 'Test User',
   profileIcon: 1,

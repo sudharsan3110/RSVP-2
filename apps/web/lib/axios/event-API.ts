@@ -1,4 +1,4 @@
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import { Attendee, AttendeeStatus } from '@/types/attendee';
 import { CommunicationForm } from '../zod/communication';
 import { CreateEventSubmissionType } from '../zod/event';
@@ -91,21 +91,27 @@ export const eventAPI = {
     return api.post(`event/${eventId}/attendees`);
   },
 
-  getEvent: async (params?: EventParams): Promise<{ events: Event[], metadata: PaginationMetadata }> => {
+  getEvent: async (
+    params?: EventParams
+  ): Promise<{ events: Event[]; metadata: PaginationMetadata }> => {
     const response = await api.get('/event', { params });
     const events = response.data.data.events.map((event: Event) => new Event(event));
     const metadata = response.data.metadata;
     return { events, metadata };
   },
 
-  getMyEvents: async (params?: EventParams): Promise<{ events: Event[], metadata: PaginationMetadata }> => {
+  getMyEvents: async (
+    params?: EventParams
+  ): Promise<{ events: Event[]; metadata: PaginationMetadata }> => {
     const response = await api.get('/event/user', { params });
-    const events = response.data.data.events.map((event:Event) => new Event(event));
+    const events = response.data.data.events.map((event: Event) => new Event(event));
     const metadata = response.data.metadata;
     return { events, metadata };
   },
 
-  getUpcomingEvents: async (params?: EventParams): Promise<{ events: Event[], metadata: PaginationMetadata }> => {
+  getUpcomingEvents: async (
+    params?: EventParams
+  ): Promise<{ events: Event[]; metadata: PaginationMetadata }> => {
     const response = await api.get('/event/upcoming', { params });
     const events = response.data.data.map((event: Event) => new Event(event));
     const metadata = response.data.metadata;
@@ -140,9 +146,14 @@ export const eventAPI = {
     return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
   },
 
-  getEventBySlug: async (slug: string): Promise<{ event: Event, totalAttendees: number } | undefined> => {
+  getEventBySlug: async (
+    slug: string
+  ): Promise<{ event: Event; totalAttendees: number } | undefined> => {
     const response = await api.get(`/event/slug/${slug}`);
-    return { event: new Event(response.data.data.event), totalAttendees: response.data.data.totalAttendees };
+    return {
+      event: new Event(response.data.data.event),
+      totalAttendees: response.data.data.totalAttendees,
+    };
   },
 
   cancelEventAttendee: async (eventId: string) => {

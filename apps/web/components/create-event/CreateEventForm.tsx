@@ -3,7 +3,7 @@
 import { useCreateEvent } from '@/lib/react-query/event';
 import { fileFromUrl } from '@/lib/utils';
 import { CreateEventFormType, CreateEventSubmissionType } from '@/lib/zod/event';
-import { VenueType } from '@/types/Events';
+import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
 import axios from 'axios';
 import { useState } from 'react';
@@ -55,7 +55,7 @@ const CreateEventForm = () => {
       name,
       category,
       description,
-      eventImageUrl:eventImageUrl.url ?? '',
+      eventImageUrl: eventImageUrl.url ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
       venueUrl: venueType === VenueType.Virtual ? location : undefined,
@@ -67,11 +67,11 @@ const CreateEventForm = () => {
     };
 
     if (data.eventImageUrl.file && data.eventImageUrl.signedUrl) {
-      setIsLoading(true)
+      setIsLoading(true);
       const imageFile = await fileFromUrl(data.eventImageUrl.file, 'event-image');
       await axios.put(data.eventImageUrl.signedUrl, imageFile);
       mutate(submissionData);
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

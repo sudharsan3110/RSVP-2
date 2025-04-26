@@ -3,7 +3,7 @@ import eventImageSrc from '@/public/images/demo-event-image.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Icons } from '../common/Icon';
-import { Event } from '@/types/Events';
+import { Event } from '@/types/events';
 import dayjs from 'dayjs';
 import { getDateGroups } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -20,7 +20,6 @@ const Timeline = ({ events }: { events?: Event[] }) => {
       </div>
     );
   }
-  
 
   const timelineData = getDateGroups(events);
 
@@ -66,8 +65,12 @@ const Timeline = ({ events }: { events?: Event[] }) => {
                         </CardHeader>
 
                         <CardContent className="flex flex-col gap-1 p-0 pt-2">
-                          <p className="text-base font-bold leading-[19.6px]">{dayjs(event.startTime).format('HH:mm A, DD MMM YYYY')}</p>
-                          <p className="text-sm font-medium leading-[19.6px]">{event.venueAddress}</p>
+                          <p className="text-base font-bold leading-[19.6px]">
+                            {dayjs(event.startTime).format('HH:mm A, DD MMM YYYY')}
+                          </p>
+                          <p className="text-sm font-medium leading-[19.6px]">
+                            {event.venueAddress}
+                          </p>
                         </CardContent>
                       </div>
                       <div className="flex flex-row items-center justify-start gap-3 pt-2 text-sm font-semibold text-white">
