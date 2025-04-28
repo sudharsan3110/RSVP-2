@@ -80,6 +80,7 @@ async function processEventNotifications() {
 
     await Promise.all(emailPromises);
   } catch (error) {
+    console.error('Failed to process event notifications:', error);
     throw error;
   } finally {
     await prisma.$disconnect();

@@ -27,7 +27,7 @@ const PhoneNumberForm = ({ user }: Props) => {
   };
 
   const onSubmit = async (data: PhoneNumberFormType) => {
-    let contact = data.contact ?? undefined;
+    const contact = data.contact ?? undefined;
     mutate(
       { contact },
       {
@@ -58,11 +58,7 @@ const PhoneNumberForm = ({ user }: Props) => {
           >
             Reset
           </Button>
-          <Button
-            type="submit"
-            radius="sm"
-            disabled={!form.formState.isDirty || isPending}
-          >
+          <Button type="submit" radius="sm" disabled={!form.formState.isDirty || isPending}>
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

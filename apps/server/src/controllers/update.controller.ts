@@ -32,7 +32,7 @@ export const sendMessageController = catchAsync(
     const getUserDetails = await UserRepository.findById(event.creatorId);
     if (!getUserDetails?.id) return res.status(404).json({ message: 'User not found' });
 
-    logger.info('Creating message in sendMessageController ...')
+    logger.info('Creating message in sendMessageController ...');
     const notificationData = {
       content: data.content,
       eventId: param.eventId as string,
@@ -88,7 +88,7 @@ export const sendMessageController = catchAsync(
 export const uploadEventImageController = catchAsync(
   async (req: IAuthenticatedRequest<{}, {}, {}>, res) => {
     const fileName = req.query.filename;
-    logger.info('Getting pre-signed url in uploadEventImageController ...')
+    logger.info('Getting pre-signed url in uploadEventImageController ...');
     const response = await generatePresignedUrl(fileName as string);
     return res.status(200).json(response);
   }
@@ -106,7 +106,7 @@ export const getMessageController = catchAsync(
     const event = await EventRepository.findById(param.eventId as string);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    logger.info('Getting all messages in  getMessageController...')
+    logger.info('Getting all messages in  getMessageController...');
     const messages = await UpdateRepository.findAllById(param.eventId as string);
     return res.status(200).json(messages);
   }

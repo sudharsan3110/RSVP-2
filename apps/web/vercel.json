@@ -1,8 +1,8 @@
 {
-    "rewrites": [
-        {
-            "source": "/api/(.*)",
-            "destination": "https://api.rsvp.kim/v1/$1"
-        }
-    ]
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://api.rsvp.kim/v1/$1"
+    }
+  ]
 }

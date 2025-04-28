@@ -50,16 +50,17 @@ const EventCategoryFilter = (props: TagType) => {
         aria-label="Tags"
       >
         <div className="flex flex-nowrap gap-3 md:flex-wrap md:justify-start">
-
           {tags.map((tag, index) => (
             <span
               key={index}
               onClick={() => tagClickHandler(tag.value)}
-              className={`relative flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-[8px] px-3 py-1 text-sm font-medium text-black transition-all duration-200 ${eventCategoryColors[tag.value as keyof typeof eventCategoryColors]
-                } ${props.selectedTag === tag.value
+              className={`relative flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-[8px] px-3 py-1 text-sm font-medium text-black transition-all duration-200 ${
+                eventCategoryColors[tag.value as keyof typeof eventCategoryColors]
+              } ${
+                props.selectedTag === tag.value
                   ? 'scale-105 border-2 border-white bg-opacity-80 shadow-md'
                   : 'border border-transparent opacity-80 hover:opacity-100'
-                }`}
+              }`}
             >
               {tag.label}
               {props.selectedTag === tag.value && (

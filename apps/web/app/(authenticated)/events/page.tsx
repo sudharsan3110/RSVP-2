@@ -186,7 +186,10 @@ const Events = () => {
 
           <section className="mt-1"></section>
         </section>
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="events-list">
+        <div
+          className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          data-testid="events-list"
+        >
           {data?.events?.map((eventData) => (
             <EventCard event={eventData} key={eventData.id} type="manage" />
           ))}

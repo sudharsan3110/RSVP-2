@@ -33,7 +33,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
     eventId: id as string,
     sortBy: 'registrationTime',
   });
-  let usersData = data?.attendees || [];
+  const usersData = data?.attendees || [];
 
   const toggleCohostSelectionDialog = (isOpen: boolean) => {
     setIsCohostSelectionDialogOpen(isOpen);
@@ -105,9 +105,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                             src={attendee.user?.profileIconUrl}
                             alt={attendee.user?.fullName}
                           />
-                          <AvatarFallback>
-                            {attendee.user?.initials}
-                          </AvatarFallback>
+                          <AvatarFallback>{attendee.user?.initials}</AvatarFallback>
                         </Avatar>
                         <div className="ml-3 text-left">
                           <p className="text-sm font-medium">{attendee.user?.fullName}</p>
@@ -127,7 +125,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                 ) : (
                   <>
                     <NoResults
-                    className='mt-10'
+                      className="mt-10"
                       title="No User found"
                       message="Please confirm that if user is registered on the platform."
                     />
@@ -139,7 +137,7 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
                         }}
                         className="mt-4"
                       >
-                        Invite {searchQuery.slice(0, 10)}...  as Co-host
+                        Invite {searchQuery.slice(0, 10)}... as Co-host
                       </Button>
                     )}
                   </>

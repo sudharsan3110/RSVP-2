@@ -70,7 +70,7 @@ export const evenTimeOptions: FormSelectOption[] = [
 ];
 
 export const eventCategoryOptions: FormSelectOption[] = [
-  { value: 'meetup', label: 'Meetup', },
+  { value: 'meetup', label: 'Meetup' },
   { value: 'birthday', label: 'Birthday' },
   { value: 'entertainment', label: 'Entertainment' },
   { value: 'conference', label: 'Conference' },
@@ -85,27 +85,26 @@ export const eventCategoryOptions: FormSelectOption[] = [
 ];
 
 export const eventCategoryColors = {
-  "all": 'bg-[#F2F2F2]',
-  "entertainment": 'bg-[#F2F2F2]',
-  'meetup': 'bg-[#EDE9FF]',
-  'hangout': 'bg-[#FFF5D7]',
-  'birthday': 'bg-[#FFECEC]',
-  'concert': 'bg-[#E4FFEA]',
-  'conference': 'bg-[#E0F7FF]',
-  'workshop': 'bg-[#FFE6FB]',
-  'party': 'bg-[#FFD6D6]',
-  'sports': 'bg-[#D6FFEE]',
-  'networking': 'bg-[#D6E4FF]',
-  'exhibition': 'bg-[#F0E6FF]',
-  'festival': 'bg-[#FFF0D6]',
-  'charity': 'bg-[#FFE0E0]',
-  'food': 'bg-[#DAFFD6]',
-  'art': 'bg-[#D6FEFF]',
-  'education': 'bg-[#E6EAFF]',
-  'gaming': 'bg-[#FFECD6]',
-  'others': 'bg-[#F2F2F2]',
+  all: 'bg-[#F2F2F2]',
+  entertainment: 'bg-[#F2F2F2]',
+  meetup: 'bg-[#EDE9FF]',
+  hangout: 'bg-[#FFF5D7]',
+  birthday: 'bg-[#FFECEC]',
+  concert: 'bg-[#E4FFEA]',
+  conference: 'bg-[#E0F7FF]',
+  workshop: 'bg-[#FFE6FB]',
+  party: 'bg-[#FFD6D6]',
+  sports: 'bg-[#D6FFEE]',
+  networking: 'bg-[#D6E4FF]',
+  exhibition: 'bg-[#F0E6FF]',
+  festival: 'bg-[#FFF0D6]',
+  charity: 'bg-[#FFE0E0]',
+  food: 'bg-[#DAFFD6]',
+  art: 'bg-[#D6FEFF]',
+  education: 'bg-[#E6EAFF]',
+  gaming: 'bg-[#FFECD6]',
+  others: 'bg-[#F2F2F2]',
 };
-
 
 export const NO_PLANNED_EVENTS_TITLE = 'No Upcoming Events';
 export const NO_PAST_EVENTS_TITLE = 'No Past Events';
@@ -113,8 +112,7 @@ export const NO_PLANNED_EVENTS_MESSAGE =
   'You’re not attending any events yet. Click Below to navigate to discover events around you!.';
 
 export const NO_EVENT_TITLE = 'No Events Planned';
-export const NO_EVENTS_MESSAGE =
-  'You have no events planned yet. Why not host one?';
+export const NO_EVENTS_MESSAGE = 'You have no events planned yet. Why not host one?';
 export const locationName = [
   {
     value: 'all',

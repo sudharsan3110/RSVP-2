@@ -1,4 +1,4 @@
-import { userAvatarOptions } from "@/utils/constants";
+import { userAvatarOptions } from '@/utils/constants';
 
 export class User {
   id: string;
@@ -44,10 +44,18 @@ export class User {
   }
 
   get initials(): string {
-    return this.fullName?.split(' ').map((name) => name[0]).join('') ?? 'A';
+    return (
+      this.fullName
+        ?.split(' ')
+        .map((name) => name[0])
+        .join('') ?? 'A'
+    );
   }
 
   get profileIconUrl(): string {
-    return userAvatarOptions.find((option) => option.id === this.profileIcon)?.src ?? userAvatarOptions[1].src;
+    return (
+      userAvatarOptions.find((option) => option.id === this.profileIcon)?.src ??
+      userAvatarOptions[1].src
+    );
   }
 }

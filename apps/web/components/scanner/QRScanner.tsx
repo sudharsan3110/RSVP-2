@@ -48,7 +48,9 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
         setIsInitialized(true);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to initialize camera';
-        console.error('QR Scanner Error:', errorMessage);
+        toast.error('Camera Error', {
+          description: errorMessage,
+        });
       }
     };
 

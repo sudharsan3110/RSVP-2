@@ -208,9 +208,7 @@ describe('Sign In Dialog', () => {
 
     render(
       <SigninDialog variant="signin">
-        <Button>
-          Sign In
-        </Button>
+        <Button>Sign In</Button>
       </SigninDialog>
     );
 

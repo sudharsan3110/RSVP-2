@@ -38,7 +38,7 @@ const SecondaryEmailForm = ({ user }: Props) => {
   };
 
   const onSubmit = async (data: SecondaryEmailFormType) => {
-    let secondaryEmail = data.secondaryEmail;
+    const secondaryEmail = data.secondaryEmail;
     mutate(
       { secondaryEmail },
       {

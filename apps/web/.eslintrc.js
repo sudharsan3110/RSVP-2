@@ -16,8 +16,13 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './tsconfig.json',
+    project: ['tsconfig.json'],
     sourceType: 'module',
+    ecmaVersion: 2022,
+    ecmaFeatures: {
+      jsx: true,
+    },
+    tsconfigRootDir: __dirname,
   },
   plugins: ['@typescript-eslint', 'react', 'react-hooks', 'prettier'],
   rules: {
@@ -31,10 +36,13 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     '@next/next/no-img-element': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-empty-object-types': 'off',
   },
   settings: {
     react: {
       version: 'detect',
     },
   },
+  reportUnusedDisableDirectives: true,
 };

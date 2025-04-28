@@ -15,9 +15,7 @@ const AttendeeDetailsContent = ({ attendee }: Props) => {
         </div>
         <Avatar className="h-[60px] w-[60px]">
           <AvatarImage src={attendee?.user?.profileIconUrl} alt={attendee?.user?.fullName} />
-          <AvatarFallback>
-            {attendee?.user?.initials}
-          </AvatarFallback>
+          <AvatarFallback>{attendee?.user?.initials}</AvatarFallback>
         </Avatar>
       </div>
       <div className="space-y-2">

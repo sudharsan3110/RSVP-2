@@ -1,8 +1,6 @@
 import z from 'zod';
 
-const secondaryEmailSchema = z
-  .object({ secondaryEmail: z.string().email().or(z.null()) })
-  .strict();
+const secondaryEmailSchema = z.object({ secondaryEmail: z.string().email().or(z.null()) }).strict();
 
 const contactNumberSchema = z.object({ contact: z.string() }).strict();
 

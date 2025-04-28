@@ -1,6 +1,6 @@
-import { userAvatarOptions } from '@/utils/constants';
 import Image from 'next/image';
 import { useMemo } from 'react';
+import { userAvatarOptions } from '@/utils/constants';
 
 interface ChatMessageProps {
   message: string;
@@ -16,7 +16,7 @@ const ChatMessage = ({ message, time, user }: ChatMessageProps) => {
   const cleanMessage = stripHtml(message);
   const profilePictureUrl = useMemo(() => {
     const profileUrl = userAvatarOptions.find((option) => option.id === user?.profileIcon);
-    return profileUrl?.src ?? userAvatarOptions[0]?.src!;
+    return profileUrl?.src ?? userAvatarOptions[0]?.src;
   }, [user?.profileIcon]);
 
   return (

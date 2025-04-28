@@ -21,14 +21,10 @@ const ErrorScreen = ({ className, message }: ErrorScreenProps) => {
         </div>
         <p className="text-center text-secondary">{message || 'An error occurred'}</p>
         <Link href="/">
-          <Button
-            variant="default"
-            size="default"
-            className="gap-2"
-          >
-            Let's go Back
+          <Button variant="default" size="default" className="gap-2">
+            Let&apos;s go Back
           </Button>
-          </Link>
+        </Link>
       </div>
     </Container>
   );

@@ -35,8 +35,8 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
   const { mutate, isPending } = useSignInMutation();
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
-  const [countdown, setCountdown] = useState(120); 
-  const timerRef = useRef<NodeJS.Timeout | null>(null); 
+  const [countdown, setCountdown] = useState(120);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<SignInFormType>({
     resolver: zodResolver(signInFormSchema),
@@ -46,11 +46,10 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
     mode: 'onSubmit',
   });
 
-  
   const email = form.getValues('email');
 
   const startCountdown = () => {
-    setIsResendDisabled(true); 
+    setIsResendDisabled(true);
     setCountdown(120);
 
     if (timerRef.current) clearInterval(timerRef.current);
@@ -69,7 +68,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
 
   useEffect(() => {
     if (isEmailSent) {
-      startCountdown(); 
+      startCountdown();
     }
 
     return () => {
@@ -100,12 +99,15 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
 
   const handleResend = () => {
     if (!isResendDisabled) {
-      mutate({ email }, {
-        onSuccess: () => {
-          setIsEmailSent(true); 
-          startCountdown(); 
-        },
-      });
+      mutate(
+        { email },
+        {
+          onSuccess: () => {
+            setIsEmailSent(true);
+            startCountdown();
+          },
+        }
+      );
     }
   };
 
@@ -172,11 +174,11 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
               data-testid="resend-btn"
               onClick={handleResend}
             >
-             {isResendDisabled
-  ? `Resend in ${Math.floor(countdown / 60)}:${(countdown % 60)
-      .toString()
-      .padStart(2, '0')}`
-  : 'Click to resend'}
+              {isResendDisabled
+                ? `Resend in ${Math.floor(countdown / 60)}:${(countdown % 60)
+                    .toString()
+                    .padStart(2, '0')}`
+                : 'Click to resend'}
             </Button>
           </div>
         )}

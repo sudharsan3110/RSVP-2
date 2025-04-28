@@ -40,7 +40,9 @@ export const EventHeroSection = () => {
     }
   };
 
-  const percentage = (((data?.totalAttendees || 0) / (data?.event?.capacity || 1)) * 100).toFixed(2);
+  const percentage = (((data?.totalAttendees || 0) / (data?.event?.capacity || 1)) * 100).toFixed(
+    2
+  );
 
   return (
     <div className="mb-10 mt-8 w-full space-y-6">

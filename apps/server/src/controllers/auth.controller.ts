@@ -27,7 +27,7 @@ export const signinController = catchAsync(
       user = await UserRepository.create(email);
     }
 
-    logger.info('Creating token in signinController ...')
+    logger.info('Creating token in signinController ...');
     const token = await UserRepository.createToken(user.id);
     logger.info(`${config.CLIENT_URL}?token=${token}`);
     const emailData = {
@@ -61,7 +61,7 @@ export const verifySigninController = catchAsync(
     const decodedToken = verifyAccessToken(token);
     if (!decodedToken) return res.status(401).json({ message: 'Token expired or invalid' });
 
-    logger.info('Verifying token in verifySigninController ...')
+    logger.info('Verifying token in verifySigninController ...');
     const user = await UserRepository.verifyToken(decodedToken.tokenId);
     if (!user) return res.status(401).json({ message: 'Token expired or invalid' });
 
@@ -116,7 +116,7 @@ export const getMyDataController = catchAsync(async (req: IAuthenticatedRequest,
   const userId = req.userId;
   if (!userId) return res.status(401).json({ message: 'Invalid or expired token' });
 
-  logger.info('Getting user information in getMyDataController ...')
+  logger.info('Getting user information in getMyDataController ...');
   const user = await UserRepository.findById(userId.toString());
   if (!user) return res.status(401).json({ message: 'Invalid or expired token' });
   const { magicToken, refreshToken, ...safeUser } = user;

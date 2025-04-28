@@ -41,10 +41,9 @@ export const eventHostColumns: ColumnDef<Cohost>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => <ActionColumn row={row} />
+    cell: ({ row }) => <ActionColumn row={row} />,
   },
 ];
-
 
 const ActionColumn = ({ row }: { row: Row<Cohost> }) => {
   const host = row.original;
@@ -54,12 +53,8 @@ const ActionColumn = ({ row }: { row: Row<Cohost> }) => {
     deleteCohostMutate({ eventId: host.eventId, cohostId: host.id });
   };
   return (
-    <Button
-      variant="destructive"
-      radius="sm"
-      size="sm"
-      onClick={handleRemoveCohost}
-    >
+    <Button variant="destructive" radius="sm" size="sm" onClick={handleRemoveCohost}>
       Remove Host
-    </Button>);
+    </Button>
+  );
 };

@@ -32,7 +32,8 @@ const TicketPage = () => {
 
   if (loading) return <LoadingScreen className="min-h-screen" />;
 
-  if (!event || !attendee) return <ErrorScreen message="Event not found or attendee not found" className="min-h-screen" />;
+  if (!event || !attendee)
+    return <ErrorScreen message="Event not found or attendee not found" className="min-h-screen" />;
 
   return (
     <div className="container-main my-10">

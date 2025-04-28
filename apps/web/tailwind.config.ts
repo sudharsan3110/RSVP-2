@@ -116,7 +116,7 @@ const config = {
         'zoom-in': 'zoom-in 0.3s ease-in',
         'slide-in-from-top': 'slide-in-from-top 1s ease-in',
         'slide-in-from-bottom': 'slide-in-from-bottom 1s ease-in',
-        'fade-in': 'fade-in 0.5s ease-in'
+        'fade-in': 'fade-in 0.5s ease-in',
       },
     },
   },

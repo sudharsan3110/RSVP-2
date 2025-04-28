@@ -7,7 +7,11 @@ import Timeline from '@/components/planned-events/Timeline';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { EventParams } from '@/lib/axios/event-API';
 import { useGetUpcomingEvents } from '@/lib/react-query/event';
-import { NO_PLANNED_EVENTS_MESSAGE, NO_PLANNED_EVENTS_TITLE, NO_PAST_EVENTS_TITLE } from '@/utils/constants';
+import {
+  NO_PLANNED_EVENTS_MESSAGE,
+  NO_PLANNED_EVENTS_TITLE,
+  NO_PAST_EVENTS_TITLE,
+} from '@/utils/constants';
 import { Suspense, useState } from 'react';
 
 const PlannedEvents = () => {
@@ -43,70 +47,62 @@ const PlannedEvents = () => {
   );
 };
 
-
 const UpcomingEvents = () => {
   const [filter, setFilter] = useState<EventParams>({
     page: 1,
     limit: 10,
     startDate: new Date(),
-  })
+  });
   const today = new Date();
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useGetUpcomingEvents(filter);
+  const { data, isLoading, isError } = useGetUpcomingEvents(filter);
 
+  if (isLoading) return <LoadingScreen />;
 
-  if (isLoading) return <LoadingScreen />
-
-  if (isError) return <div>Error loading events</div>
-  if (data?.events.length === 0) return <NoResults
-    image="/images/no-event-image.svg"
-    altText="no-event-image"
-    imgWidth={200}
-    imgHeight={200}
-    title={NO_PLANNED_EVENTS_TITLE}
-    message={NO_PLANNED_EVENTS_MESSAGE}
-  />
+  if (isError) return <div>Error loading events</div>;
+  if (data?.events.length === 0)
+    return (
+      <NoResults
+        image="/images/no-event-image.svg"
+        altText="no-event-image"
+        imgWidth={200}
+        imgHeight={200}
+        title={NO_PLANNED_EVENTS_TITLE}
+        message={NO_PLANNED_EVENTS_MESSAGE}
+      />
+    );
   return <Timeline events={data?.events} />;
 };
-
-
 
 const PastEvents = () => {
   const [filter, setFilter] = useState<EventParams>({
     page: 1,
     limit: 10,
     endDate: new Date(),
-  })
+  });
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useGetUpcomingEvents(filter);
+  const { data, isLoading, isError } = useGetUpcomingEvents(filter);
 
-  if (isLoading) return <LoadingScreen />
+  if (isLoading) return <LoadingScreen />;
 
-  if (isError) return <div>Error loading events</div>
+  if (isError) return <div>Error loading events</div>;
 
-  if (data?.events.length === 0) return <NoResults
-    image="/images/no-event-image.svg"
-    altText="no-event-image"
-    imgWidth={200}
-    imgHeight={200}
-    title={NO_PLANNED_EVENTS_TITLE}
-    message={NO_PLANNED_EVENTS_MESSAGE}
-    showBtn={true}
-    btnText="Discover Events"
-    btnLink="/discover"
-  />
+  if (data?.events.length === 0)
+    return (
+      <NoResults
+        image="/images/no-event-image.svg"
+        altText="no-event-image"
+        imgWidth={200}
+        imgHeight={200}
+        title={NO_PAST_EVENTS_TITLE}
+        message={NO_PLANNED_EVENTS_MESSAGE}
+        showBtn={true}
+        btnText="Discover Events"
+        btnLink="/discover"
+      />
+    );
 
   return <Timeline events={data?.events} />;
-
-}
-
+};
 
 export default function Page() {
   return (

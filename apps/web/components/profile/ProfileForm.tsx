@@ -15,7 +15,7 @@ import { profileFormSchema, ProfileFormType } from '@/lib/zod/profile';
 import { Loader2 } from 'lucide-react';
 
 type Props = {
-      user: User;
+  user: User;
 };
 
 const ProfileForm = ({ user }: Props) => {
@@ -26,7 +26,7 @@ const ProfileForm = ({ user }: Props) => {
       fullName: user.fullName ?? '',
       location: user.location ?? '',
       bio: user?.bio ?? '',
-      profileIcon: user?.profileIcon  ?? 1,
+      profileIcon: user?.profileIcon ?? 1,
       twitter: user?.twitter ?? '',
       website: user?.website ?? '',
       instagram: user?.instagram ?? '',
@@ -50,7 +50,7 @@ const ProfileForm = ({ user }: Props) => {
 
   const profilePictureUrl = useMemo(() => {
     const profileUrl = userAvatarOptions.find((option) => option.id === profileIcon);
-    return profileUrl?.src ?? userAvatarOptions[0]?.src!;
+    return profileUrl?.src ?? userAvatarOptions[0]?.src;
   }, [profileIcon]);
 
   return (

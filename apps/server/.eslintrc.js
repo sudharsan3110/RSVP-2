@@ -8,6 +8,10 @@ module.exports = {
   parserOptions: {
     project: './tsconfig.json',
     sourceType: 'module',
+    ecmaVersion: 2022,
+    ecmaFeatures: {
+      jsx: true,
+    },
   },
   plugins: ['@typescript-eslint'],
   rules: {
@@ -16,5 +20,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/ban-types': 'off',
+    '@typescript-eslint/no-empty-object-type': 'off',
   },
+  reportUnusedDisableDirectives: true,
 };

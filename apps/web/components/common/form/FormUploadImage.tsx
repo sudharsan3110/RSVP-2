@@ -51,7 +51,8 @@ function FormImageUpload<
       const fileUrl = URL.createObjectURL(file);
       const url = signedUrl.split('?')[0];
 
-      if (fileUrl && url) setValue(name, { file: fileUrl, url: url, signedUrl: signedUrl } as TFieldValues[TName]);
+      if (fileUrl && url)
+        setValue(name, { file: fileUrl, url: url, signedUrl: signedUrl } as TFieldValues[TName]);
 
       setUploadProgress(100);
     } catch (error) {
@@ -72,7 +73,7 @@ function FormImageUpload<
           {label && <FormLabel className={cn('text-white', labelClassName)}>{label}</FormLabel>}
           <FormControl>
             <div className="mt-4 space-y-4">
-              {value.file &&
+              {value.file && (
                 <div className="relative aspect-square w-full rounded-lg bg-secondary">
                   <img
                     src={value.file || value.url}
@@ -89,7 +90,7 @@ function FormImageUpload<
                     <X size={18} />
                   </Button>
                 </div>
-              }
+              )}
               {!value.file && (
                 <div className="flex flex-col items-center gap-4">
                   <input

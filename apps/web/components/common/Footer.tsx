@@ -34,7 +34,11 @@ const Footer = ({ className }: PropsWithClassName) => {
             )}
 
             <p className="text-sm font-medium">
-              © {currentYear} <Link href="https://team.shiksha/" target='_blank' className='hover:underline'>Team Shiksha</Link>. All rights reserved.
+              © {currentYear}{' '}
+              <Link href="https://team.shiksha/" target="_blank" className="hover:underline">
+                Team Shiksha
+              </Link>
+              . All rights reserved.
             </p>
           </div>
           <div className="flex flex-wrap gap-x-14 gap-y-8 md:gap-x-28">
@@ -65,7 +69,6 @@ const Footer = ({ className }: PropsWithClassName) => {
           </div>
         </Container>
       </div>
-
     </footer>
   );
 };

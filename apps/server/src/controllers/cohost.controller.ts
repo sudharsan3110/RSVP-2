@@ -20,7 +20,7 @@ export const getEventHostController = catchAsync(
     const { eventId } = req.params;
     if (!eventId) return res.status(400).json({ message: 'Event Id is required' });
 
-    logger.info('Getting all host in getEventHostController ...')
+    logger.info('Getting all host in getEventHostController ...');
     const hosts = await CohostRepository.findAllByEventId(eventId);
     if (!hosts) return res.status(404).json({ message: 'No hosts found' });
 
@@ -49,11 +49,12 @@ export const addEventHostController = catchAsync(
         .status(403)
         .json({ message: API_MESSAGES.COHOST.ADD.INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED });
 
-    logger.info('Getting host details in addEventHostController ...')
+    logger.info('Getting host details in addEventHostController ...');
     const user = await UserRepository.findbyEmail(email);
     if (!user) return res.status(404).json({ message: API_MESSAGES.USER.NOT_FOUND });
 
-    if (!user.isCompleted) return res.status(400).json({ message: API_MESSAGES.USER.PROFILE_INCOMPLETE });
+    if (!user.isCompleted)
+      return res.status(400).json({ message: API_MESSAGES.USER.PROFILE_INCOMPLETE });
     const hostExists = await CohostRepository.findByUserIdAndEventId(user.id, eventId);
     if (hostExists) return res.status(400).json({ message: 'Host already exists' });
 

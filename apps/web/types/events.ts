@@ -1,4 +1,4 @@
-import { Cohost } from "./cohost";
+import { Cohost } from './cohost';
 
 export enum VenueType {
   Physical = 'PHYSICAL',
@@ -66,9 +66,10 @@ export class Event {
 
   checkCohostByUserName(userName?: string) {
     if (!userName) return false;
-    return this.cohosts?.find((cohost) => cohost.user?.userName?.toLowerCase() === userName.toLowerCase());
+    return this.cohosts?.find(
+      (cohost) => cohost.user?.userName?.toLowerCase() === userName.toLowerCase()
+    );
   }
-
 
   checkCreator(creatorId: string) {
     return this.creator?.id === creatorId;
