@@ -15,10 +15,9 @@ import { useCurrentUser } from '@/lib/react-query/auth';
 import { useGetEventById } from '@/lib/react-query/event';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 const ManageEventPage = () => {
-  const { data: userData } = useCurrentUser();
   const { id } = useParams<{ id: string }>();
   const queryParams = useQueryParams({ defaultValues: { tab: 'overview' } });
   const tabValue = queryParams.get('tab', 'overview') as string | null;
@@ -35,10 +34,6 @@ const ManageEventPage = () => {
 
   const { event } = data;
 
-  const isCoHost = event.checkCohost(userData?.userName || '');
-
-  if (!isCoHost) return notFound();
-
   return (
     <Container className="min-h-screen space-y-8 py-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row">
@@ -54,7 +49,7 @@ const ManageEventPage = () => {
       </header>
       <main>
         <Tabs defaultValue="overview" value={tabValue!} onValueChange={handleTabChange}>
-          <ScrollArea className="w-full sm:h-[cacl(100vw-36px)]">
+          <ScrollArea className="w-full sm:w-[calc(100vw-36px)]">
             <TabsList variant="underline" className="w-full">
               <TabsTrigger variant="underline" value="overview">
                 Overview

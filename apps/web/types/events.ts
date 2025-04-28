@@ -66,9 +66,7 @@ export class Event {
 
   checkCohostByUserName(userName?: string) {
     if (!userName) return false;
-    return this.cohosts?.find(
-      (cohost) => cohost.user?.userName?.toLowerCase() === userName.toLowerCase()
-    );
+    return this.cohosts?.findIndex((cohost) => cohost.user?.userName?.toLowerCase() === userName.toLowerCase()) !== -1;
   }
 
   checkCreator(creatorId: string) {
