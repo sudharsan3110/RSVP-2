@@ -113,7 +113,7 @@ export const eventAPI = {
     params?: EventParams
   ): Promise<{ events: Event[]; metadata: PaginationMetadata }> => {
     const response = await api.get('/event/upcoming', { params });
-    const events = response.data.data.map((event: Event) => new Event(event));
+    const events = response.data.data.events.map((event: Event) => new Event(event));
     const metadata = response.data.metadata;
     return { events, metadata };
   },
@@ -163,7 +163,7 @@ export const eventAPI = {
 
   updateAttendeeStatus: async (eventId: string, attendeeId: string, allowedStatus: boolean) => {
     return api.patch(`/event/${eventId}/attendee/${attendeeId}/status`, {
-      allowedStatus
+      allowedStatus,
     });
   },
 

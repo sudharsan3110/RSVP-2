@@ -52,29 +52,28 @@ const UpcomingEvents = () => {
     page: 1,
     limit: 10,
     startDate: new Date(),
-  })
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useGetUpcomingEvents(filter);
+  });
+  const { data, isLoading, isError } = useGetUpcomingEvents(filter);
 
   if (isLoading) return <LoadingScreen />;
 
-  if (isLoading) return <LoadingScreen />
+  if (isLoading) return <LoadingScreen />;
 
-  if (isError) return <div>Error loading events</div>
-  if (data?.events.length === 0) return <NoResults
-    image="/images/no-event-image.svg"
-    altText="no-event-image"
-    imgWidth={200}
-    showBtn
-    btnText="Discover Events"
-    btnLink="/discover"
-    imgHeight={200}
-    title={NO_PLANNED_EVENTS_TITLE}
-    message={NO_PLANNED_EVENTS_MESSAGE}
-  />
+  if (isError) return <div>Error loading events</div>;
+  if (data?.events.length === 0)
+    return (
+      <NoResults
+        image="/images/no-event-image.svg"
+        altText="no-event-image"
+        imgWidth={200}
+        showBtn
+        btnText="Discover Events"
+        btnLink="/discover"
+        imgHeight={200}
+        title={NO_PLANNED_EVENTS_TITLE}
+        message={NO_PLANNED_EVENTS_MESSAGE}
+      />
+    );
   return <Timeline events={data?.events} />;
 };
 

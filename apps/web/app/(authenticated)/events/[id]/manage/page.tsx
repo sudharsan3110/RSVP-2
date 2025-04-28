@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useQueryParams from '@/hooks/useSearchParams';
-import { useCurrentUser } from '@/lib/react-query/auth';
 import { useGetEventById } from '@/lib/react-query/event';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
