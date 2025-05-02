@@ -9,6 +9,7 @@ export const useEventCommunications = (eventId: string) => {
   return useQuery({
     queryKey: ['event-communications', eventId],
     queryFn: () => eventAPI.getEventCommunications(eventId),
+    select: (data) => data.data,
   });
 };
 

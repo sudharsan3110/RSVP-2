@@ -44,8 +44,8 @@ export const eventAPI = {
 
   getEventById: async (eventId: string) =>
     api.get(`/event/${eventId}`).then((res) => ({
-      totalAttendees: res.data.totalAttendees as number,
-      event: new Event(res.data.event),
+      totalAttendees: res.data.data.totalAttendees as number,
+      event: new Event(res.data.data.event),
     })),
 
   editEventSlug: async (payload: { eventId: string; slug: string }) =>
@@ -176,8 +176,8 @@ export const eventAPI = {
 
   /* Cohost API */
   getEventCohosts: async (eventId: string): Promise<Cohost[]> => {
-    const hosts = await api.get(`/cohosts/events/${eventId}`);
-    return hosts.data.hosts.map((host: Cohost) => new Cohost(host));
+    const { data } = await api.get(`/cohosts/events/${eventId}`);
+    return data.data.map((host: Cohost) => new Cohost(host));
   },
 
   createEventCohost: async (eventId: string, payload: { cohostEmail: string; role: string }) => {

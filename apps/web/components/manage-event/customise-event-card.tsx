@@ -64,7 +64,7 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
             <h2 className="line-clamp-2 text-left text-xl font-semibold text-white">
               {event.name}
             </h2>
-            <p className="text-sm text-secondary">Hosted By - {event.creator?.full_name}</p>
+            <p className="text-sm text-secondary">Hosted By - {event.creator?.fullName}</p>
           </header>
           <div className="flex items-center gap-3.5">
             <MapPinIcon className="size-5 shrink-0" />

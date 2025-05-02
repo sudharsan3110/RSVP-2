@@ -29,9 +29,9 @@ export class Event {
   totalAttendees?: number;
   creator?: {
     id: string;
-    full_name: string;
+    fullName: string;
     username: string;
-    profile_icon: string;
+    profileIcon: string;
   };
   cohosts?: Cohost[];
 

@@ -178,7 +178,21 @@ export class AttendeeRepository {
 
     return await this.attendeePaginator.paginate(
       { page, limit, sortBy, sortOrder },
-      { where: whereClause, include: { user: true } }
+      {
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              id: true,
+              fullName: true,
+              primaryEmail: true,
+              contact: true,
+              userName: true,
+              profileIcon: true,
+            },
+          },
+        },
+      }
     );
   }
 
@@ -187,7 +201,7 @@ export class AttendeeRepository {
    * @param eventId - The unique ID of the event.
    * @returns An array of attendees with user details.
    */
-  static async findAllAttendees(eventId: string){
+  static async findAllAttendees(eventId: string) {
     const attendees = await prisma.attendee.findMany({
       where: {
         eventId,
@@ -248,7 +262,7 @@ export class AttendeeRepository {
    * @param status - The new status.
    * @returns The updated attendee object.
    */
-  static async updateAttendeeStatus( id: string, allowedStatus: boolean) {
+  static async updateAttendeeStatus(id: string, allowedStatus: boolean) {
     return await prisma.attendee.update({
       where: {
         id,
@@ -273,8 +287,7 @@ export class AttendeeRepository {
     });
   }
 
-
-  /** 
+  /**
    * Cancels an attendee record by ID.
    * @param id - The unique ID of the attendee.
    * @returns The updated attendee object with `status` set to `CANCELLED`.
@@ -288,7 +301,6 @@ export class AttendeeRepository {
       },
     });
   }
-
 
   /**
    * Restores a soft-deleted attendee record by ID.

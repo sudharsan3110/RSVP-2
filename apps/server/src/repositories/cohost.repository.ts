@@ -42,7 +42,16 @@ export class CohostRepository {
     return await prisma.cohost.findMany({
       where: { eventId, isDeleted: false },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            primaryEmail: true,
+            contact: true,
+            userName: true,
+            profileIcon: true,
+          },
+        },
         event: true,
       },
     });

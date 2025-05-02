@@ -89,9 +89,9 @@ export const TEST_EVENT: Event = new Event({
   updatedAt: new Date(),
   creator: {
     id: '1',
-    full_name: 'Event Creator',
+    fullName: 'Event Creator',
     username: 'eventcreator',
-    profile_icon: 'creator-icon',
+    profileIcon: 'creator-icon',
   },
   cohosts: TEST_COHOSTS,
 });

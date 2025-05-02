@@ -145,10 +145,10 @@ export const useGetAttendeeByEventId = (filter: GetAttendeeByEventIdParams) => {
   return useQuery<{ attendees: Attendee[]; total: number }, AxiosError<ErrorResponse>>({
     queryFn: async () => {
       const response = await eventAPI.getEventAttendees(filter);
-      const attendees = Array.from(response.data.data).map(
+      const attendees = Array.from(response.data.data.data).map(
         (attendee) => new Attendee(attendee as Attendee)
       );
-      return { attendees, total: response.data.total };
+      return { attendees, total: response.data.data.metadata.total };
     },
     queryKey: ['attendees', filter],
   });
@@ -264,6 +264,7 @@ export const useGetEventCohosts = (eventId: string) => {
   return useQuery({
     queryKey: [EVENT_COHOST_KEY, eventId],
     queryFn: () => eventAPI.getEventCohosts(eventId),
+    enabled: !!eventId,
   });
 };
 
