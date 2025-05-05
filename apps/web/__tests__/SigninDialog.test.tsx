@@ -184,10 +184,10 @@ describe('Sign In Dialog', () => {
 
     const resendButton = await screen.findByTestId('resend-btn');
     expect(resendButton).toBeDisabled();
-    expect(resendButton).toHaveTextContent('Please wait 2 minutes...');
+    expect(resendButton).toHaveTextContent('Resend in 2:00');
 
     act(() => {
-      vi.runAllTimers();
+      vi.advanceTimersByTime(120000);
     });
 
     expect(resendButton).not.toBeDisabled();
@@ -199,7 +199,7 @@ describe('Sign In Dialog', () => {
     const mockMutateWithDelay = vi.fn((_, { onSuccess }) => {
       setTimeout(() => {
         onSuccess();
-      }, 1000);
+      }, 120000);
     });
     (useSignInMutation as any).mockReturnValue({
       mutate: mockMutateWithDelay,

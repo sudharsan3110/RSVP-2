@@ -6,6 +6,7 @@ export interface IAuthenticatedRequest<
   ReqBody = { accessToken?: string; refreshToken?: string },
 > extends Request<P, ResBody, ReqBody> {
   userId?: string;
+  Role?: string;
 }
 
 export interface IEventIdRequest

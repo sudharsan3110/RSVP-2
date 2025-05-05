@@ -12,6 +12,16 @@ export const ENDPOINT_FILTER_EVENTS = '/filter';
 export const ENDPOINT_USER_EVENTS = '/user';
 export const ENDPOINT_AUTH_ME = '/me';
 
+export const FAKE_USER_ID2 ={
+  id: 'test-user-2',
+  email: 'user@example.com',
+  full_name: 'User Example',
+  username: 'userexample',
+  is_completed: true,
+  magicToken: 'secret-magic-token',
+  refreshToken: 'secret-refresh-token',
+}
+
 export const FAKE_EVENT = {
   id: 'event-123',
   slug: 'annual-conference',
@@ -21,7 +31,7 @@ export const FAKE_EVENT = {
     username: 'teamshiksha',
     profile_icon: null,
   },
-  Cohost: [],
+  Cohost: [FAKE_USER_ID2.id],
 };
 
 export const FAKE_ATTENDEE_COUNT = 15;

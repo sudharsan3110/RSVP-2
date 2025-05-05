@@ -16,11 +16,12 @@ export const eventManageMiddleware = (allowedRoles: Role[]) => {
     if (!eventId) {
       return res.status(400).json({ message: 'Event ID is required' });
     }
-
-    const hasAccess = await CohostRepository.FindhostOrCohost(userId, eventId, allowedRoles);
-
+    
+    const hasAccess = await CohostRepository.FindhostOrCohost(userId, eventId, allowedRoles,true);
+    
     if (!hasAccess) return res.status(403).json({ message: 'Unauthorized access' });
-
+    req.Role = hasAccess as Role;
+    
     return next();
   });
 };

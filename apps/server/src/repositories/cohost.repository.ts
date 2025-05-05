@@ -117,13 +117,14 @@ export class CohostRepository {
    * @param userId - The unique ID of the user.
    * @param eventId - The unique ID of the event.
    * @param roles - An array of roles to check (default: all roles).
-   * @returns A boolean indicating whether the user is a host or cohost with the specified roles.
+   * @returns The cohost object if found, otherwise null.
    */
   static async FindhostOrCohost(
     userId: string,
     eventId: string,
-    roles: Role[] = [Role.CREATOR, Role.MANAGER, Role.CELEBRITY, Role.READ_ONLY]
-  ): Promise<boolean> {
+    roles: Role[] = [Role.CREATOR, Role.MANAGER, Role.CELEBRITY, Role.READ_ONLY],
+    returnType: boolean = false,
+  ): Promise<Role | boolean> {
     const cohost = await prisma.cohost.findFirst({
       where: {
         userId,
@@ -133,6 +134,11 @@ export class CohostRepository {
         },
       },
     });
-    return cohost !== null;
+  
+    if (returnType) {
+      return cohost?.role ?? false;
+    }
+  
+    return !!cohost;
   }
 }

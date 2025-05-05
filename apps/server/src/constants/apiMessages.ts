@@ -9,6 +9,7 @@ export const API_MESSAGES = {
         'Insufficient permissions: You need to be a Creator or Manager to add hosts to an event',
     },
     REMOVE: {
+      NOT_A_COHOST : 'User is not a cohost of this event',
       SUCCESS: 'Cohost removed successfully',
       INSUFFICIENT_PERMS_MANAGER_OR_CREATOR_REQUIRED:
         'Insufficient permissions: You need to be a "Creator" to remove other "Manager"s',
@@ -19,8 +20,10 @@ export const API_MESSAGES = {
       CANNOT_REMOVE_SELF: 'Cannot remove self from hosts',
     },
   },
+  EVENT_AND_USER_REQUIRED: 'Event Id and cohost user is required',
   EVENT: {
     NOT_FOUND: `Event not found or doesn't exists`,
+
   },
   ALLOW_GUEST: {
     UNAUTHORIZED_ACCESS: 'Unauthorized access',
