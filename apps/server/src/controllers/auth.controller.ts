@@ -2,7 +2,7 @@ import config from '@/config/config';
 import { IAuthenticatedRequest } from '@/interface/middleware';
 import { UserRepository } from '@/repositories/user.repository';
 import { TokenExpiredError } from '@/utils/apiError';
-import { SuccessMsgResponse, SuccessResponse } from '@/utils/apiResponse';
+import { ForbiddenResponse, SuccessMsgResponse, SuccessResponse } from '@/utils/apiResponse';
 import catchAsync from '@/utils/catchAsync';
 import { generateAccessToken, generateRefreshToken, verifyAccessToken } from '@/utils/jwt';
 import logger from '@/utils/logger';
@@ -20,11 +20,16 @@ import z from 'zod';
 export const signinController = catchAsync(
   async (req: Request<{}, {}, z.infer<typeof SigninSchema>>, res) => {
     const { email } = req.body;
-    let user;
-    const existinguser = await UserRepository.findbyEmail(email);
+    const existingUser = await UserRepository.findbyEmail(email, null);
+    if (existingUser && existingUser.isDeleted) {
+      return new ForbiddenResponse(
+        "Your account has been deactivated. Please contact admin to restore your account."
+      ).send(res);
+    }
 
-    if (existinguser) {
-      user = existinguser;
+    let user;
+    if (existingUser) {
+      user = existingUser;
     } else {
       user = await UserRepository.create(email);
     }
