@@ -51,14 +51,22 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
         <CardDescription> </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-12 md:flex-row">
-        <Image
-          priority
-          src={event.eventImageUrl}
-          width={300}
-          height={300}
-          className="aspect-square w-full rounded-[8px] object-cover md:h-40 md:w-40"
-          alt="event-image"
-        />
+        <figure className="relative md:h-40 md:w-40 aspect-square">
+          <div className="relative w-full h-full overflow-hidden rounded-lg">
+            <div
+              className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
+              style={{ backgroundImage: `url(${event?.eventImageUrl})` }}
+            />
+            <Image
+              priority
+              src={event.eventImageUrl}
+              width={300}
+              height={300}
+              className="relative z-10 aspect-square w-full rounded-[8px] object-contain md:h-40 md:w-40"
+              alt="event-image"
+            />
+          </div>
+        </figure>
         <div className="flex flex-col justify-between gap-4">
           <header className="space-y-1">
             <h2 className="line-clamp-2 text-left text-xl font-semibold text-white">
@@ -69,7 +77,7 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
           <div className="flex items-center gap-3.5">
             <MapPinIcon className="size-5 shrink-0" />
             <p className="line-clamp-2 max-w-sm truncate font-medium text-white">
-              {event.venueAddress}
+              {event.venueAddress ?? 'To be announced'}
             </p>
           </div>
           <div className="flex gap-3.5 text-sm">

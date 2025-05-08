@@ -18,26 +18,36 @@ const EventPreview = ({ className, children, venueType }: EventPreviewProps) => 
   const image = watch('eventImageUrl');
 
   const removeImage = () => {
-    setValue('eventImageUrl', {
-      signedUrl: '',
-      file: '',
-      url: '',
-    });
+    setValue(
+      'eventImageUrl',
+      {
+        signedUrl: '',
+        file: '',
+        url: '',
+      },
+      { shouldDirty: true, shouldTouch: true }
+    );
   };
 
   return (
     <section className={className}>
       {image.file && (
-        <figure className="relative mx-auto mb-4 aspect-square md:w-3/4">
-          <img
-            src={image.file}
-            alt="Event Image"
-            className="aspect-square overflow-clip rounded-lg object-cover mt-2 md:mt-0"
-          />
+        <figure className="relative mx-auto mb-4 w-full max-w-3xl aspect-square">
+          <div className="relative w-full h-full overflow-hidden rounded-lg">
+            <div
+              className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
+              style={{ backgroundImage: `url(${image.file})` }}
+            />
+            <img
+              src={image.file}
+              alt="Event Image"
+              className="relative z-10 mx-auto h-full object-contain"
+            />
+          </div>
           <Button
-            className="absolute -right-2 -top-2 z-10 hidden bg-opacity-80 hover:bg-destructive hover:bg-opacity-100 hover:text-white md:flex"
+            className="absolute -top-3 -right-3 z-20 bg-opacity-80 hover:bg-destructive hover:bg-opacity-100 hover:text-white"
             onClick={removeImage}
-            variant="secondary"
+            variant="destructive"
             size="icon"
             radius="sm"
           >

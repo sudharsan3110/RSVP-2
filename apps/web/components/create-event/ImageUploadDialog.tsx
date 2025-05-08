@@ -54,7 +54,12 @@ const ImageUploadDialog = ({ children }: Props) => {
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      if (image && url) setValue('eventImageUrl', { file: image, url: url, signedUrl: signedUrl });
+      if (image && url)
+        setValue(
+          'eventImageUrl',
+          { file: image, url: url, signedUrl: signedUrl },
+          { shouldDirty: true, shouldTouch: true }
+        );
     }
   };
   return (

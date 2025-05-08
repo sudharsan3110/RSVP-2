@@ -118,7 +118,7 @@ const AutheticatedHeader = () => {
         </Container>
       </nav>
 
-      <div className="fixed bottom-0 left-0 right-0 flex h-16 w-full origin-bottom transform items-center justify-between gap-3 bg-background px-4 md:hidden">
+      <div className="fixed z-30 bottom-0 left-0 right-0 flex h-16 w-full origin-bottom transform items-center justify-between gap-3 bg-background px-4 md:hidden">
         <Link href="/events">
           <Button
             className="text-md group text-white hover:bg-primary active:bg-primary"

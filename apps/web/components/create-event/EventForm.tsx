@@ -19,40 +19,64 @@ import FormImageUpload from '../common/form/FormUploadImage';
 import Tiptap from '../ui/tiptap';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import EventPreview from './EventPreview';
+
 type Props = {
+  isEditing?: boolean;
   defaultValues: CreateEventFormType;
   isLoading: boolean;
   onSubmit: (data: CreateEventFormType) => void;
 };
 
-const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
+const EventForm = ({ isEditing, defaultValues, isLoading, onSubmit }: Props) => {
   const allowedDate = new Date();
   allowedDate.setHours(0, 0, 0, 0);
   allowedDate.setDate(allowedDate.getDate() + 1);
+
+  let submitLabel = 'Create Event';
+
+  if (isLoading) {
+    submitLabel = isEditing ? 'Updating...' : 'Creating...';
+  } else if (isEditing) {
+    submitLabel = 'Update Event';
+  }
 
   const form = useForm<CreateEventFormType>({
     resolver: zodResolver(createEventFormSchema),
     defaultValues: defaultValues,
   });
 
-  const venueType = form.watch('venueType');
+  const {
+    control,
+    watch,
+    getValues,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty },
+  } = form;
+
+  const venueType = watch('venueType');
+
+  const handleFormSubmit = async (data: CreateEventFormType) => {
+    await onSubmit(data);
+    reset(data);
+  };
 
   return (
     <Form {...form}>
       <section className="flex items-start justify-between gap-20">
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(handleFormSubmit)}
           className="flex max-w-[585px] grow flex-col gap-[1.125rem]"
         >
           <FormImageUpload
-            control={form.control}
+            control={control}
             name="eventImageUrl"
             className="lg:hidden"
             label="Event Image"
           />
-          <FormInput label="Event Name" name="name" control={form.control} />
+          <FormInput label="Event Name" name="name" control={control} />
           <FormCombobox
-            control={form.control}
+            control={control}
             label="Category"
             name="category"
             placeholder="Select a category"
@@ -60,48 +84,43 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
           />
           <div className="flex max-w-96 items-end gap-3.5">
             <FormGroupSelect
-              control={form.control}
+              control={control}
               label="From"
               name="fromTime"
               defaultValue="17:00"
               options={evenTimeOptions}
             />
             <FormDatePicker
-              control={form.control}
+              control={control}
               name="fromDate"
               iconClassName="opacity-100"
-              // disabled={(date) => date <= new Date(new Date().setHours(0, 0, 0, 0))}
               disabled={(date) => date < allowedDate}
             />
           </div>
-          {form.formState.errors.fromDateTime && (
-            <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.fromDateTime.message}
-            </p>
+          {errors.fromDateTime && (
+            <p className="text-sm font-medium text-destructive">{errors.fromDateTime.message}</p>
           )}
           <div className="flex max-w-96 items-end gap-3.5">
             <FormGroupSelect
-              control={form.control}
+              control={control}
               label="To"
               name="toTime"
               defaultValue="20:00"
               options={evenTimeOptions}
             />
             <FormDatePicker
-              control={form.control}
+              control={control}
               name="toDate"
               iconClassName="opacity-100"
               initialFocus={true}
-              disabled={(date) => date < form.getValues('fromDate')}
+              disabled={(date) => date < getValues('fromDate')}
             />
           </div>
-          {form.formState.errors.toDateTime && (
-            <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.toDateTime.message}
-            </p>
+          {errors.toDateTime && (
+            <p className="text-sm font-medium text-destructive">{errors.toDateTime.message}</p>
           )}
           <FormField
-            control={form.control}
+            control={control}
             name="description"
             render={({ field }) => (
               <FormItem>
@@ -112,7 +131,7 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
           />
           <div>
             <FormField
-              control={form.control}
+              control={control}
               name="venueType"
               render={({ field }) => (
                 <FormItem>
@@ -159,23 +178,23 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
             {venueType !== VenueType.Later && (
               <FormInput
                 name="location"
-                control={form.control}
+                control={control}
                 placeholder={venueType === VenueType.Physical ? 'Address' : 'Event Link'}
                 className="mt-2"
               />
             )}
           </div>
           <FormSwitch
-            control={form.control}
+            control={control}
             name="hostPermissionRequired"
             className="!mt-1 data-[state=checked]:bg-[linear-gradient(188deg,#AC6AFF_53.34%,#DF7364_116.65%)]"
             thumbClassName="bg-white"
-            containerClassName="flex flex-col lg:flex-row justify-between lg:items-end gap-3"
+            containerClassName="flex flex-row justify-between items-start gap-3"
             label="Required Approval"
             description="Needs host permission to join event"
           />
           <FormInput
-            control={form.control}
+            control={control}
             label="Capacity"
             name="capacity"
             type="number"
@@ -191,20 +210,20 @@ const EventForm = ({ defaultValues, isLoading, onSubmit }: Props) => {
               <EventPreview />
             </DrawerContent>
           </Drawer>
-          {form.formState.errors.eventImageUrl && (
+          {errors.eventImageUrl && (
             <p className="hidden text-sm font-medium text-destructive lg:block">
-              {form.formState.errors.eventImageUrl.message}
+              {errors.eventImageUrl.message}
             </p>
           )}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isDirty}
             className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
           >
-            {isLoading ? 'Saving...' : 'Save Event'}
+            {submitLabel}
           </Button>
         </form>
-        <EventPreview className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 pb-[28px] pt-8 lg:block" />
+        <EventPreview className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 py-7 lg:block" />
       </section>
     </Form>
   );

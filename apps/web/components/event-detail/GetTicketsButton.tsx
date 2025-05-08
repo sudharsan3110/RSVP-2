@@ -18,12 +18,13 @@ type GetTicketsButtonProps = {
 
 const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
-  const { mutate, isSuccess } = useCreateAttendee();
+  const { mutate, isSuccess, isPending } = useCreateAttendee();
   const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
   const {
     mutate: cancelRegistration,
     isSuccess: cancelRegistrationSuccess,
     reset: resetCancelRegistration,
+    isPending: isCancelling,
   } = useSoftDeleteAttendee();
 
   const handleGetTickets = async () => {
@@ -66,7 +67,7 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
           className="w-full rounded-full px-4 py-2"
           onClick={handleCancelRegistration}
         >
-          Cancel Registration
+          {isCancelling ? 'Cancelling...' : 'Cancel Registration'}
         </Button>
       </div>
     );
@@ -90,7 +91,7 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
 
   return (
     <Button className="mt-4 w-full rounded-full px-4 py-2" onClick={handleGetTickets}>
-      Get Tickets
+      {isPending ? 'Processing...' : 'Get Tickets'}
     </Button>
   );
 };

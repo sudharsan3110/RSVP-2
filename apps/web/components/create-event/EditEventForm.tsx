@@ -91,7 +91,7 @@ const EditEventForm = () => {
   };
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <p className="flex items-center justify-center h-full w-full">Loading...</p>;
   }
 
   return (
@@ -100,7 +100,12 @@ const EditEventForm = () => {
         <p className="font-medium text-secondary">Fill in the form below to create a new event</p>
       </div>
       <Separator className="my-9 bg-separator" />
-      <EventForm defaultValues={defaultValues} isLoading={isPending} onSubmit={onSubmit} />
+      <EventForm
+        isEditing
+        defaultValues={defaultValues}
+        isLoading={isPending}
+        onSubmit={onSubmit}
+      />
     </>
   );
 };

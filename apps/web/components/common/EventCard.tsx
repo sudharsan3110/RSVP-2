@@ -22,15 +22,21 @@ const Card = ({ className, event, type }: CardProps) => {
         className
       )}
     >
-      <figure>
-        <Image
-          priority
-          src={event?.eventImageUrl}
-          width={300}
-          height={200}
-          className="h-44 w-full rounded-[8px] object-cover"
-          alt={'demo-event-image'}
-        />
+      <figure className="relative mx-auto mb-4 w-full aspect-auto">
+        <div className="relative w-full h-full overflow-hidden rounded-lg">
+          <div
+            className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
+            style={{ backgroundImage: `url(${event?.eventImageUrl})` }}
+          />
+          <Image
+            priority
+            src={event?.eventImageUrl}
+            width={300}
+            height={200}
+            className="relative z-10 h-44 w-full rounded-[8px] object-contain"
+            alt="event-image"
+          />
+        </div>
       </figure>
       <section className="flex flex-col">
         <span className="text-xl font-bold line-clamp-1">{event?.name}</span>

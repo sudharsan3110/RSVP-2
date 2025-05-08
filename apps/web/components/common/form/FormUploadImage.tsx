@@ -36,11 +36,15 @@ function FormImageUpload<
   const [isUploading, setIsUploading] = useState(false);
   const { setValue } = useFormContext<TFieldValues>();
   const removeImage = () => {
-    setValue(name, {
-      signedUrl: '',
-      file: '',
-      url: '',
-    } as TFieldValues[TName]);
+    setValue(
+      name,
+      {
+        signedUrl: '',
+        file: '',
+        url: '',
+      } as TFieldValues[TName],
+      { shouldDirty: true, shouldTouch: true }
+    );
   };
 
   const handleSave = async (file: File) => {
@@ -52,7 +56,10 @@ function FormImageUpload<
       const url = signedUrl.split('?')[0];
 
       if (fileUrl && url)
-        setValue(name, { file: fileUrl, url: url, signedUrl: signedUrl } as TFieldValues[TName]);
+        setValue(name, { file: fileUrl, url: url, signedUrl: signedUrl } as TFieldValues[TName], {
+          shouldDirty: true,
+          shouldTouch: true,
+        });
 
       setUploadProgress(100);
     } catch (error) {
@@ -74,14 +81,20 @@ function FormImageUpload<
           <FormControl>
             <div className="mt-4 space-y-4">
               {value.file && (
-                <div className="relative aspect-square w-full rounded-lg bg-secondary">
-                  <img
-                    src={value.file || value.url}
-                    alt="Uploaded Image"
-                    className="aspect-square rounded-lg bg-white object-cover"
-                  />
+                <figure className="relative mx-auto mb-4 w-full max-w-3xl aspect-square">
+                  <div className="relative w-full h-full overflow-hidden rounded-lg">
+                    <div
+                      className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
+                      style={{ backgroundImage: `url(${value.file})` }}
+                    />
+                    <img
+                      src={value.file || value.url}
+                      alt="Uploaded Image"
+                      className="relative z-10 mx-auto h-full object-contain"
+                    />
+                  </div>
                   <Button
-                    className="absolute -right-2 -top-2 z-10"
+                    className="absolute -top-3 -right-3 z-20 bg-opacity-80 hover:bg-destructive hover:bg-opacity-100 hover:text-white"
                     onClick={removeImage}
                     variant="destructive"
                     size="icon"
@@ -89,7 +102,7 @@ function FormImageUpload<
                   >
                     <X size={18} />
                   </Button>
-                </div>
+                </figure>
               )}
               {!value.file && (
                 <div className="flex flex-col items-center gap-4">

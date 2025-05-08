@@ -34,14 +34,22 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
           className="absolute inset-0 hidden h-full w-full scale-110 object-cover blur-md md:block"
         />
         <div className="relative mx-auto h-[300px] w-full object-cover sm:h-[350px] sm:w-[600px] md:h-[400px] md:w-[800px] lg:h-[600px] lg:w-[970px]">
-          <Image
-            src={event.eventImageUrl}
-            width={1920}
-            height={1080}
-            priority
-            className="h-full w-full object-cover"
-            alt="event-detail-desktop"
-          />
+          <figure className="relative h-full w-full">
+            <div className="relative w-full h-full overflow-hidden rounded-lg">
+              <div
+                className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
+                style={{ backgroundImage: `url(${event?.eventImageUrl})` }}
+              />
+              <Image
+                src={event.eventImageUrl}
+                width={1920}
+                height={1080}
+                priority
+                className="relative z-10 h-full w-full object-contain"
+                alt="event-detail-desktop"
+              />
+            </div>
+          </figure>
         </div>
       </div>
       <article className="my-6 flex flex-col items-start md:my-12">
