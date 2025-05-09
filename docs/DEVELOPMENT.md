@@ -44,7 +44,89 @@ This diagram is a valuable tool for developers as it helps in understanding the 
 
 ## UML Diagrams
 
-TBC - put all the UML diagrams here
+### Repository UML diagram
+```mermaid
+classDiagram
+    class UserRepository {
+        +static findById(id: string)
+        +static findByUserName(userName: string)
+        +static findbyEmail(primaryEmail: string, isDeleted?: boolean|null)
+        +static findAllByIds(ids: string[])
+        +static create(primaryEmail: string)
+        +static createToken(userId: string)
+        +static verifyToken(tokenId: string)
+        +static updateProfile(id: string, data: any)
+        +static updateRefreshToken(userId: string, refreshToken: string|null)
+        +static delete(userId: string)
+    }
+
+    class EventRepository {
+        +static findEvents(filters: EventFilter)
+        +static findbySlug(slug: string)
+        +static findAllPlannedEvents(params: object)
+        +static findById(eventId: string)
+        +static findAllPopularEvents(take: number)
+        +static create(eventDetails: ICreateEvent)
+        +static update(eventId: string, data: Partial~Event~)
+        +static updateSlug(eventId: string, creatorId: string, slug: string)
+        +static cancel(eventId: string, creatorId: string)
+        +static delete(eventId: string, creatorId: string)
+    }
+
+    class AttendeeRepository {
+        +static attendeePaginator: Paginator
+        +static findById(id: string)
+        +static findByQrToken(qrToken: string, eventId?: string)
+        +static findByUserIdAndEventId(userId: string, eventId: string, isDeleted?: boolean)
+        +static findAllByEventId(eventId: string)
+        +static findRegisteredEventsByUser(params: IRegisteredEvent)
+        +static findAttendeesByEventId(params: IAttendeesByEvent)
+        +static findAllAttendees(eventId: string)
+        +static create(data: Prisma.AttendeeCreateInput)
+        +static update(id: string, data: Prisma.AttendeeUpdateInput)
+        +static countAttendees(eventId: string)
+        +static updateAttendeeStatus(id: string, allowedStatus: boolean)
+        +static cancel(id: string)
+        +static restore(id: string, status: Status)
+    }
+
+    class CohostRepository {
+        +static findById(id: string)
+        +static findByUserIdAndEventId(userId: string, eventId: string)
+        +static findAllByEventId(eventId: string)
+        +static create(data: Prisma.CohostCreateManyInput)
+        +static update(id: string, data: Prisma.CohostUpdateInput)
+        +static removeCoHost(cohostId: string, eventId: string)
+        +static delete(id: string)
+        +static FindhostOrCohost(userId: string, eventId: string, roles?: Role[], returnType?: boolean)
+    }
+
+    class UpdateRepository {
+        +static findAllById(eventId: string)
+        +static create(notificationDetails: IUpdate)
+    }
+
+    UserRepository --> EventRepository: cascade deletes
+    UserRepository --> AttendeeRepository: cascade deletes
+    UserRepository --> CohostRepository: cascade deletes
+    UserRepository --> UpdateRepository: cascade deletes
+    EventRepository --> AttendeeRepository: references
+    EventRepository --> CohostRepository: references
+    EventRepository --> UserRepository: references creator
+    AttendeeRepository --> UserRepository: references user
+    AttendeeRepository --> EventRepository: references event
+    CohostRepository --> UserRepository: references user
+    CohostRepository --> EventRepository: references event
+    UpdateRepository --> UserRepository: references user
+    UpdateRepository --> EventRepository: references event
+```
+
+#### About This Diagram
+- **Repository Classes**: Each box represents a repository class that provides methods for interacting with a specific data type.
+- **Static Methods**: All repository methods are static, following our implementation pattern.
+- **Relationships**:
+  - Solid arrows from UserRepository show cascade delete operations (when a user is deleted, related records are also marked as deleted)
+  - Other arrows show reference relationships between repositories
 
 ## Endpoints
 
