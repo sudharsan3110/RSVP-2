@@ -15,6 +15,7 @@ import FormProvider from '../ui/form-provider';
 import { ScrollArea } from '../ui/scroll-area';
 import Tiptap from '../ui/tiptap';
 import ChatMessage from './ChatMessage';
+import { LoaderCircle } from 'lucide-react';
 
 interface CommunicationProps {
   eventId: string;
@@ -95,7 +96,7 @@ const Communication = ({ eventId }: CommunicationProps) => {
             )}
           />
           <Button className="float-end mt-2 rounded-[6px]" disabled={form.formState.isSubmitting}>
-            Send
+            {form.formState.isSubmitting ? <LoaderCircle className="animate-spin" /> : <>Send</>}
           </Button>
         </FormProvider>
       </section>

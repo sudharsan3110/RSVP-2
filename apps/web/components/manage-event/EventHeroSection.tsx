@@ -76,6 +76,7 @@ export const EventHeroSection = () => {
           <button
             onClick={downloadExcel}
             className="flex h-[96px] w-full items-center rounded-lg bg-blue p-4"
+            disabled={isPending}
           >
             <div className="flex h-[64px] w-[64px] items-center justify-center rounded-lg bg-white">
               <Icons.download className="text-xl" />

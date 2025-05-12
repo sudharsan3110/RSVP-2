@@ -9,6 +9,7 @@ import {
 import Link from 'next/link';
 import SigninDialog from '../auth/SigninDialog';
 import { Button } from '../ui/button';
+import { LoaderCircle } from 'lucide-react';
 
 type GetTicketsButtonProps = {
   eventId: string;
@@ -18,7 +19,7 @@ type GetTicketsButtonProps = {
 
 const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
-  const { mutate, isSuccess, isPending } = useCreateAttendee();
+  const { mutate, isSuccess, isPending: createAttendeeLoading } = useCreateAttendee();
   const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
   const {
     mutate: cancelRegistration,
@@ -63,11 +64,12 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
           </Button>
         </Link>
         <Button
-          variant="destructive"
+          variant={isCancelling ? 'subtle' : 'destructive'}
           className="w-full rounded-full px-4 py-2"
           onClick={handleCancelRegistration}
+          disabled={isCancelling}
         >
-          {isCancelling ? 'Cancelling...' : 'Cancel Registration'}
+          {isCancelling ? <LoaderCircle className="animate-spin" /> : <>Cancel Registration</>}
         </Button>
       </div>
     );
@@ -90,8 +92,13 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
   }
 
   return (
-    <Button className="mt-4 w-full rounded-full px-4 py-2" onClick={handleGetTickets}>
-      {isPending ? 'Processing...' : 'Get Tickets'}
+    <Button
+      variant={createAttendeeLoading ? 'subtle' : 'default'}
+      className="mt-4 w-full rounded-full px-4 py-2"
+      onClick={handleGetTickets}
+      disabled={createAttendeeLoading}
+    >
+      {createAttendeeLoading ? <LoaderCircle className="animate-spin" /> : <>Get Tickets</>}
     </Button>
   );
 };

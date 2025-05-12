@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/lib/react-query/auth';
 import { useCancelEvent, useGetAttendeeDetails, useGetEventById } from '@/lib/react-query/event';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import dayjs from 'dayjs';
-import { Link, Presentation } from 'lucide-react';
+import { Link, Presentation, LoaderCircle } from 'lucide-react';
 import { notFound, useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import QRCode from 'react-qr-code';
@@ -20,7 +20,7 @@ const TicketPage = () => {
   const { data: userData, isLoading: isUserLoading } = useCurrentUser();
   const { data: attendee, isLoading: isAttendeeLoading } = useGetAttendeeDetails(id);
   const { data: eventData, isLoading: isEventLoading } = useGetEventById(id);
-  const { mutate: cancelEvent } = useCancelEvent();
+  const { mutate: cancelEvent, isPending: cancelEventloading } = useCancelEvent();
 
   const event = eventData?.event;
 
@@ -64,10 +64,11 @@ const TicketPage = () => {
           ) : null}
           <Button
             className="h-12 w-full rounded-[6px] border bg-dark-900 md:w-1/2"
-            variant="destructive"
+            variant={cancelEventloading ? 'subtle' : 'destructive'}
             onClick={handleEventCancel}
+            disabled={cancelEventloading}
           >
-            Cancel ticket
+            {cancelEventloading ? <LoaderCircle className="animate-spin" /> : <>Cancel ticket</>}
           </Button>
         </div>
       </div>
