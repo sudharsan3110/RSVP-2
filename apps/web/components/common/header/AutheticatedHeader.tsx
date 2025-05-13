@@ -31,11 +31,21 @@ const AutheticatedHeader = () => {
 
   const profileIcon = userAvatarOptions.find((option) => option.id === userData?.profileIcon);
   const getActiveClass = (path: string) => {
-    return pathname === path ? 'text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white';
+    return pathname === path
+      ? 'text-white bg-primary font-medium hover:bg-primary'
+      : 'text-gray-400 hover:bg-gray-700 hover:text-white';
   };
+
+  const getIconActiveClass = (path: string) => {
+    return pathname === path ? 'text-white' : 'text-gray-400 group-hover:text-white';
+  };
+
   const eventsActiveClass = getActiveClass('/events');
+  const eventsIconActiveClass = getIconActiveClass('/events');
   const plannedActiveClass = getActiveClass('/planned');
+  const plannedIconActiveClass = getIconActiveClass('/planned');
   const discoverActiveClass = getActiveClass('/discover');
+  const discoverIconActiveClass = getIconActiveClass('/discover');
 
   const handleLogout = () => {
     if (userData?.id) {
@@ -56,7 +66,7 @@ const AutheticatedHeader = () => {
               <Link href="/events">
                 <Button className={`text-md group ${eventsActiveClass}`} variant={'ghost'}>
                   <TicketIcon
-                    className={`mr-2 h-5 w-5 group-hover:text-white ${eventsActiveClass}`}
+                    className={`mr-2 h-5 w-5 group-hover:text-white ${eventsIconActiveClass}`}
                   />
                   My Events
                 </Button>
@@ -64,7 +74,7 @@ const AutheticatedHeader = () => {
               <Link href="/planned">
                 <Button className={`text-md group ${plannedActiveClass}`} variant={'ghost'}>
                   <CalendarDateRangeIcon
-                    className={`mr-2 h-5 w-5 text-gray-400 group-hover:text-white ${plannedActiveClass}`}
+                    className={`mr-2 h-5 w-5 text-gray-400 group-hover:text-white ${plannedIconActiveClass}`}
                   />
                   Upcoming Events
                 </Button>
@@ -72,7 +82,7 @@ const AutheticatedHeader = () => {
               <Link href="/discover">
                 <Button className={`text-md group ${discoverActiveClass}`} variant={'ghost'}>
                   <Icons.discover
-                    className={`mr-2 h-5 w-5 group-hover:text-white ${discoverActiveClass} `}
+                    className={`mr-2 h-5 w-5 group-hover:text-white ${discoverIconActiveClass}`}
                   />
                   Discover
                 </Button>
