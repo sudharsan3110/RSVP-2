@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <QueryProvider>
-      <html lang="en">
+      <html lang="en" className="scroll-pt-[90px]">
         <body className={cn(plusJakartaSans.className, 'dark flex min-h-screen flex-col')}>
           <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster richColors />
