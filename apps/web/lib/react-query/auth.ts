@@ -2,7 +2,7 @@
 
 import { User } from '@/types/user';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authAPI, SigninPayload, VerifySigninPayload } from '../axios/auth-API';
@@ -12,14 +12,18 @@ interface VerifySignInResponse {
   data: { user: User };
 }
 
+interface ErrorResponse {
+  message: string;
+}
+
 export const useSignInMutation = () => {
-  return useMutation<AxiosResponse, Error, SigninPayload>({
+  return useMutation<AxiosResponse, AxiosError<ErrorResponse>, SigninPayload>({
     mutationFn: authAPI.signin,
     onSuccess: () => {
       toast.success('Magic link sent to your email. Please check your inbox.');
     },
-    onError: () => {
-      toast.error('Failed to send magic link. Please try again.');
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || 'Failed to send magic link. Please try again.');
     },
   });
 };

@@ -66,9 +66,9 @@ const Events = () => {
     <Container className="mt-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row mb-12">
         <div className="space-y-2">
-          <p className="text-3xl">
+          <h1 className="text-3xl font-semibold">
             Manage Your <span className="text-primary">Events</span>
-          </p>
+          </h1>
         </div>
       </header>
       {data?.events?.length != 0 ? (

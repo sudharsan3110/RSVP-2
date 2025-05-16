@@ -20,11 +20,10 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
 
       try {
         // Check for camera permissions
-        const hasPermission = await QrScanner.hasCamera();
-        if (!hasPermission) {
-          toast.error('Camera Error', {
-            description:
-              'Camera is blocked or not accessible. Please allow camera access and reload.',
+        const deviceHasCamera = await QrScanner.hasCamera();
+        if (!deviceHasCamera) {
+          toast.error('Camera Not Found', {
+            description: 'Please make sure you have a camera on your device.',
           });
           return;
         }
@@ -47,8 +46,11 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
         await qrScanner.start();
         setIsInitialized(true);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to initialize camera';
-        toast.error('Camera Error', {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Camera is blocked or not accessible. Please allow camera access and reload.';
+        toast.error('Failed to Access Camera', {
           description: errorMessage,
         });
       }

@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { CheckCircleIcon } from '@heroicons/react/16/solid';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
 import dayjs from 'dayjs';
 import Image from 'next/image';

@@ -1,5 +1,4 @@
 import { Attendee } from '@/types/attendee';
-import { Event } from '@/types/events';
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';

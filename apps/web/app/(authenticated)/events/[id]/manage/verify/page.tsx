@@ -7,6 +7,7 @@ import TicketInput from '@/components/scanner/TicketInput';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import { eventAPI } from '@/lib/axios/event-API';
 import { useGetEventById } from '@/lib/react-query/event';
 import { Attendee } from '@/types/attendee';
@@ -23,6 +24,7 @@ const ScannerPage = () => {
   const [error, setError] = useState<string | null>(null);
   const eventId = useParams().id as string;
   const { data } = useGetEventById(eventId);
+  const isMobile = useMediaQuery('(max-width: 639px)');
 
   const handleCodeScanned = async (code: string) => {
     setIsLoading(true);
@@ -73,8 +75,8 @@ const ScannerPage = () => {
           </TabsList>
 
           <TabsContent value="qr-code">
-            <div className="sm:hidden">
-              {attendeeData ? (
+            {isMobile ? (
+              attendeeData ? (
                 <AttendeeDetails
                   error={error}
                   loading={isLoading}
@@ -83,11 +85,10 @@ const ScannerPage = () => {
                 />
               ) : (
                 <QRScanner onScan={handleCodeScanned} />
-              )}
-            </div>
-            <div className="hidden sm:block">
+              )
+            ) : (
               <QRScanner onScan={handleCodeScanned} />
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="ticket-number">
