@@ -1,7 +1,10 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AttendeeStatus } from '@/types/attendee';
 import { Event, VenueType } from '@/types/events';
+import { Cohost, Role } from '@/types/cohost';
+import { User } from '@/types/user';
 import { userAvatarOptions } from '@/utils/constants';
+
 export const venueDisplay = (event: Event | null) => {
   switch (event?.venueType) {
     case VenueType.Physical:
@@ -44,4 +47,14 @@ export const getBadgeVariant = (status: AttendeeStatus) => {
 export const getProfilePictureUrl = (profileIConId: number | string) => {
   const profileUrl = userAvatarOptions.find((option) => option.id === profileIConId);
   return profileUrl?.src ?? userAvatarOptions[0].src;
+};
+
+export const isCurrentUserCohost = (userData?: User, cohosts: Cohost[] = []): boolean => {
+  return cohosts.some(
+    (cohost) =>
+      cohost.user &&
+      cohost.role === Role.MANAGER &&
+      userData &&
+      cohost.user.userName === userData.userName
+  );
 };

@@ -6,6 +6,7 @@ import { Cohost, Role } from '@/types/cohost';
 import { useDeleteCohost } from '@/lib/react-query/event';
 import { VERCEL_AVATAR_BASE_URL } from '@/utils/constants';
 import { ColumnDef, Row } from '@tanstack/react-table';
+import { useCurrentUser } from '@/lib/react-query/auth';
 
 // Define the shape of your data
 export type EventHost = {
@@ -46,15 +47,21 @@ export const eventHostColumns: ColumnDef<Cohost>[] = [
 ];
 
 const ActionColumn = ({ row }: { row: Row<Cohost> }) => {
-  const host = row.original;
   const { mutate: deleteCohostMutate } = useDeleteCohost();
+  const { data: userData } = useCurrentUser();
+
+  const host = row.original;
   if (host.role === Role.CREATOR) return <></>;
+
+  const isCohost = host.user && userData && host.user.userName === userData.userName;
+
   const handleRemoveCohost = () => {
     deleteCohostMutate({ eventId: host.eventId, cohostId: host.id });
   };
+
   return (
     <Button variant="destructive" radius="sm" size="sm" onClick={handleRemoveCohost}>
-      Remove Host
+      {isCohost ? 'Leave' : 'Remove Host'}
     </Button>
   );
 };

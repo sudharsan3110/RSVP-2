@@ -302,6 +302,7 @@ export const useDeleteCohost = () => {
     onSuccess: (resp, { eventId }) => {
       toast.success(resp?.message);
       queryClient.invalidateQueries({ queryKey: [EVENT_COHOST_KEY, eventId] });
+      queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
     },
     onError: (resp: AxiosError) => {
       const errMsg = resp.response?.data as ErrorResponse | undefined;

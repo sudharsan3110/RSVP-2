@@ -206,6 +206,7 @@ export class EventRepository {
           },
         },
         cohosts: {
+          where: { isDeleted: false },
           select: {
             role: true,
             user: {

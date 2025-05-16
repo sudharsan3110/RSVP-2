@@ -159,6 +159,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
 
             {event?.isActive && (
               <GetTicketsButton
+                cohosts={event.cohosts}
                 creatorId={event.creatorId}
                 eventId={event.id}
                 isPermissionRequired={event?.hostPermissionRequired}

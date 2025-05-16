@@ -9,15 +9,23 @@ import {
 import Link from 'next/link';
 import SigninDialog from '../auth/SigninDialog';
 import { Button } from '../ui/button';
+import { Cohost } from '@/types/cohost';
+import { isCurrentUserCohost } from '@/utils/event';
 import { LoaderCircle } from 'lucide-react';
 
 type GetTicketsButtonProps = {
+  cohosts?: Cohost[];
   eventId: string;
   isPermissionRequired: boolean;
   creatorId: string;
 };
 
-const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicketsButtonProps) => {
+const GetTicketsButton = ({
+  cohosts,
+  eventId,
+  isPermissionRequired,
+  creatorId,
+}: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess, isPending: createAttendeeLoading } = useCreateAttendee();
   const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
@@ -27,6 +35,8 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
     reset: resetCancelRegistration,
     isPending: isCancelling,
   } = useSoftDeleteAttendee();
+
+  const isCohost = isCurrentUserCohost(userData, cohosts);
 
   const handleGetTickets = async () => {
     resetCancelRegistration();
@@ -45,7 +55,7 @@ const GetTicketsButton = ({ eventId, isPermissionRequired, creatorId }: GetTicke
     );
   }
 
-  if (userData?.id === creatorId) {
+  if (userData?.id === creatorId || isCohost) {
     return (
       <Link href={`/events/${eventId}/manage`} className="w-full">
         <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2 text-center">

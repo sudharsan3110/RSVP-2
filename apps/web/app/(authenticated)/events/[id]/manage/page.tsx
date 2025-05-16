@@ -11,6 +11,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useQueryParams from '@/hooks/useSearchParams';
 import { useGetEventById } from '@/lib/react-query/event';
+import { useCurrentUser } from '@/lib/react-query/auth';
+import { isCurrentUserCohost } from '@/utils/event';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -21,7 +23,10 @@ const ManageEventPage = () => {
   const queryParams = useQueryParams({ defaultValues: { tab: 'overview' } });
   const tabValue = queryParams.get('tab', 'overview') as string | null;
 
-  const { data, isLoading, isError } = useGetEventById(id);
+  const { data, isLoading, isError, isSuccess } = useGetEventById(id);
+  const { data: userData } = useCurrentUser();
+
+  const isCohost = isCurrentUserCohost(userData, data?.event.cohosts);
 
   const handleTabChange = (value: string) => {
     queryParams.set('tab', value);
@@ -64,15 +69,17 @@ const ManageEventPage = () => {
               <TabsTrigger variant="underline" value="communication">
                 Communication
               </TabsTrigger>
-              <TabsTrigger variant="underline" value="more">
-                More
-              </TabsTrigger>
+              {!isCohost && (
+                <TabsTrigger variant="underline" value="more">
+                  More
+                </TabsTrigger>
+              )}
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
           <TabsContent className="mt-6" value="overview">
-            <OverviewSection />
+            <OverviewSection eventData={data?.event} isSuccess={isSuccess} />
           </TabsContent>
 
           <TabsContent className="mt-6" value="guests">

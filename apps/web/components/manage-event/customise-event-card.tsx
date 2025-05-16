@@ -1,4 +1,8 @@
 'use client';
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound, useParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -7,25 +11,31 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useGetEventById } from '@/lib/react-query/event';
-import { formatDateTime } from '@/lib/utils';
-import { CalendarIcon, Check, MapPinIcon } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
-import { useState } from 'react';
 import { Button } from '../ui/button';
+import { formatDateTime } from '@/lib/utils';
+import { Event } from '@/types/events';
+import { CalendarIcon, Check, MapPinIcon } from 'lucide-react';
+import { useCurrentUser } from '@/lib/react-query/auth';
+import { isCurrentUserCohost } from '@/utils/event';
 
-const CustomiseEventCard = ({ className }: PropsWithClassName) => {
+type CustomiseEventCarDProps = {
+  className: string;
+  event: Event;
+  isSuccess: boolean;
+};
+
+const CustomiseEventCard = ({ className, event, isSuccess }: CustomiseEventCarDProps) => {
   const { id } = useParams();
   if (typeof id !== 'string') notFound();
 
-  const { data, isSuccess } = useGetEventById(id);
+  const { data: userData } = useCurrentUser();
+
+  const isCohost = isCurrentUserCohost(userData, event.cohosts);
+
   const [showCopied, setShowCopied] = useState(false);
 
   if (!isSuccess) return notFound();
 
-  const { event } = data;
   const { date, time } = formatDateTime(event.startTime.toISOString());
   const { date: endDate, time: endTime } = formatDateTime(event.endTime.toISOString());
 
@@ -98,11 +108,13 @@ const CustomiseEventCard = ({ className }: PropsWithClassName) => {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4 sm:flex-row">
-        <Link href={`/events/${id}/edit`} className="w-full sm:flex-1">
-          <Button className="w-full sm:flex-1" radius="sm" variant="tertiary">
-            Edit Event
-          </Button>
-        </Link>
+        {!isCohost && (
+          <Link href={`/events/${id}/edit`} className="w-full sm:flex-1">
+            <Button className="w-full sm:flex-1" radius="sm" variant="tertiary">
+              Edit Event
+            </Button>
+          </Link>
+        )}
         <Button className="w-full sm:flex-1" radius="sm" variant="tertiary" onClick={handleShare}>
           {showCopied ? (
             <div className="flex items-center justify-center gap-2">
