@@ -45,7 +45,7 @@ export class EventRepository {
             lt: currentDateTime,
           },
           endTime: {
-            gt: currentDateTime,
+            gt: currentDateTime, 
           },
         },
       ],
@@ -62,7 +62,7 @@ export class EventRepository {
 
       if (endDate) {
         where.AND.push({
-          startTime: { lte: endDate },
+          endTime: { lte: endDate },
         });
       }
     }

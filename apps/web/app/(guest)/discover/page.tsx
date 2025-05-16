@@ -65,7 +65,6 @@ const DiscoverEvents = () => {
     status: '',
     limit: 10,
     category: filters.category,
-    startDate: dayjs().startOf('day').toDate(),
   });
 
   useEffect(() => {
