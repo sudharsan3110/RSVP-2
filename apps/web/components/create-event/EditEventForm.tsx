@@ -49,11 +49,9 @@ const EditEventForm = () => {
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
       endTime: combineDateAndTime(toDate, toTime),
-      eventDate: new Date(Date.UTC(
-        fromDate.getFullYear(),
-        fromDate.getMonth(),
-        fromDate.getDate()
-      )), 
+      eventDate: new Date(
+        Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate())
+      ),
     };
 
     // Upload image if it's a new image

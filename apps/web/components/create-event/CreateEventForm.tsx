@@ -63,11 +63,9 @@ const CreateEventForm = () => {
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
       endTime: combineDateAndTime(toDate, toTime),
-      eventDate: new Date(Date.UTC(
-        fromDate.getFullYear(),
-        fromDate.getMonth(),
-        fromDate.getDate()
-      )),    
+      eventDate: new Date(
+        Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate())
+      ),
     };
 
     if (data.eventImageUrl.file && data.eventImageUrl.signedUrl) {
