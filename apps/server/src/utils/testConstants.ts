@@ -1,3 +1,5 @@
+import { Role } from "@prisma/client";
+
 export const HTTP_OK = 200;
 export const HTTP_CREATED = 201;
 export const HTTP_BAD_REQUEST = 400;
@@ -45,3 +47,13 @@ export const FAKE_USER = {
   magicToken: 'secret-magic-token',
   refreshToken: 'secret-refresh-token',
 };
+
+export const FAKE_HOST = {
+  id: "cohost-id",
+  userId: FAKE_USER_ID2.id,
+  eventId: FAKE_EVENT.id,
+  role: 'MANAGER' as Role,
+  isDeleted: false,
+  createdAt: new Date(),
+  updatedAt: new Date()
+}
