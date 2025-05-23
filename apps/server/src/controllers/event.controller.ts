@@ -345,8 +345,7 @@ export const createAttendeeController = catchAsync(
     const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId, null);
     if (existingAttendee) {
       console.log(existingAttendee.status);
-      const isUserTicketCancelled =
-        existingAttendee.isDeleted && existingAttendee.status === Status.NOT_GOING;
+      const isUserTicketCancelled = existingAttendee.isDeleted && existingAttendee.status === Status.CANCELLED;
       if (isUserTicketCancelled) {
         const restoredAttendee = await AttendeeRepository.restore(
           existingAttendee.id,

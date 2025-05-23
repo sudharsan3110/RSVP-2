@@ -169,10 +169,12 @@ export const useUpdateEvent = () => {
 
 export const useCreateAttendee = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, string>({
     mutationFn: eventAPI.createAttendee,
-    onSuccess: () => {
+    onSuccess: (_, eventId) => {
       toast.success('Attendee created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['event', eventId, 'ticket-details'] });
       router.refresh();
     },
     onError: (error) => {
@@ -197,7 +199,7 @@ export const useSoftDeleteAttendee = () => {
 
 export const useGetAttendeeDetails = (eventId: string) => {
   return useQuery({
-    queryKey: ['event', eventId, 'ticket'],
+    queryKey: ['event', eventId, 'attendee-details'],
     queryFn: () => eventAPI.getAttendee(eventId),
     retry: 1,
     enabled: !!eventId,
@@ -213,9 +215,10 @@ export const useVerifyAttendee = () => {
     mutationFn: eventAPI.verifyAttendee,
   });
 };
+
 export const useGetAttendeeTicketDetails = (eventId: string) => {
   return useQuery({
-    queryKey: ['event', eventId, 'ticket'],
+    queryKey: ['event', eventId, 'ticket-details'],
     queryFn: () => eventAPI.getAttendeeTicketDetail(eventId),
     retry: 0,
     enabled: !!eventId,
@@ -243,8 +246,10 @@ export const useUpdateAttendeeStatus = () => {
       attendeeId: string;
       allowedStatus: boolean;
     }) => eventAPI.updateAttendeeStatus(eventId, attendeeId, allowedStatus),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['attendees'] });
+      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId, 'ticket-details'] });
+      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId, 'attendee-details'] });
     },
   });
 };

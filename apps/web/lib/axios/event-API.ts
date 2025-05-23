@@ -143,7 +143,7 @@ export const eventAPI = {
   },
 
   getAttendeeTicketDetail: async (eventId: string) => {
-    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data as Attendee);
+    return api.get(`event/${eventId}/attendees/ticket`).then((res) => res.data.data as Attendee);
   },
 
   getEventBySlug: async (

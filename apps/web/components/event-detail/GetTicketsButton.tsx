@@ -28,7 +28,11 @@ const GetTicketsButton = ({
 }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess, isPending: createAttendeeLoading } = useCreateAttendee();
-  const { isSuccess: attendeeDataSuccess, isLoading } = useGetAttendeeTicketDetails(eventId);
+  const {
+    isSuccess: attendeeDataSuccess,
+    isLoading: isAttendeeLoading,
+    data: attendeeData,
+  } = useGetAttendeeTicketDetails(eventId);
   const {
     mutate: cancelRegistration,
     isSuccess: cancelRegistrationSuccess,
@@ -47,7 +51,7 @@ const GetTicketsButton = ({
     cancelRegistration(eventId);
   };
 
-  if (isLoading && userDataLoading) {
+  if (userDataLoading || isAttendeeLoading) {
     return (
       <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2" disabled>
         Loading...
@@ -55,7 +59,15 @@ const GetTicketsButton = ({
     );
   }
 
-  if (userData?.id === creatorId || isCohost) {
+  if (!userData?.id) {
+    return (
+      <SigninDialog variant="signin">
+        <Button className="mt-4 w-full rounded-full px-4 py-2">Get Tickets</Button>
+      </SigninDialog>
+    );
+  }
+
+  if (userData.id === creatorId || isCohost) {
     return (
       <Link href={`/events/${eventId}/manage`} className="w-full">
         <Button variant="subtle" className="mt-4 w-full rounded-full px-4 py-2 text-center">
@@ -65,7 +77,11 @@ const GetTicketsButton = ({
     );
   }
 
-  if ((isSuccess || attendeeDataSuccess) && !cancelRegistrationSuccess) {
+  if (
+    (isSuccess || attendeeDataSuccess) &&
+    !cancelRegistrationSuccess &&
+    attendeeData?.allowedStatus
+  ) {
     return (
       <div className="flex w-full flex-col gap-4">
         <Link href={`/ticket/${eventId}`}>
@@ -85,15 +101,11 @@ const GetTicketsButton = ({
     );
   }
 
-  if (!userData?.id) {
-    return (
-      <SigninDialog variant="signin">
-        <Button className="mt-4 w-full rounded-full px-4 py-2">Get Tickets</Button>
-      </SigninDialog>
-    );
-  }
-
-  if (isPermissionRequired) {
+  if (
+    (isSuccess || attendeeDataSuccess) &&
+    !cancelRegistrationSuccess &&
+    !attendeeData?.allowedStatus
+  ) {
     return (
       <Button className="mt-4 w-full cursor-auto rounded-full px-4 py-2" variant="outline">
         Waiting for Approval
