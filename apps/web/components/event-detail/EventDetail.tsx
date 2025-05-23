@@ -156,7 +156,9 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
               <>
                 <h2 className="text-xl font-bold">Registration</h2>
                 <p className="mt-2 font-semibold">
-                  {remainingSeats > 0 ? `${remainingSeats} Seats are Remaining.` : 'No Seats Remaining.'}
+                  {remainingSeats > 0
+                    ? `${remainingSeats} Seats are Remaining.`
+                    : 'No Seats Remaining.'}
                 </p>
                 {totalAttendees > 0 && (
                   <div className="flex items-center pb-2 pt-4">

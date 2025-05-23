@@ -140,7 +140,7 @@ const DiscoverEvents = () => {
                   : 'flex flex-col items-center justify-center gap-6 md:hidden'
               )}
             >
-              <Popover open={open} onOpenChange={setOpen}>
+              {/* <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
@@ -183,7 +183,7 @@ const DiscoverEvents = () => {
                     </CommandList>
                   </Command>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
 
               <Select onValueChange={(value) => setFilters((prev) => ({ ...prev, sort: value }))}>
                 <SelectTrigger className="w-[90vw] hover:rounded-[8px] md:w-[200px]">

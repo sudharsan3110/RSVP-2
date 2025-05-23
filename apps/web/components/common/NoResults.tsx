@@ -46,8 +46,8 @@ const NoResults = ({
       </div>
       <h2 className="mb-2 text-center text-xl font-semibold">{title}</h2>
       <p className="text-center font-medium text-tertiary text-pretty">{message}</p>
-      {showBtn && (
-        btnLink ? (
+      {showBtn &&
+        (btnLink ? (
           <Link href={btnLink} className="max-w-sm mx-auto mt-5 flex justify-center">
             <Button variant="default" className="max-w-sm w-full">
               {btnIcon && (
@@ -65,8 +65,7 @@ const NoResults = ({
               {btnText}
             </Button>
           </div>
-        )
-      )}
+        ))}
     </Container>
   );
 };
