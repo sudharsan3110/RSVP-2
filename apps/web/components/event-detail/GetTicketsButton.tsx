@@ -18,6 +18,7 @@ type GetTicketsButtonProps = {
   eventId: string;
   isPermissionRequired: boolean;
   creatorId: string;
+  remainingSeats: number;
 };
 
 const GetTicketsButton = ({
@@ -25,6 +26,7 @@ const GetTicketsButton = ({
   eventId,
   isPermissionRequired,
   creatorId,
+  remainingSeats,
 }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess, isPending: createAttendeeLoading } = useCreateAttendee();
@@ -50,6 +52,14 @@ const GetTicketsButton = ({
   const handleCancelRegistration = () => {
     cancelRegistration(eventId);
   };
+
+  if (remainingSeats <= 0) {
+    return (
+      <Button className="mt-4 w-full cursor-auto rounded-full px-4 py-2" variant="outline">
+        No Tickets Remaining
+      </Button>
+    );
+  }
 
   if (userDataLoading || isAttendeeLoading) {
     return (

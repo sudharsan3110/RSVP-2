@@ -31,6 +31,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
   const cohosts = event.cohosts?.length ?? 0;
   const capacity = event.capacity ?? 0;
 
+  const remainingSeats = capacity - totalAttendees;
   return (
     <main>
       <div className="relative w-full overflow-hidden">
@@ -155,7 +156,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
               <>
                 <h2 className="text-xl font-bold">Registration</h2>
                 <p className="mt-2 font-semibold">
-                  {capacity - totalAttendees} Seats are Remaining.
+                  {remainingSeats > 0 ? `${remainingSeats} Seats are Remaining.` : 'No Seats Remaining.'}
                 </p>
                 {totalAttendees > 0 && (
                   <div className="flex items-center pb-2 pt-4">
@@ -177,6 +178,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
 
             {event?.isActive && (
               <GetTicketsButton
+                remainingSeats={remainingSeats}
                 cohosts={event.cohosts}
                 creatorId={event.creatorId}
                 eventId={event.id}
