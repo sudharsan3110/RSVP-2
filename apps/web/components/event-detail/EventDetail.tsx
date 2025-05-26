@@ -18,11 +18,13 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
   const [formattedStartDate, setFormattedStartDate] = useState('');
   const [formattedStartTime, setFormattedStartTime] = useState('');
   const [formattedEndTime, setFormattedEndTime] = useState('');
+  const [formattedEndDate, setFormattedEndDate] = useState('');
 
   useEffect(() => {
     setFormattedStartDate(dayjs(event.startTime).format('dddd, MMMM D'));
     setFormattedStartTime(dayjs(event.startTime).format('h:mm A'));
     setFormattedEndTime(dayjs(event.endTime).format('h:mm A'));
+    setFormattedEndDate(dayjs(event.endTime).format('dddd, MMMM D'));
   }, [event.startTime, event.endTime]);
 
   const additionalCount = totalAttendees > 4 ? totalAttendees - 4 : 0;
@@ -80,7 +82,11 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
             <article className="font-bold">
               {formattedStartTime && formattedEndTime && formattedStartDate ? (
                 <>
-                  <p>{formattedStartDate}</p>
+                  <p>
+                    {formattedStartDate === formattedEndDate
+                      ? formattedStartDate
+                      : formattedStartDate + ' - ' + formattedEndDate}
+                  </p>
                   <p className="text-sm text-secondary">
                     {formattedStartTime} - {formattedEndTime}
                   </p>
@@ -130,7 +136,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
                     className="rounded-full border-primary border-2 object-cover"
                   />
                   <p className="ml-3 text-sm font-medium capitalize text-secondary">
-                    {cohost.user?.fullName}
+                    {cohost.user?.fullName?.toLowerCase()}
                   </p>
                 </div>
               ))}
