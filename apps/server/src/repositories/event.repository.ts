@@ -107,7 +107,7 @@ export class EventRepository {
    * @param slug - The slug of the event.
    * @returns The event object if found, otherwise null.
    */
-  static async findbySlug(slug: string | undefined) {
+  static async findbySlug(slug: string) {
     return await prisma.event.findUnique({
       where: { slug, isDeleted: false },
       include: {
@@ -142,55 +142,55 @@ export class EventRepository {
    * @param params - The filters and pagination options.
    * @returns An object containing the events and pagination metadata.
    */
-static async findAllPlannedEvents({
-  filters,
-  pagination = { page: 1, limit: 10 },
-}: {
-  filters: IEventFilters;
-  pagination: IPaginationParams;
-}) {
-  const { userId, search, category, fromDate, toDate, venueType, status } = filters;
-  const eventsPaginator = new Paginator('event');
-  const { page = 1, limit = 10, sortBy = 'startTime', sortOrder = 'desc' } = pagination;
+  static async findAllPlannedEvents({
+    filters,
+    pagination = { page: 1, limit: 10 },
+  }: {
+    filters: IEventFilters;
+    pagination: IPaginationParams;
+  }) {
+    const { userId, search, category, fromDate, toDate, venueType, status } = filters;
+    const eventsPaginator = new Paginator('event');
+    const { page = 1, limit = 10, sortBy = 'startTime', sortOrder = 'desc' } = pagination;
 
-  const where: Prisma.EventWhereInput = {
-    ...(userId && { creatorId: userId, isDeleted: false }),
-    ...(category && { category: category }),
-    ...(fromDate &&
-      toDate && {
-        AND: [
-          { startTime: { gte: fromDate, lte: toDate } },
-          { endTime: { gte: fromDate, lte: toDate } },
+    const where: Prisma.EventWhereInput = {
+      ...(userId && { creatorId: userId, isDeleted: false }),
+      ...(category && { category: category }),
+      ...(fromDate &&
+        toDate && {
+          AND: [
+            { startTime: { gte: fromDate, lte: toDate } },
+            { endTime: { gte: fromDate, lte: toDate } },
+          ],
+        }),
+      ...(search && {
+        OR: [
+          { name: { contains: search } },
+          { description: { contains: search } },
+          { category: { contains: search } },
         ],
       }),
-    ...(search && {
-      OR: [
-        { name: { contains: search } },
-        { description: { contains: search } },
-        { category: { contains: search } },
-      ],
-    }),
-    ...(venueType && { venueType: venueType as VenueType }),
-  };
-  if (status && status !== 'all') {
-    where.isActive = status === 'active';
+      ...(venueType && { venueType: venueType as VenueType }),
+    };
+    if (status && status !== 'all') {
+      where.isActive = status === 'active';
+    }
+
+    const { data, metadata } = await eventsPaginator.paginate(
+      {
+        page,
+        limit,
+        sortOrder,
+        sortBy,
+      },
+      { where: where, include: { creator: true } }
+    );
+
+    return {
+      events: data,
+      metadata,
+    };
   }
-
-  const { data, metadata } = await eventsPaginator.paginate(
-    {
-      page,
-      limit,
-      sortOrder,
-      sortBy,
-    },
-    { where: where, include: { creator: true } }
-  );
-
-  return {
-    events: data,
-    metadata,
-  };
-}
 
   /**
    * Finds an event by its unique ID.

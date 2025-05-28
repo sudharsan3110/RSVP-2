@@ -1,19 +1,17 @@
 import {
   getMyDataController,
+  logoutController,
   signinController,
   verifySigninController,
-  logoutController,
 } from '@/controllers/auth.controller';
 import authMiddleware from '@/middleware/authMiddleware';
-import { validate } from '@/middleware/validate';
-import { SigninSchema, verifySigninSchema } from '@/validations/auth.validation';
 import { Router } from 'express';
 
 const authRouter: Router = Router();
 
-authRouter.post('/signin', validate({ body: SigninSchema }), signinController);
+authRouter.post('/signin', signinController);
 
-authRouter.post('/verify-signin', validate({ body: verifySigninSchema }), verifySigninController);
+authRouter.post('/verify-signin', verifySigninController);
 
 authRouter.post('/logout', authMiddleware, logoutController);
 

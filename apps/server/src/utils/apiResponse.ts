@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Response } from 'express';
-import logger from './logger';
 
 // Helper code for the API consumer to understand the error and handle is accordingly
 enum StatusCode {

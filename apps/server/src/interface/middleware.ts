@@ -1,10 +1,11 @@
 import { Request } from 'express';
 
 export interface IAuthenticatedRequest<
-  P = {},
-  ResBody = {},
-  ReqBody = { accessToken?: string; refreshToken?: string },
-> extends Request<P, ResBody, ReqBody> {
+  P = {}, // Params
+  ResBody = {}, // Response Body
+  ReqBody = { accessToken?: string; refreshToken?: string }, // Request Body
+  ReqQuery = {}, // Request Query
+> extends Request<P, ResBody, ReqBody, ReqQuery> {
   userId?: string;
   Role?: string;
 }

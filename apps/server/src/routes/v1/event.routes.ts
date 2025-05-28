@@ -20,23 +20,6 @@ import {
   verifyQrController,
 } from '@/controllers/event.controller';
 
-import {
-  attendeeParamsSchema,
-  qrTokenSchema,
-  upcomingEventsQuerySchema,
-  verifyQrTokenParamsSchema,
-  updateAttendeeStatusParamsSchema,
-  attendeeStatusUpdateSchema
-} from '@/validations/attendee.validation';
-import {
-  attendeesQuerySchema,
-  CreateEventSchema,
-  eventFilterSchema,
-  eventLimitSchema,
-  eventParamsSchema,
-  SlugSchema,
-  userUpdateSchema,
-} from '@/validations/event.validation';
 import { Router } from 'express';
 
 import {
@@ -46,51 +29,28 @@ import {
 } from '@/controllers/update.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
-import { validate } from '@/middleware/validate';
-import { eventsPlannedByUserReqSchema } from '@/validations/event.validation';
 import { Role } from '@prisma/client';
 
 const eventRouter: Router = Router();
 
 eventRouter.get('/upload-image', uploadEventImageController);
 
-eventRouter.get('/', validate({ query: eventFilterSchema }), filterEventController);
+eventRouter.get('/', filterEventController);
 
-eventRouter.get(
-  '/slug/:slug',
-  validate({ params: SlugSchema }),
-  getEventBySlugController
-);
+eventRouter.get('/slug/:slug', getEventBySlugController);
 
-eventRouter.post('/', authMiddleware, validate({ body: CreateEventSchema }), createEventController);
+eventRouter.post('/', authMiddleware, createEventController);
+eventRouter.get('/upcoming', authMiddleware, getUserUpcomingEventController);
 
-eventRouter.get(
-  '/upcoming',
-  authMiddleware,
-  validate({ query: upcomingEventsQuerySchema }),
-  getUserUpcomingEventController
-);
+eventRouter.get('/popular', getPopularEventController);
 
-eventRouter.get('/popular', validate({ query: eventLimitSchema }), getPopularEventController);
+eventRouter.get('/user', authMiddleware, getplannedByUserController);
 
-eventRouter.get(
-  '/user',
-  authMiddleware,
-  validate({ query: eventsPlannedByUserReqSchema }),
-  getplannedByUserController
-);
-
-eventRouter.get(
-  '/:eventId',
-  validate({ params: eventParamsSchema }),
-  authMiddleware,
-  getEventByIdController
-);
+eventRouter.get('/:eventId', authMiddleware, getEventByIdController);
 
 eventRouter.patch(
   '/:eventId',
   authMiddleware,
-  validate({ params: eventParamsSchema, body: CreateEventSchema }),
   eventManageMiddleware([Role.CREATOR]),
   updateEventController
 );
@@ -98,7 +58,6 @@ eventRouter.patch(
 eventRouter.patch(
   '/:eventId/cancel',
   authMiddleware,
-  validate({ params: eventParamsSchema }),
   eventManageMiddleware([Role.CREATOR]),
   cancelEventController
 );
@@ -106,7 +65,6 @@ eventRouter.patch(
 eventRouter.delete(
   '/:eventId',
   authMiddleware,
-  validate({ params: eventParamsSchema }),
   eventManageMiddleware([Role.CREATOR]),
   deleteEventController
 );
@@ -114,22 +72,15 @@ eventRouter.delete(
 eventRouter.patch(
   '/:eventId/slug',
   authMiddleware,
-  validate({ params: eventParamsSchema, body: SlugSchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   updateEventSlugController
 );
 
-eventRouter.post(
-  '/:eventId/attendees',
-  authMiddleware,
-  validate({ params: attendeeParamsSchema }),
-  createAttendeeController
-);
+eventRouter.post('/:eventId/attendees', authMiddleware, createAttendeeController);
 
 eventRouter.get(
   '/:eventId/attendees',
   authMiddleware,
-  validate({ params: eventParamsSchema, query: attendeesQuerySchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   getAttendeeController
 );
@@ -137,7 +88,6 @@ eventRouter.get(
 eventRouter.get(
   '/:eventId/attendees/excel',
   authMiddleware,
-  validate({ params: eventParamsSchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   getExcelSheetController
 );
@@ -145,29 +95,17 @@ eventRouter.get(
 eventRouter.post(
   '/:eventId/communications',
   authMiddleware,
-  validate({ params: eventParamsSchema, body: userUpdateSchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   sendMessageController
 );
 
-eventRouter.get(
-  '/:eventId/communications',
-  authMiddleware,
-  validate({ params: eventParamsSchema }),
-  getMessageController
-);
+eventRouter.get('/:eventId/communications', authMiddleware, getMessageController);
 
-eventRouter.get(
-  '/:eventId/attendees/ticket',
-  authMiddleware,
-  validate({ params: attendeeParamsSchema }),
-  getAttendeeTicketController
-);
+eventRouter.get('/:eventId/attendees/ticket', authMiddleware, getAttendeeTicketController);
 
 eventRouter.patch(
   '/:eventId/attendee/:attendeeId/verify',
   authMiddleware,
-  validate({ params: verifyQrTokenParamsSchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   verifyQrController
 );
@@ -175,7 +113,6 @@ eventRouter.patch(
 eventRouter.get(
   '/:eventId/attendee/qr/:qrToken',
   authMiddleware,
-  validate({ params: qrTokenSchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   scanTicketController
 );
@@ -183,16 +120,10 @@ eventRouter.get(
 eventRouter.patch(
   '/:eventId/attendee/:attendeeId/status',
   authMiddleware,
-  validate({ params: updateAttendeeStatusParamsSchema, body: attendeeStatusUpdateSchema }),
   eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
   updateAttendeeStatusController
 );
 
-eventRouter.delete(
-  '/:eventId/attendee',
-  authMiddleware,
-  validate({ params: eventParamsSchema }),
-  deleteAttendeeController
-);
+eventRouter.delete('/:eventId/attendee', authMiddleware, deleteAttendeeController);
 
 export { eventRouter };

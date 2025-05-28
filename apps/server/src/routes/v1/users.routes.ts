@@ -1,28 +1,17 @@
-import { Router } from 'express';
-import authMiddleware from '@/middleware/authMiddleware';
-import { validate } from '@/middleware/validate';
-import { profilePayloadSchema, userParamsSchema } from '@/validations/users.validation';
 import {
+  deleteUserController,
   getUserPublicController,
   updateUserProfileController,
-  deleteUserController,
 } from '@/controllers/user.controller';
+import authMiddleware from '@/middleware/authMiddleware';
+import { Router } from 'express';
 
 const userRouter: Router = Router();
 
-userRouter.post(
-  '/profile',
-  authMiddleware,
-  validate({ body: profilePayloadSchema }),
-  updateUserProfileController
-);
+userRouter.post('/profile', authMiddleware, updateUserProfileController);
 
 userRouter.get('/:username', authMiddleware, getUserPublicController);
 
-userRouter.delete(
-  '/',
-  authMiddleware,
-  deleteUserController
-);
+userRouter.delete('/', authMiddleware, deleteUserController);
 
 export { userRouter };

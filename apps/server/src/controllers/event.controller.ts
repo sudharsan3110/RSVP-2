@@ -14,22 +14,31 @@ import {
 } from '@/utils/apiError';
 import { SuccessResponse } from '@/utils/apiResponse';
 import catchAsync from '@/utils/catchAsync';
+import { controller } from '@/utils/controller';
 import { sluggify } from '@/utils/function';
 import logger from '@/utils/logger';
 import EmailService from '@/utils/sendEmail';
 import {
   attendeePayloadSchema,
-  editSlugSchema,
   UpcomingEventsQuery,
   upcomingEventsQuerySchema,
 } from '@/validations/attendee.validation';
+import { eventParamsSchema } from '@/validations/cohost.validation';
 import {
   attendeesQuerySchema,
+  cancelEventSchema,
   CreateEventSchema,
-  EventFilter,
+  deleteEventSchema,
   eventFilterSchema,
   eventLimitSchema,
+  eventSlugSchema,
   eventsPlannedByUserReqSchema,
+  getEventByIdSchema,
+  scanTicketSchema,
+  updateAttendeeStatusSchema,
+  UpdateEventSchema,
+  updateEventSlugSchema,
+  verifyQrSchema,
 } from '@/validations/event.validation';
 import { Attendee, Prisma, Status, VenueType } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
@@ -42,18 +51,16 @@ import z from 'zod';
  * @param res - The HTTP response object.
  * @returns The event details and total attendees.
  */
-export const getEventBySlugController = catchAsync(
-  async (req: IAuthenticatedRequest<{ slug?: string }, {}, {}>, res) => {
-    const { slug } = req.params;
+export const getEventBySlugController = controller(eventSlugSchema, async (req, res) => {
+  const { slug } = req.params;
 
-    logger.info('Getting event by slug in getEventBySlugController ...');
-    const event = await EventRepository.findbySlug(slug);
-    if (!event) throw new NotFoundError('Event not found');
-    const totalAttendees = await AttendeeRepository.countAttendees(event.id);
+  logger.info('Getting event by slug in getEventBySlugController ...');
+  const event = await EventRepository.findbySlug(slug);
+  if (!event) throw new NotFoundError('Event not found');
+  const totalAttendees = await AttendeeRepository.countAttendees(event.id);
 
-    return new SuccessResponse('success', { event, totalAttendees }).send(res);
-  }
-);
+  return new SuccessResponse('success', { event, totalAttendees }).send(res);
+});
 
 /**
  * Retrieves an event by its ID.
@@ -61,19 +68,16 @@ export const getEventBySlugController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The event details and total attendees.
  */
-export const getEventByIdController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const { eventId } = req.params;
-    if (!eventId) throw new BadRequestError('Event ID is required');
+export const getEventByIdController = controller(getEventByIdSchema, async (req, res) => {
+  const { eventId } = req.params;
 
-    logger.info('Getting event by id in getEventByIdController ...');
-    const event = await EventRepository.findById(eventId);
-    if (!event) throw new NotFoundError('Event not found');
-    const totalAttendees = await AttendeeRepository.countAttendees(event.id);
+  logger.info('Getting event by id in getEventByIdController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  const totalAttendees = await AttendeeRepository.countAttendees(event.id);
 
-    return new SuccessResponse('success', { event, totalAttendees }).send(res);
-  }
-);
+  return new SuccessResponse('success', { event, totalAttendees }).send(res);
+});
 
 /**
  * Edits the slug of an event.
@@ -81,22 +85,16 @@ export const getEventByIdController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The updated slug.
  */
-export const updateEventSlugController = catchAsync(
-  async (
-    req: IAuthenticatedRequest<{ eventId?: string }, {}, z.infer<typeof editSlugSchema>>,
-    res
-  ) => {
-    const { eventId } = req.params;
-    const { userId } = req;
-    if (!userId) throw new TokenExpiredError();
+export const updateEventSlugController = controller(updateEventSlugSchema, async (req, res) => {
+  const { eventId } = req.params;
+  const { userId } = req;
+  if (!userId) throw new TokenExpiredError();
 
-    if (!eventId) throw new BadRequestError('Event ID is required');
-    const slug = req.body.slug;
-    logger.info('Updating slug in updateEventSlugController ...');
-    const updatedSlug = await EventRepository.updateSlug(eventId, userId, slug);
-    return new SuccessResponse('success', updatedSlug).send(res);
-  }
-);
+  const slug = req.body.slug;
+  logger.info('Updating slug in updateEventSlugController ...');
+  const updatedSlug = await EventRepository.updateSlug(eventId, userId, slug);
+  return new SuccessResponse('success', updatedSlug).send(res);
+});
 
 /**
  * Retrieves popular events based on a limit.
@@ -104,8 +102,8 @@ export const updateEventSlugController = catchAsync(
  * @param res - The HTTP response object.
  * @returns A list of popular events.
  */
-export const getPopularEventController = catchAsync(async (req, res) => {
-  const { limit } = eventLimitSchema.parse(req.query);
+export const getPopularEventController = controller(eventLimitSchema, async (req, res) => {
+  const { limit } = req.query;
 
   logger.info('Getting popular events in getPopularEventController ...');
   const popularEvents = await EventRepository.findAllPopularEvents(limit);
@@ -119,15 +117,13 @@ export const getPopularEventController = catchAsync(async (req, res) => {
  * @param res - The HTTP response object.
  * @returns A list of filtered events with metadata.
  */
-export const filterEventController = catchAsync(
-  async (req: IAuthenticatedRequest<{}, {}, EventFilter>, res) => {
-    logger.info('Filtering events in filterEventController ...');
-    const filters = eventFilterSchema.parse(req.query);
-    const events = await EventRepository.findEvents(filters);
+export const filterEventController = controller(eventFilterSchema, async (req, res) => {
+  logger.info('Filtering events in filterEventController ...');
+  const filters = req.query;
+  const events = await EventRepository.findEvents(filters);
 
-    return new SuccessResponse('success', events).send(res);
-  }
-);
+  return new SuccessResponse('success', events).send(res);
+});
 
 /**
  * Retrieves upcoming events for a user.
@@ -135,11 +131,13 @@ export const filterEventController = catchAsync(
  * @param res - The HTTP response object.
  * @returns A list of upcoming events with metadata.
  */
-export const getUserUpcomingEventController = catchAsync(
-  async (req: IAuthenticatedRequest<{}, {}, UpcomingEventsQuery>, res) => {
-    const userId = req.userId;
+export const getUserUpcomingEventController = controller(
+  upcomingEventsQuerySchema,
+  async (req, res) => {
+    const { userId } = req;
     if (!userId) throw new TokenExpiredError();
-    const filters = upcomingEventsQuerySchema.parse(req.query);
+
+    const filters = req.query;
 
     logger.info('Getting upcoming event in getUserUpcomingEventController ..');
     const registeredEvents = await AttendeeRepository.findRegisteredEventsByUser({
@@ -161,35 +159,33 @@ export const getUserUpcomingEventController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The newly created event object.
  */
-export const createEventController = catchAsync(
-  async (req: IAuthenticatedRequest<{}, {}, z.infer<typeof CreateEventSchema>>, res) => {
-    const data = req.body;
-    const userId = req.userId;
-    if (!userId) throw new TokenExpiredError();
+export const createEventController = controller(CreateEventSchema, async (req, res) => {
+  const data = req.body;
+  const userId = req.userId;
+  if (!userId) throw new TokenExpiredError();
 
-    const getUserData = await UserRepository.findById(userId);
-    if (!getUserData) throw new NotFoundError('User not found');
-    if (!getUserData.isCompleted)
-      throw new BadRequestError('Please complete your profile before creating event');
+  const getUserData = await UserRepository.findById(userId);
+  if (!getUserData) throw new NotFoundError('User not found');
+  if (!getUserData.isCompleted)
+    throw new BadRequestError('Please complete your profile before creating event');
 
-    logger.info('Formatting data for create event in createEventController ...');
-    const formattedData = {
-      ...data,
-      creatorId: userId,
-      slug: sluggify(data.name),
-      venueType: data.venueType.toUpperCase() as VenueType,
-    };
+  logger.info('Formatting data for create event in createEventController ...');
+  const formattedData = {
+    ...data,
+    creatorId: userId,
+    slug: sluggify(data.name),
+    venueType: data.venueType.toUpperCase() as VenueType,
+  };
 
-    const newEvent = await EventRepository.create(formattedData);
-    await CohostRepository.create({
-      userId: userId,
-      role: 'CREATOR',
-      eventId: newEvent.id,
-    });
+  const newEvent = await EventRepository.create(formattedData);
+  await CohostRepository.create({
+    userId: userId,
+    role: 'CREATOR',
+    eventId: newEvent.id,
+  });
 
-    return new SuccessResponse('success', newEvent).send(res);
-  }
-);
+  return new SuccessResponse('success', newEvent).send(res);
+});
 
 /**
  * Updates an existing event.
@@ -197,24 +193,20 @@ export const createEventController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The updated event object.
  */
-export const updateEventController = catchAsync(
-  async (
-    req: IAuthenticatedRequest<{ eventId?: string }, {}, z.infer<typeof CreateEventSchema>>,
-    res
-  ) => {
-    const eventId = req.params.eventId;
-    const data = req.body;
-    if (!eventId) throw new BadRequestError('Event ID is required');
+export const updateEventController = controller(UpdateEventSchema, async (req, res) => {
+  const { eventId } = req.params;
+  const data = req.body;
 
-    logger.info('Updating event in updateEventController ...');
-    const updatedEvent = await EventRepository.update(eventId, {
-      ...data,
-      venueType: data.venueType.toUpperCase() as VenueType,
-    });
+  if (!data.venueType) throw new BadRequestError('Venue type cannot be updated');
 
-    return new SuccessResponse('success', updatedEvent).send(res);
-  }
-);
+  logger.info('Updating event in updateEventController ...');
+  const updatedEvent = await EventRepository.update(eventId, {
+    ...data,
+    venueType: data.venueType.toUpperCase() as VenueType,
+  });
+
+  return new SuccessResponse('success', updatedEvent).send(res);
+});
 
 /**
  * Cancels an event by setting its `isActive` status to false.
@@ -222,22 +214,19 @@ export const updateEventController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The canceled event object.
  */
-export const cancelEventController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const { eventId } = req.params;
-    const { userId } = req;
-    if (!userId) throw new TokenExpiredError();
-    if (!eventId) throw new BadRequestError('Event ID is required');
+export const cancelEventController = controller(cancelEventSchema, async (req, res) => {
+  const { eventId } = req.params;
+  const { userId } = req;
+  if (!userId) throw new TokenExpiredError();
 
-    logger.info('Finding event in cancelEventController ...');
-    const event = await EventRepository.findById(eventId);
-    if (!event) throw new NotFoundError('Event not found');
-    if (!event.isActive) throw new BadRequestError('Event already cancelled');
-    const cancelEvent = await EventRepository.cancel(eventId, userId);
+  logger.info('Finding event in cancelEventController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  if (!event.isActive) throw new BadRequestError('Event already cancelled');
+  const cancelEvent = await EventRepository.cancel(eventId, userId);
 
-    return new SuccessResponse('success', cancelEvent).send(res);
-  }
-);
+  return new SuccessResponse('success', cancelEvent).send(res);
+});
 
 /**
  * Soft deletes an event by setting its `isDeleted` status to true.
@@ -245,22 +234,19 @@ export const cancelEventController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The deleted event object.
  */
-export const deleteEventController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const { eventId } = req.params;
-    const { userId } = req;
-    if (!userId) throw new TokenExpiredError();
-    if (!eventId) throw new BadRequestError('Event ID is required');
+export const deleteEventController = controller(deleteEventSchema, async (req, res) => {
+  const { eventId } = req.params;
+  const { userId } = req;
+  if (!userId) throw new TokenExpiredError();
 
-    logger.info('Finding event and deleting in deleteEventController ...');
-    const event = await EventRepository.findById(eventId);
-    if (!event) throw new NotFoundError('Event not found');
-    if (event.isDeleted) throw new BadRequestError('Event already deleted');
-    const deletedEvent = await EventRepository.delete(eventId, userId);
+  logger.info('Finding event and deleting in deleteEventController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  if (event.isDeleted) throw new BadRequestError('Event already deleted');
+  const deletedEvent = await EventRepository.delete(eventId, userId);
 
-    return new SuccessResponse('Event deleted successfully', deletedEvent).send(res);
-  }
-);
+  return new SuccessResponse('Event deleted successfully', deletedEvent).send(res);
+});
 
 /**
  * Retrieves all planned events for a specific user.
@@ -268,10 +254,21 @@ export const deleteEventController = catchAsync(
  * @param res - The HTTP response object.
  * @returns A list of planned events for the user.
  */
-export const getplannedByUserController = catchAsync(
-  async (req: IAuthenticatedRequest<{}, {}, {}>, res) => {
-    const { search, category, fromDate, toDate, venueType, page, limit, sortBy, sortOrder, status } =
-    eventsPlannedByUserReqSchema.parse(req.query);
+export const getplannedByUserController = controller(
+  eventsPlannedByUserReqSchema,
+  async (req, res) => {
+    const {
+      search,
+      category,
+      fromDate,
+      toDate,
+      venueType,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      status,
+    } = req.query;
 
     const userId = req.userId;
     if (!userId) throw new TokenExpiredError();
@@ -306,97 +303,89 @@ export const getplannedByUserController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The newly created attendee object.
  */
-export const createAttendeeController = catchAsync(
-  async (
-    req: IAuthenticatedRequest<{ eventId?: string }, {}, z.infer<typeof attendeePayloadSchema>>,
-    res
-  ) => {
-    let attendeeStatus: Partial<Attendee> = {};
-    const userId = req.userId;
-    if (!userId) throw new TokenExpiredError();
+export const createAttendeeController = controller(attendeePayloadSchema, async (req, res) => {
+  let attendeeStatus: Partial<Attendee> = {};
+  const userId = req.userId;
+  if (!userId) throw new TokenExpiredError();
 
-    const user = await UserRepository.findById(userId);
-    if (!user || !user.isCompleted) throw new BadRequestError('User profile is not completed');
+  const user = await UserRepository.findById(userId);
+  if (!user || !user.isCompleted) throw new BadRequestError('User profile is not completed');
 
-    const eventId = req.params.eventId;
-    if (!eventId) throw new BadRequestError('Event ID is required');
+  const { eventId } = req.params;
 
-    logger.info('Finding event by id in createAttendeeController ...');
-    const event = await EventRepository.findById(eventId as string);
-    if (!event) throw new NotFoundError('Event not found');
-    if (!event.isActive) throw new BadRequestError('Event is not active');
+  logger.info('Finding event by id in createAttendeeController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  if (!event.isActive) throw new BadRequestError('Event is not active');
 
-    const currentTime = new Date();
-    if (event.endTime < currentTime) throw new BadRequestError('Event has expired');
+  const currentTime = new Date();
+  if (event.endTime < currentTime) throw new BadRequestError('Event has expired');
 
-    if (event.capacity) {
-      const currentAttendeeCount = await AttendeeRepository.countAttendees(eventId);
-      if (currentAttendeeCount >= event.capacity) {
-        throw new BadRequestError('Event is at full capacity. No seats available.');
-      }
+  if (event.capacity) {
+    const currentAttendeeCount = await AttendeeRepository.countAttendees(eventId);
+    if (currentAttendeeCount >= event.capacity) {
+      throw new BadRequestError('Event is at full capacity. No seats available.');
     }
-
-    if (!event.hostPermissionRequired) {
-      attendeeStatus = { allowedStatus: true, status: Status.GOING };
-    } else {
-      attendeeStatus = { allowedStatus: false, status: Status.WAITING };
-    }
-
-    const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId, null);
-    if (existingAttendee) {
-      console.log(existingAttendee.status);
-      const isUserTicketCancelled = existingAttendee.isDeleted && existingAttendee.status === Status.CANCELLED;
-      if (isUserTicketCancelled) {
-        const restoredAttendee = await AttendeeRepository.restore(
-          existingAttendee.id,
-          Status.GOING
-        );
-        attendeeStatus = { isDeleted: false, status: Status.GOING };
-        return new SuccessResponse('Attendee restored successfully', restoredAttendee).send(res);
-      }
-      throw new BadRequestError('User already registered for this event');
-    }
-
-    const uuid = randomUUID();
-    const hash = createHash('sha256').update(uuid).digest('base64');
-    const qrToken = hash.slice(0, 6);
-
-    const attendeeData: Prisma.AttendeeCreateInput = {
-      ...attendeeStatus,
-      qrToken: qrToken,
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-      event: {
-        connect: {
-          id: eventId,
-        },
-      },
-    };
-
-    const newAttendee = await AttendeeRepository.create(attendeeData);
-    const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
-
-    const emailData = {
-      id: 5,
-      subject: 'Event Registration Confirmation',
-      recipient: user.primaryEmail,
-      body: {
-        email: user.primaryEmail,
-        qrLink: url,
-      },
-    };
-    if (config.NODE_ENV !== 'development') {
-      await EmailService.send(emailData);
-    } else {
-      logger.info('Email notification:', emailData);
-    }
-
-    return new SuccessResponse('success', newAttendee).send(res);
   }
-);
+
+  if (!event.hostPermissionRequired) {
+    attendeeStatus = { allowedStatus: true, status: Status.GOING };
+  } else {
+    attendeeStatus = { allowedStatus: false, status: Status.WAITING };
+  }
+
+  const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId, null);
+  if (existingAttendee) {
+    console.log(existingAttendee.status);
+    const isUserTicketCancelled =
+      existingAttendee.isDeleted && existingAttendee.status === Status.NOT_GOING;
+    if (isUserTicketCancelled) {
+      const restoredAttendee = await AttendeeRepository.restore(existingAttendee.id, Status.GOING);
+      attendeeStatus = { isDeleted: false, status: Status.GOING };
+      return new SuccessResponse('Attendee restored successfully', restoredAttendee).send(res);
+    }
+    throw new BadRequestError('User already registered for this event');
+  }
+
+  const uuid = randomUUID();
+  const hash = createHash('sha256').update(uuid).digest('base64');
+  const qrToken = hash.slice(0, 6);
+
+  const attendeeData: Prisma.AttendeeCreateInput = {
+    ...attendeeStatus,
+    qrToken: qrToken,
+    user: {
+      connect: {
+        id: userId,
+      },
+    },
+    event: {
+      connect: {
+        id: eventId,
+      },
+    },
+  };
+
+  const newAttendee = await AttendeeRepository.create(attendeeData);
+  const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
+
+  const emailData = {
+    id: 5,
+    subject: 'Event Registration Confirmation',
+    recipient: user.primaryEmail,
+    body: {
+      email: user.primaryEmail,
+      qrLink: url,
+    },
+  };
+  if (config.NODE_ENV !== 'development') {
+    await EmailService.send(emailData);
+  } else {
+    logger.info('Email notification:', emailData);
+  }
+
+  return new SuccessResponse('success', newAttendee).send(res);
+});
 
 /**
  * Retrieves a paginated list of attendees for a specific event.
@@ -404,21 +393,18 @@ export const createAttendeeController = catchAsync(
  * @param res - The HTTP response object.
  * @returns A paginated list of attendees.
  */
-export const getAttendeeController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const eventId = req.params.eventId;
-    if (!eventId) throw new BadRequestError('Event ID is required');
+export const getAttendeeController = controller(eventParamsSchema, async (req, res) => {
+  const { eventId } = req.params;
 
-    logger.info('Finding event by id in getAttendeeController ...');
-    const event = await EventRepository.findById(eventId as string);
-    if (!event) throw new NotFoundError('Event not found');
+  logger.info('Finding event by id in getAttendeeController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
 
-    const pagination = await attendeesQuerySchema.parseAsync(req.query);
-    const attendees = await AttendeeRepository.findAttendeesByEventId({ eventId, ...pagination });
+  const pagination = await attendeesQuerySchema.parseAsync(req.query);
+  const attendees = await AttendeeRepository.findAttendeesByEventId({ eventId, ...pagination });
 
-    return new SuccessResponse('success', attendees).send(res);
-  }
-);
+  return new SuccessResponse('success', attendees).send(res);
+});
 
 /**
  * Exports the list of attendees for a specific event as an Excel sheet.
@@ -492,21 +478,18 @@ export const getExcelSheetController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The attendee details.
  */
-export const getAttendeeTicketController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const userId = req.userId;
-    const eventId = req.params.eventId;
+export const getAttendeeTicketController = controller(eventParamsSchema, async (req, res) => {
+  const userId = req.userId;
+  const { eventId } = req.params;
 
-    if (!userId) throw new TokenExpiredError();
-    if (!eventId) throw new BadRequestError('Event ID is required');
+  if (!userId) throw new TokenExpiredError();
 
-    logger.info('Getting user ticket in getAttendeeTicketController ...');
-    const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
-    if (!attendee) throw new NotFoundError('Attendee not found');
+  logger.info('Getting user ticket in getAttendeeTicketController ...');
+  const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
+  if (!attendee) throw new NotFoundError('Attendee not found');
 
-    return new SuccessResponse('success', attendee).send(res);
-  }
-);
+  return new SuccessResponse('success', attendee).send(res);
+});
 
 /**
  * Updates the allowed status and status of an attendee for a specific event.
@@ -514,11 +497,11 @@ export const getAttendeeTicketController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The updated attendee object.
  */
-export const updateAttendeeStatusController = catchAsync(
-  async (req: IAuthenticatedRequest<{ attendeeId?: string }, {}, IAllowStatus>, res) => {
+export const updateAttendeeStatusController = controller(
+  updateAttendeeStatusSchema,
+  async (req, res) => {
     const { attendeeId } = req.params;
     const { allowedStatus } = req.body;
-    if (!attendeeId) throw new BadRequestError(API_MESSAGES.ALLOW_GUEST.ATTENDEEID_REQUIRED);
 
     logger.info('Updating attendee status in updateAttendeeStatusController ...');
     const updatedAttendee = await AttendeeRepository.updateAttendeeStatus(
@@ -539,18 +522,15 @@ export const updateAttendeeStatusController = catchAsync(
  * @param res - The HTTP response object.
  * @returns The attendee details.
  */
-export const scanTicketController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string; qrToken?: string }, {}, {}>, res) => {
-    const { eventId, qrToken } = req.params;
-    if (!qrToken) throw new BadRequestError('QR Token is required');
+export const scanTicketController = controller(scanTicketSchema, async (req, res) => {
+  const { eventId, qrToken } = req.params;
 
-    logger.info('Getting attendee using qr in scanTicketController ...');
-    const attendee = await AttendeeRepository.findByQrToken(qrToken, eventId);
-    if (!attendee) throw new NotFoundError('Attendee not found');
+  logger.info('Getting attendee using qr in scanTicketController ...');
+  const attendee = await AttendeeRepository.findByQrToken(qrToken, eventId);
+  if (!attendee) throw new NotFoundError('Attendee not found');
 
-    return new SuccessResponse('success', attendee).send(res);
-  }
-);
+  return new SuccessResponse('success', attendee).send(res);
+});
 
 /**
  * Verifies the QR token of an attendee for a specific event.
@@ -558,47 +538,44 @@ export const scanTicketController = catchAsync(
  * @param res - The HTTP response object.
  * @returns A success message if the QR token is valid.
  */
-export const verifyQrController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string; attendeeId?: string }, {}, {}>, res) => {
-    const userId = req.userId;
-    const { attendeeId, eventId } = req.params;
+export const verifyQrController = controller(verifyQrSchema, async (req, res) => {
+  const userId = req.userId;
+  const { attendeeId, eventId } = req.params;
 
-    if (!attendeeId || !eventId) throw new BadRequestError('Attendee ID and Event ID is required');
-    if (!userId) throw new TokenExpiredError();
+  if (!userId) throw new TokenExpiredError();
 
-    const attendee = await AttendeeRepository.findById(attendeeId);
-    if (!attendee) throw new NotFoundError('Attendee not found');
+  const attendee = await AttendeeRepository.findById(attendeeId);
+  if (!attendee) throw new NotFoundError('Attendee not found');
 
-    if (attendee.eventId !== eventId) throw new BadRequestError('Attendee is not allowed');
-    if (!attendee.allowedStatus) throw new ForbiddenError('Attendee is not allowed');
-    if (attendee.hasAttended) throw new BadRequestError('Already scanned ticket');
+  if (attendee.eventId !== eventId) throw new BadRequestError('Attendee is not allowed');
+  if (!attendee.allowedStatus) throw new ForbiddenError('Attendee is not allowed');
+  if (attendee.hasAttended) throw new BadRequestError('Already scanned ticket');
 
-    logger.info('Getting event using id in verifyQrController ...');
-    const event = await EventRepository.findById(eventId);
-    if (!event) throw new NotFoundError('Event not found');
-    const currentTime = new Date();
-    const eventStartTime = new Date(event.startTime);
-    const eventEndTime = new Date(event.endTime);
+  logger.info('Getting event using id in verifyQrController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  const currentTime = new Date();
+  const eventStartTime = new Date(event.startTime);
+  const eventEndTime = new Date(event.endTime);
 
-    const verificationStartTime = new Date(eventStartTime);
-    verificationStartTime.setHours(eventStartTime.getHours() - 1);
+  const verificationStartTime = new Date(eventStartTime);
+  verificationStartTime.setHours(eventStartTime.getHours() - 1);
 
-    if (currentTime < verificationStartTime) {
-      throw new BadRequestError('Ticket verification will start 1 hour before the event');
-    }
-
-    if (currentTime > eventEndTime) {
-      throw new BadRequestError('Event has ended. Ticket is no longer valid');
-    }
-
-    await AttendeeRepository.update(attendee.id, {
-      hasAttended: true,
-      checkInTime: currentTime,
-    });
-
-    return new SuccessResponse('success', { message: 'Ticket is valid' }).send(res);
+  if (currentTime < verificationStartTime) {
+    throw new BadRequestError('Ticket verification will start 1 hour before the event');
   }
-);
+
+  if (currentTime > eventEndTime) {
+    throw new BadRequestError('Event has ended. Ticket is no longer valid');
+  }
+
+  await AttendeeRepository.update(attendee.id, {
+    hasAttended: true,
+    checkInTime: currentTime,
+  });
+
+  return new SuccessResponse('success', { message: 'Ticket is valid' }).send(res);
+});
 
 /**
  * Soft deletes an attendee record for a specific event.
@@ -606,17 +583,14 @@ export const verifyQrController = catchAsync(
  * @param res - The HTTP response object.
  * @returns A success message if the attendee is removed successfully.
  */
-export const deleteAttendeeController = catchAsync(
-  async (req: IAuthenticatedRequest<{ eventId?: string }, {}, {}>, res) => {
-    const { eventId } = req.params;
-    if (!eventId) throw new BadRequestError('Event ID is required');
-    const userId = req.userId;
-    if (!userId) throw new TokenExpiredError();
+export const deleteAttendeeController = controller(eventParamsSchema, async (req, res) => {
+  const { eventId } = req.params;
+  const userId = req.userId;
+  if (!userId) throw new TokenExpiredError();
 
-    logger.info('Getting attendee in deleteAttendeeController ...');
-    const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
-    if (!attendee) throw new NotFoundError('Attendee record not found');
-    const cancelledAttendee = await AttendeeRepository.cancel(attendee.id);
-    return new SuccessResponse('Attendee removed successfully', cancelledAttendee).send(res);
-  }
-);
+  logger.info('Getting attendee in deleteAttendeeController ...');
+  const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);
+  if (!attendee) throw new NotFoundError('Attendee record not found');
+  const cancelledAttendee = await AttendeeRepository.cancel(attendee.id);
+  return new SuccessResponse('Attendee removed successfully', cancelledAttendee).send(res);
+});
