@@ -107,7 +107,9 @@ const ProfileForm = ({ user }: Props) => {
           type="text"
           inputClassName="rounded-l-none"
         >
-          <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://</span>
+          <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2 whitespace-nowrap">
+            https://
+          </span>
         </FormInput>
         <div className="ml-auto flex items-center gap-2">
           <Button

@@ -44,7 +44,19 @@ export const profileFormSchema = z.object({
   profileIcon: z.coerce.number().optional(),
   twitter: z.string().optional(),
   instagram: z.string().optional(),
-  website: z.string().url().optional(),
+  website: z
+    .string()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        return urlPattern.test(val);
+      },
+      {
+        message: 'Please enter a valid URL',
+      }
+    ),
   secondaryEmail: z.string().email().optional(),
 });
 
