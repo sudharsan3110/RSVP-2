@@ -1,3 +1,5 @@
+/** @type {import("eslint").Linter.Config} */
+
 module.exports = {
   env: {
     node: true,
@@ -6,9 +8,10 @@ module.exports = {
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './tsconfig.json',
+    project: ['./tsconfig.json'],
     sourceType: 'module',
     ecmaVersion: 2022,
+    tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,
     },
@@ -23,4 +26,5 @@ module.exports = {
     '@typescript-eslint/no-empty-object-type': 'off',
   },
   reportUnusedDisableDirectives: true,
+  ignorePatterns: ['dist', '.eslintrc.js'],
 };

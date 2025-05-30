@@ -12,12 +12,17 @@ import FormProvider from '../ui/form-provider';
 import { Separator } from '../ui/separator';
 import { Event } from '@/types/events';
 import { LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
+import ConfirmationAlert from './confirmationAlert';
 
 const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
   const { id: eventId, isActive } = event;
   const { mutate, isPending } = useEditEventSlug();
   const { mutate: delMutate, isPending: deleteLoading } = useDeleteEventMutation();
   const { mutate: cancelMutate, isPending: cancelLoading } = useCancelEventMutation();
+
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const form = useForm({
     defaultValues: { slug },
@@ -30,6 +35,16 @@ const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
 
   const onSubmit = (data: { slug: string }) => {
     mutate({ eventId, slug: data.slug }, { onSuccess: () => reset({ slug: data.slug }) });
+  };
+
+  const handleCancelEvent = () => {
+    cancelMutate(eventId);
+    setShowCancelDialog(false);
+  };
+
+  const handleDeleteEvent = () => {
+    delMutate(eventId);
+    setShowDeleteDialog(false);
   };
 
   return (
@@ -89,11 +104,21 @@ const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
           <Button
             variant={cancelLoading ? 'subtle' : 'destructive'}
             className="rounded-[6px]"
-            onClick={() => cancelMutate(eventId)}
+            onClick={() => setShowCancelDialog(true)}
             disabled={cancelLoading}
           >
             {cancelLoading ? <LoaderCircle className="animate-spin" /> : <>Cancel Event</>}
           </Button>
+          <ConfirmationAlert
+            open={showCancelDialog}
+            onOpenChange={setShowCancelDialog}
+            onConfirm={handleCancelEvent}
+            isLoading={cancelLoading}
+            title="Cancel Event"
+            description={`Are you sure you want to delete this event? To confirm, please type: "cancel this event".`}
+            confirmationText="cancel this event"
+            buttonText="Cancel this event"
+          />
         </section>
       )}
       <Separator className="my-11 bg-separator" />
@@ -109,11 +134,21 @@ const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
         <Button
           variant={deleteLoading ? 'subtle' : 'destructive'}
           className="rounded-[6px] opacity-50 hover:opacity-100"
-          onClick={() => delMutate(eventId)}
+          onClick={() => setShowDeleteDialog(true)}
           disabled={deleteLoading}
         >
           {deleteLoading ? <LoaderCircle className="animate-spin" /> : <>Delete My Event</>}
         </Button>
+        <ConfirmationAlert
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onConfirm={handleDeleteEvent}
+          isLoading={deleteLoading}
+          title="Delete Event"
+          description={`Are you sure you want to delete this event? To confirm, please type: "delete this event".`}
+          confirmationText="delete this event"
+          buttonText="Delete this event"
+        />
       </section>
     </section>
   );
