@@ -32,21 +32,21 @@ export class UserRepository {
     return user;
   }
 
-/**
- * Finds a user by their primary email address.
- * @param primaryEmail - The primary email of the user.
- * @param isDeleted - Filter by isDeleted status. Pass null to ignore this filter.
- * @returns The user object if found, otherwise null.
- */
-static async findbyEmail(primaryEmail: string, isDeleted: boolean | null = false) {
-  const user = await prisma.users.findFirst({
-    where: { 
-      primaryEmail,
-      isDeleted: isDeleted !== null ? isDeleted : undefined,
-    },
-  });
-  return user;
-}
+  /**
+   * Finds a user by their primary email address.
+   * @param primaryEmail - The primary email of the user.
+   * @param isDeleted - Filter by isDeleted status. Pass null to ignore this filter.
+   * @returns The user object if found, otherwise null.
+   */
+  static async findbyEmail(primaryEmail: string, isDeleted: boolean | null = false) {
+    const user = await prisma.users.findFirst({
+      where: {
+        primaryEmail,
+        isDeleted: isDeleted !== null ? isDeleted : undefined,
+      },
+    });
+    return user;
+  }
 
   /**
    * Finds multiple users by their IDs.
@@ -161,10 +161,10 @@ static async findbyEmail(primaryEmail: string, isDeleted: boolean | null = false
 
       const deletedUser = await tx.users.update({
         where: { id: userId },
-        data: { 
+        data: {
           isDeleted: true,
           magicToken: null,
-          refreshToken: null
+          refreshToken: null,
         },
       });
 

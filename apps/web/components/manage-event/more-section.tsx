@@ -60,7 +60,9 @@ const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
 
         <FormProvider methods={form} onSubmit={form.handleSubmit(onSubmit)}>
           <FormInput control={form.control} name="slug" label="Public URL">
-            <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2">https://rsvp.com/</span>
+            <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2 whitespace-nowrap">
+              https://rsvp.com/
+            </span>
           </FormInput>
           <div className="mt-4 flex justify-end space-x-4">
             <Button

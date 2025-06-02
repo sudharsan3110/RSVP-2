@@ -43,7 +43,6 @@ import {
 import { Attendee, Prisma, Status, VenueType } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
-import z from 'zod';
 
 /**
  * Retrieves an event by its slug.
@@ -338,9 +337,13 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
   if (existingAttendee) {
     console.log(existingAttendee.status);
     const isUserTicketCancelled =
-      existingAttendee.isDeleted && existingAttendee.status === Status.NOT_GOING;
+      existingAttendee.isDeleted && existingAttendee.status === Status.CANCELLED;
     if (isUserTicketCancelled) {
-      const restoredAttendee = await AttendeeRepository.restore(existingAttendee.id, Status.GOING);
+      const restoredAttendee = await AttendeeRepository.restore(
+        existingAttendee.id,
+        event.hostPermissionRequired ? Status.WAITING : Status.GOING,
+        event.hostPermissionRequired ? false : true
+      );
       attendeeStatus = { isDeleted: false, status: Status.GOING };
       return new SuccessResponse('Attendee restored successfully', restoredAttendee).send(res);
     }
@@ -587,6 +590,14 @@ export const deleteAttendeeController = controller(eventParamsSchema, async (req
   const { eventId } = req.params;
   const userId = req.userId;
   if (!userId) throw new TokenExpiredError();
+
+  const currentDate = new Date();
+
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+
+  if (event?.endTime < currentDate)
+    throw new NotFoundError('The event has already ended, cannot cancel registration.');
 
   logger.info('Getting attendee in deleteAttendeeController ...');
   const attendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId);

@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role } from '@prisma/client';
 
 export const HTTP_OK = 200;
 export const HTTP_CREATED = 201;
@@ -14,7 +14,7 @@ export const ENDPOINT_FILTER_EVENTS = '/filter';
 export const ENDPOINT_USER_EVENTS = '/user';
 export const ENDPOINT_AUTH_ME = '/me';
 
-export const FAKE_USER_ID2 ={
+export const FAKE_USER_ID2 = {
   id: 'test-user-2',
   email: 'user@example.com',
   full_name: 'User Example',
@@ -22,7 +22,7 @@ export const FAKE_USER_ID2 ={
   is_completed: true,
   magicToken: 'secret-magic-token',
   refreshToken: 'secret-refresh-token',
-}
+};
 
 export const FAKE_EVENT = {
   id: 'event-123',
@@ -49,11 +49,11 @@ export const FAKE_USER = {
 };
 
 export const FAKE_HOST = {
-  id: "cohost-id",
+  id: 'cohost-id',
   userId: FAKE_USER_ID2.id,
   eventId: FAKE_EVENT.id,
   role: 'MANAGER' as Role,
   isDeleted: false,
   createdAt: new Date(),
-  updatedAt: new Date()
-}
+  updatedAt: new Date(),
+};

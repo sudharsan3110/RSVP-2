@@ -123,7 +123,7 @@ export class CohostRepository {
     userId: string,
     eventId: string,
     roles: Role[] = [Role.CREATOR, Role.MANAGER, Role.CELEBRITY, Role.READ_ONLY],
-    returnType: boolean = false,
+    returnType: boolean = false
   ): Promise<Role | boolean> {
     const cohost = await prisma.cohost.findFirst({
       where: {
@@ -134,11 +134,11 @@ export class CohostRepository {
         },
       },
     });
-  
+
     if (returnType) {
       return cohost?.role ?? false;
     }
-  
+
     return !!cohost;
   }
 }

@@ -48,7 +48,11 @@ export class AttendeeRepository {
    * @param eventId - The unique ID of the event.
    * @returns The attendee object if found, otherwise null.
    */
-  static async findByUserIdAndEventId(userId: string, eventId: string, isDeleted: boolean | null = false) {
+  static async findByUserIdAndEventId(
+    userId: string,
+    eventId: string,
+    isDeleted: boolean | null = false
+  ) {
     return await prisma.attendee.findFirst({
       where: {
         userId,
@@ -84,12 +88,16 @@ export class AttendeeRepository {
     const whereClause: Prisma.AttendeeWhereInput = {
       userId,
       isDeleted: false,
+      AND: {
+        event: { isDeleted: false },
+      },
     };
     const currentDateTime = new Date();
 
     if (startDate) {
       whereClause.event = {
-        OR: [          {
+        OR: [
+          {
             startTime: {
               gte: startDate,
             },
@@ -321,12 +329,13 @@ export class AttendeeRepository {
    * @param id - The unique ID of the attendee.
    * @returns The updated attendee object with `isDeleted` set to false.
    */
-  static async restore(id: string, status: Status) {
+  static async restore(id: string, status: Status, allowedStatus: boolean) {
     return await prisma.attendee.update({
       where: { id, isDeleted: true, status: Status.CANCELLED },
       data: {
         status: status,
         isDeleted: false,
+        allowedStatus: allowedStatus,
       },
     });
   }
