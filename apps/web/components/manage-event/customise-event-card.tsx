@@ -17,6 +17,7 @@ import { Event } from '@/types/events';
 import { CalendarIcon, Check, MapPinIcon } from 'lucide-react';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { isCurrentUserCohost } from '@/utils/event';
+import { toast } from 'sonner';
 
 type CustomiseEventCarDProps = {
   className: string;

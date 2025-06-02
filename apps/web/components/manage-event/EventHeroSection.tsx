@@ -35,7 +35,6 @@ export const EventHeroSection = () => {
       URL.revokeObjectURL(link.href);
       toast.success('Downloaded Successfully');
     } catch (error) {
-      console.error(error);
       toast.error('Failed to download');
     }
   };

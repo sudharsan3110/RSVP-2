@@ -98,7 +98,9 @@ export const useEditEventSlug = () => {
       toast.success('Event URL updated successfully');
       queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
     },
-    onError: () => toast.error('An error occurred'),
+    onError: () => {
+      toast.error('An error occurred');
+    },
   });
 };
 
@@ -110,7 +112,9 @@ export const useCancelEventMutation = () => {
       toast.success('Event cancelled successfully');
       queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
     },
-    onError: () => toast.error('An error occurred'),
+    onError: () => {
+      toast.error('An error occurred');
+    },
   });
 };
 
@@ -124,7 +128,9 @@ export const useDeleteEventMutation = () => {
       queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
       router.push('/');
     },
-    onError: () => toast.error('An error occurred'),
+    onError: () => {
+      toast.error('An error occurred');
+    },
   });
 };
 
@@ -228,8 +234,12 @@ export const useGetAttendeeTicketDetails = (eventId: string) => {
 export const useCancelEvent = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, { eventId: string }>({
     mutationFn: ({ eventId }) => eventAPI.cancelEventAttendee(eventId),
-    onSuccess: () => toast.success('Event cancelled successfully'),
-    onError: () => toast.error('An error occurred'),
+    onSuccess: () => {
+      toast.success('Event cancelled successfully');
+    },
+    onError: () => {
+      toast.error('An error occurred');
+    },
   });
 };
 
