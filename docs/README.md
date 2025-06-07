@@ -18,7 +18,7 @@ Create, share, and sell tickets effortlessly. Your all-in-one event management s
 ![Vitest](https://img.shields.io/badge/-Vitest-252529?style=for-the-badge&logo=vitest&logoColor=FCC72B)
 
 Read [DEVELOPMENT](./DEVELOPMENT.md) for instructions to develop features locally and for detailed documentation.
-
+- [PRD - Product Requirement Document](./tech/PRD.md)
 ---
 
 <p align="center" style="text"><strong>If you liked something about this repository, do give it a 🌟.</strong></p>
