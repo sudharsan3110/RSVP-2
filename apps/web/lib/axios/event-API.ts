@@ -31,6 +31,7 @@ export type EventParams = {
   startDate?: Date;
   endDate?: Date;
   sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 };
 
 export const eventAPI = {

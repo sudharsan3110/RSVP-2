@@ -19,52 +19,35 @@ export class EventRepository {
     page,
     limit,
     category,
+    location,
     startDate,
     endDate,
-    location,
     sortOrder,
     search,
-    sortBy,
+    sort,
   }: EventFilter) {
     const eventsPaginator = new Paginator('event');
     const currentDateTime = new Date();
+
+    let sortBy = 'startTime';
+    if (sort === 'date') {
+      sortBy = 'startTime';
+    } else if (sort === 'attendees') {
+      sortBy = 'attendeeCount';
+    }
 
     const where: Prisma.EventWhereInput = {
       ...(location && { location: location }),
       ...(category && { category: category }),
       isDeleted: false,
       isActive: true,
-      OR: [
-        {
-          startTime: {
-            gte: currentDateTime,
-          },
-        },
-        {
-          startTime: {
-            lt: currentDateTime,
-          },
-          endTime: {
-            gt: currentDateTime,
-          },
-        },
-      ],
+      endTime: { gte: currentDateTime },
     };
 
     if (startDate || endDate) {
       where.AND = [];
-
-      if (startDate) {
-        where.AND.push({
-          startTime: { gte: startDate },
-        });
-      }
-
-      if (endDate) {
-        where.AND.push({
-          endTime: { lte: endDate },
-        });
-      }
+      if (startDate) where.AND.push({ startTime: { gte: startDate } });
+      if (endDate) where.AND.push({ endTime: { lte: endDate } });
     }
 
     if (search) {
@@ -76,14 +59,9 @@ export class EventRepository {
     }
 
     const { data, metadata } = await eventsPaginator.paginate(
+      { page, limit, sortOrder, sortBy },
       {
-        page,
-        limit,
-        sortOrder,
-        sortBy,
-      },
-      {
-        where: where,
+        where,
         include: {
           creator: {
             select: {
@@ -92,16 +70,17 @@ export class EventRepository {
               userName: true,
             },
           },
+          attendees: {
+            where: {
+              isDeleted: false,
+            },
+          },
         },
       }
     );
 
-    return {
-      events: data,
-      metadata,
-    };
+    return { events: data, metadata };
   }
-
   /**
    * Finds an event by its slug.
    * @param slug - The slug of the event.
@@ -144,54 +123,62 @@ export class EventRepository {
    */
   static async findAllPlannedEvents({
     filters,
-    pagination = { page: 1, limit: 10 },
+    pagination = { page: 1, limit: 10, sortBy: 'startTime', sortOrder: 'desc' },
   }: {
-    filters: IEventFilters;
-    pagination: IPaginationParams;
+    filters: { userId?: string; status?: string; search?: string };
+    pagination: { page: number; limit: number; sortBy: string; sortOrder: 'asc' | 'desc' };
   }) {
-    const { userId, search, category, fromDate, toDate, venueType, status } = filters;
+    const { userId, status, search } = filters;
     const eventsPaginator = new Paginator('event');
     const { page = 1, limit = 10, sortBy = 'startTime', sortOrder = 'desc' } = pagination;
+    const currentDateTime = new Date();
+    console.log('Current Date and Time:', currentDateTime);
 
     const where: Prisma.EventWhereInput = {
-      ...(userId && { creatorId: userId, isDeleted: false }),
-      ...(category && { category: category }),
-      ...(fromDate &&
-        toDate && {
-          AND: [
-            { startTime: { gte: fromDate, lte: toDate } },
-            { endTime: { gte: fromDate, lte: toDate } },
-          ],
-        }),
-      ...(search && {
-        OR: [
-          { name: { contains: search } },
-          { description: { contains: search } },
-          { category: { contains: search } },
-        ],
-      }),
-      ...(venueType && { venueType: venueType as VenueType }),
+      ...(userId && { creatorId: userId }),
+      isDeleted: false,
     };
+
     if (status && status !== 'all') {
-      where.isActive = status === 'active';
+      if (status === 'active') {
+        where.isActive = true;
+        where.endTime = { gte: currentDateTime };
+      } else if (status === 'inactive') {
+        where.OR = [
+          { isActive: false },
+          {
+            isActive: true,
+            endTime: { lt: currentDateTime },
+          },
+        ];
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } },
+        { category: { contains: search } },
+      ];
     }
 
     const { data, metadata } = await eventsPaginator.paginate(
+      { page, limit, sortOrder, sortBy },
       {
-        page,
-        limit,
-        sortOrder,
-        sortBy,
-      },
-      { where: where, include: { creator: true } }
+        where,
+        include: {
+          creator: true,
+          attendees: {
+            where: {
+              isDeleted: false,
+            },
+          },
+        },
+      }
     );
 
-    return {
-      events: data,
-      metadata,
-    };
+    return { events: data, metadata };
   }
-
   /**
    * Finds an event by its unique ID.
    * @param eventId - The unique ID of the event.

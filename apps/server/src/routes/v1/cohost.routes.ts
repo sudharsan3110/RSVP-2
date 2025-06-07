@@ -20,14 +20,14 @@ cohostRouter.get(
 cohostRouter.delete(
   '/events/:eventId/:cohostId',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([Role.CREATOR]),
   removeEventCohostController
 );
 
 cohostRouter.post(
   '/',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([Role.CREATOR]),
   addEventHostController
 );
 

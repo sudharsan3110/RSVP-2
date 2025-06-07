@@ -115,20 +115,23 @@ export const UpdateEventSchema = z.object({
 
 export const eventsPlannedByUserReqSchema = z.object({
   query: z.object({
-    search: z.string().optional(),
-    category: z.string().optional(),
-    fromDate: z.coerce.date().default(() => DATE_RANGE.LOW),
-    toDate: z.coerce.date().default(() => DATE_RANGE.HIGH),
-    venueType: z.enum([VenueType.PHYSICAL, VenueType.VIRTUAL]).optional(),
-    page: z.coerce.number().positive().default(1).optional(),
-    limit: z.coerce.number().positive().default(10).optional(),
-    sortBy: z.string().max(256).optional(),
-    sortOrder: z.enum([PAGINATION_ORDER.ASC, PAGINATION_ORDER.DESC]).optional(),
+    page: z.coerce.number().positive().default(1),
+    limit: z.coerce.number().positive().default(10),
     status: z
-      .enum(['active', 'cancel', 'all'])
+      .enum(['active', 'inactive', 'all'])
       .optional()
       .default('all')
-      .or(z.literal('').transform(() => 'all')), // Transform empty string to 'all'
+      .or(z.literal('').transform(() => 'all')),
+    sort: z
+      .enum(['date', 'attendees'])
+      .optional()
+      .default('date')
+      .or(z.literal('').transform(() => 'date')),
+    sortOrder: z
+      .enum([PAGINATION_ORDER.ASC, PAGINATION_ORDER.DESC])
+      .default(PAGINATION_ORDER.DESC)
+      .or(z.literal('').transform(() => PAGINATION_ORDER.DESC)),
+    search: z.string().optional(),
   }),
 });
 
@@ -175,7 +178,9 @@ export const attendeesQuerySchema = z.object({
         return statuses.every((status) => validStatusValues.includes(status as Status));
       },
       {
-        message: `One or more status values are invalid. Valid statuses are: ${Object.values(Status).join(', ')}`,
+        message: `One or more status values are invalid. Valid statuses are: ${Object.values(
+          Status
+        ).join(', ')}`,
       }
     ),
 });
@@ -184,13 +189,20 @@ export const eventFilterSchema = z.object({
   query: z.object({
     page: z.coerce.number().positive().default(1),
     limit: z.coerce.number().positive().default(10),
-    location: z.string().optional(),
     category: z.string().optional(),
-    sortOrder: z.enum([PAGINATION_ORDER.ASC, PAGINATION_ORDER.DESC]).default(PAGINATION_ORDER.DESC),
-    search: z.string().optional(),
-    sortBy: z.string().optional(),
+    location: z.string().optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
+    sortOrder: z
+      .enum([PAGINATION_ORDER.ASC, PAGINATION_ORDER.DESC])
+      .default(PAGINATION_ORDER.DESC)
+      .or(z.literal('').transform(() => PAGINATION_ORDER.DESC)),
+    search: z.string().optional(),
+    sort: z
+      .enum(['date', 'attendees'])
+      .optional()
+      .default('date')
+      .or(z.literal('').transform(() => 'date')),
   }),
 });
 

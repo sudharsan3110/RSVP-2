@@ -37,8 +37,8 @@ export interface IEventFilters {
   userId?: string;
   search?: string;
   category?: string;
-  fromDate: Date;
-  toDate: Date;
+  fromDate?: Date;
+  toDate?: Date;
   venueType?: string;
   status?: string;
 }

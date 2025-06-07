@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -33,7 +34,10 @@ export default function CustomSelect({
 }: CustomSelectProps) {
   return (
     <Select defaultValue={defaultValue} value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={className} aria-label={ariaLabel}>
+      <SelectTrigger
+        className={cn('w-[90vw] hover:rounded-[8px] md:w-[200px]', className)}
+        aria-label={ariaLabel}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

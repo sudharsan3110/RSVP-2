@@ -11,6 +11,7 @@ import {
   ForbiddenError,
   NotFoundError,
   TokenExpiredError,
+  InternalError,
 } from '@/utils/apiError';
 import { SuccessResponse } from '@/utils/apiResponse';
 import catchAsync from '@/utils/catchAsync';
@@ -256,46 +257,35 @@ export const deleteEventController = controller(deleteEventSchema, async (req, r
 export const getplannedByUserController = controller(
   eventsPlannedByUserReqSchema,
   async (req, res) => {
-    const {
-      search,
-      category,
-      fromDate,
-      toDate,
-      venueType,
-      page,
-      limit,
-      sortBy,
-      sortOrder,
-      status,
-    } = req.query;
+    const { page, limit, status, sort, sortOrder, search } = req.query;
 
     const userId = req.userId;
     if (!userId) throw new TokenExpiredError();
+
     const existingUser = await UserRepository.findById(userId);
     if (!existingUser) throw new TokenExpiredError();
 
     logger.info('Getting planned event in getplannedByUserController ...');
+
+    const sortByField = sort === 'attendees' ? 'attendeeCount' : 'startTime';
+
     const plannedEvents = await EventRepository.findAllPlannedEvents({
       filters: {
         userId,
-        search,
-        category,
-        fromDate,
-        toDate,
-        venueType,
         status,
+        search,
       },
       pagination: {
         page,
         limit,
-        sortBy,
+        sortBy: sortByField,
         sortOrder,
       },
     });
+
     return new SuccessResponse('success', plannedEvents).send(res);
   }
 );
-
 /**
  * Registers a user as an attendee for an event.
  * @param req - The HTTP request object containing the event ID in the parameters and attendee details in the body.

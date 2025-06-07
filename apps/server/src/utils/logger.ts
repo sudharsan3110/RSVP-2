@@ -3,7 +3,11 @@ import config from '@/config/config';
 
 const enumerateErrorFormat = winston.format((info) => {
   if (info instanceof Error) {
-    Object.assign(info, { message: info.stack });
+    // Create a new object instead of modifying the original Error object
+    return {
+      ...info,
+      message: info.stack || info.message,
+    };
   }
   return info;
 });

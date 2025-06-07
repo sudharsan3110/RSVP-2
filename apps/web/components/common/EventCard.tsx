@@ -40,19 +40,14 @@ const Card = ({ className, event, type }: CardProps) => {
       <section className="flex flex-col">
         <span className="text-xl font-bold line-clamp-1">{event?.name}</span>
         <span className="mb-3 font-semibold capitalize">
-          Hosted By - {event?.creator?.fullName.toLowerCase()}
+          Hosted By -{' '}
+          {event?.creator?.fullName ? event.creator.fullName.toLowerCase() : 'Unknown Host'}
         </span>
         <span className="font-bold">
           {event?.startTime ? dayjs(event.startTime).format('hh:mm A, DD MMM YYYY') : ''}
         </span>
         <span className="font-medium">{venueDisplay(event)}</span>
       </section>
-      {/* {!!event?.numberOfAttendees && event?.numberOfAttendees > 0 && (
-        <section className="flex items-center text-sm">
-          <CheckCircleIcon className="mr-2 w-[18px]" />
-          <span>{event?.numberOfAttendees} going</span>
-        </section>
-      )} */}
       {type === 'manage' && (
         <>
           <Link href={`/events/${event?.id}/manage`} passHref className="block">

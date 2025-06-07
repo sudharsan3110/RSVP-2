@@ -3,24 +3,19 @@ import Container from '@/components/common/Container.tsx';
 import EventCard from '@/components/common/EventCard.tsx';
 import NoResults from '@/components/common/NoResults';
 import SuspenseBoundary from '@/components/common/SuspenseBoundary';
-import { Button } from '@/components/ui/button.tsx';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command.tsx';
+import { Button } from '@/components/ui/button';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import useDebounce from '@/hooks/useDebounce';
 import { useGetMyEvents } from '@/lib/react-query/event.ts';
 import { cn } from '@/lib/utils.ts';
-import { locationName, NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
-import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { Loader2 } from 'lucide-react';
+import { NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ArrowDownNarrowWideIcon, ArrowUpNarrowWideIcon, Loader2 } from 'lucide-react';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+
 interface HandleSearchEvent {
   target: {
     value: string;
@@ -28,29 +23,27 @@ interface HandleSearchEvent {
 }
 
 const Events = () => {
-  const [searchText, setSearchText] = useState('');
-
-  const debouncedSearchText = useDebounce(searchText, 500);
   const [filters, setFilters] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
-      status: parseAsString.withDefault('active'),
-      sort: parseAsString.withDefault(''),
+      status: parseAsString.withDefault('active').withOptions({ clearOnDefault: false }),
+      sort: parseAsString.withDefault('date').withOptions({ clearOnDefault: false }),
+      sortOrder: parseAsString.withDefault('desc').withOptions({ clearOnDefault: false }),
       search: parseAsString.withDefault(''),
     },
     { history: 'push' }
   );
-  const { data, isLoading, error } = useGetMyEvents(filters);
-  const [open, setOpen] = useState(false);
+  const debouncedSearchQuery = useDebounce(filters.search, 600);
+  const { data, isLoading, error } = useGetMyEvents({
+    ...filters,
+    sortOrder: filters.sortOrder as 'asc' | 'desc' | undefined,
+    search: debouncedSearchQuery,
+  });
   const [value, setValue] = useState('');
   const [isFilterOpen] = useState(true);
 
-  useEffect(() => {
-    setFilters((prev) => ({ ...prev, search: debouncedSearchText }));
-  }, [debouncedSearchText]);
-
   const handleSearch = (e: HandleSearchEvent) => {
-    setSearchText(e.target.value);
+    setFilters((prev) => ({ ...prev, search: e.target.value }));
   };
 
   if (isLoading)
@@ -99,10 +92,14 @@ const Events = () => {
       page: 1,
       status: '',
       sort: '',
+      sortOrder: '',
       search: '',
     });
-    setSearchText('');
     setValue('');
+  };
+
+  const handleSort = () => {
+    setFilters((prev) => ({ ...prev, sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' }));
   };
 
   if (error) return <div>{error.message}</div>;
@@ -125,12 +122,12 @@ const Events = () => {
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
                   </div>
-                  <input
+                  <Input
                     type="text"
-                    className="block w-full rounded-full border border-dark-500 bg-dark-500 py-2 pl-10 pr-3 leading-5 text-white placeholder-white focus:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500 sm:text-sm"
-                    placeholder="Comic"
+                    className="block w-full rounded-full bg-dark-500 py-2 pl-10 pr-3 leading-5"
+                    placeholder="Event Name..."
                     onChange={handleSearch}
-                    value={searchText}
+                    value={filters.search}
                   />
                 </div>
               </div>
@@ -148,7 +145,7 @@ const Events = () => {
                   options={[
                     { value: 'all', label: 'All' },
                     { value: 'active', label: 'Active' },
-                    { value: 'cancel', label: 'Cancelled' },
+                    { value: 'inactive', label: 'Inactive' },
                   ]}
                   placeholder="Select Status"
                   ariaLabel="Select Event Status"
@@ -157,74 +154,42 @@ const Events = () => {
                   }
                 />
 
-                {/* <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      role="combobox"
-                      aria-expanded={open}
-                      className="w-[90vw] justify-between rounded-[8px] border md:w-[200px]"
-                      data-testid="locationButton"
-                    >
-                      {value
-                        ? locationName.find((location) => location.value === value)?.label
-                        : 'Location'}
-                      <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[90vw] rounded-[8px] p-0 md:w-[200px]">
-                    <Command>
-                      <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                          <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
-                        </div>
-                        <input
-                          type="text"
-                          className="block w-full bg-transparent py-2 pl-10 pr-3 leading-5 text-white placeholder-white focus:border-dark-900 focus:outline-none focus:ring-2 focus:ring-dark-900 sm:text-sm"
-                          placeholder="Search Here..."
-                        />
-                      </div>
-                      <CommandList>
-                        <CommandEmpty>No Location found.</CommandEmpty>
-                        <CommandGroup>
-                          {locationName.map((location) => (
-                            <CommandItem
-                              key={location.value}
-                              value={location.value}
-                              onSelect={(currentValue) => {
-                                setValue(currentValue === value ? '' : currentValue);
-                                setOpen(false);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              <CheckIcon
-                                className={cn(
-                                  'mr-2 h-4 w-4',
-                                  value === location.value ? 'opacity-100' : 'opacity-0'
-                                )}
-                              />
-                              {location.label}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover> */}
-
-                <CustomSelect
-                  value={filters.sort}
-                  options={[
-                    { value: 'all', label: 'All' },
-                    { value: 'date', label: 'Date' },
-                    { value: 'attendees', label: 'Attendees' },
-                  ]}
-                  placeholder="Sort By"
-                  ariaLabel="Sort By"
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, sort: value === 'all' ? '' : value }))
-                  }
-                />
+                <div className="flex items-center">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={500}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          radius="sm"
+                          variant="tertiary"
+                          onClick={handleSort}
+                          className="rounded-r-none bg-transparent"
+                        >
+                          {filters.sortOrder === 'asc' ? (
+                            <ArrowUpNarrowWideIcon size={16} />
+                          ) : (
+                            <ArrowDownNarrowWideIcon size={16} />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {filters.sortOrder === 'asc'
+                          ? 'Sort Order: Ascending'
+                          : 'Sort Order: Descending'}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <CustomSelect
+                    value={filters.sort}
+                    options={[
+                      { value: 'date', label: 'Date' },
+                      { value: 'attendees', label: 'Attendees' },
+                    ]}
+                    placeholder="Sort By"
+                    ariaLabel="Sort By"
+                    onValueChange={(value) => setFilters((prev) => ({ ...prev, sort: value }))}
+                    className="border-l-0 rounded-l-none"
+                  />
+                </div>
               </div>
             </section>
           </section>
