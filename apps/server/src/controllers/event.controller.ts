@@ -386,15 +386,16 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
  * @param res - The HTTP response object.
  * @returns A paginated list of attendees.
  */
-export const getAttendeeController = controller(eventParamsSchema, async (req, res) => {
+export const getAttendeeController = controller(attendeesQuerySchema, async (req, res) => {
   const { eventId } = req.params;
-
   logger.info('Finding event by id in getAttendeeController ...');
   const event = await EventRepository.findById(eventId);
   if (!event) throw new NotFoundError('Event not found');
 
-  const pagination = await attendeesQuerySchema.parseAsync(req.query);
-  const attendees = await AttendeeRepository.findAttendeesByEventId({ eventId, ...pagination });
+  const attendees = await AttendeeRepository.findAttendeesByEventId({
+    eventId,
+    ...req.query,
+  });
 
   return new SuccessResponse('success', attendees).send(res);
 });
