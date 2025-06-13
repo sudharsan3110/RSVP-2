@@ -147,7 +147,7 @@ const AutheticatedHeader = () => {
             <span className="w-0 overflow-hidden group-hover:w-fit">Planned</span>
           </Button>
         </Link>
-        <Link href="">
+        <Link href="/discover">
           <Button
             className="text-md group text-white hover:bg-primary active:bg-primary"
             variant={'ghost'}

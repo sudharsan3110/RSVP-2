@@ -10,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 export const fileFromUrl = async (url: string, filename: string): Promise<File> => {
   const blob = await fetch(url).then((r) => r.blob());
   URL.revokeObjectURL(url);
-  return new File([blob], filename);
+  return new File([blob], filename, { type: blob.type });
 };
 
 export const formatDateTime = (date: string) => {

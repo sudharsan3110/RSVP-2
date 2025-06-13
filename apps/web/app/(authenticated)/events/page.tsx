@@ -9,7 +9,8 @@ import useDebounce from '@/hooks/useDebounce';
 import { useGetMyEvents, useGetMyEventsInifinite } from '@/lib/react-query/event.ts';
 import { cn } from '@/lib/utils.ts';
 import { NO_EVENT_TITLE, NO_EVENTS_MESSAGE } from '@/utils/constants.ts';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import { ArrowDownNarrowWideIcon, ArrowUpNarrowWideIcon, Loader2 } from 'lucide-react';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useRef, useState } from 'react';
@@ -44,7 +45,7 @@ const Events = () => {
       search: debouncedSearchQuery,
     });
   const [value, setValue] = useState('');
-  const [isFilterOpen] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -145,7 +146,7 @@ const Events = () => {
         <main>
           <section className="flex flex-col gap-6">
             <section className="flex w-full flex-col items-center justify-between md:flex-row">
-              <div className="flex w-full flex-1 items-center md:mr-12 md:max-w-2xl">
+              <div className="flex w-full flex-1 items-center md:mr-12 md:max-w-2xl gap-4">
                 <div className="relative flex w-full">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
@@ -158,14 +159,30 @@ const Events = () => {
                     value={filters.search}
                   />
                 </div>
+
+                <div className="md:hidden">
+                  <Button size="icon" variant={isFilterOpen ? 'destructive' : 'ghost'} asChild>
+                    {isFilterOpen ? (
+                      <XMarkIcon
+                        data-testid="close"
+                        className="h-6 w-6"
+                        onClick={() => setIsFilterOpen(false)}
+                      />
+                    ) : (
+                      <FunnelIcon
+                        data-testid="funnel"
+                        className="h-6 w-6"
+                        onClick={() => setIsFilterOpen(true)}
+                      />
+                    )}
+                  </Button>
+                </div>
               </div>
 
               <div
                 className={cn(
-                  'mt-6 md:mt-0',
-                  isFilterOpen
-                    ? 'hidden gap-6 sm:flex-row md:flex md:flex-row'
-                    : 'flex flex-col items-center justify-center gap-6 md:hidden'
+                  'mt-6 md:mt-0 md:mx-4 flex gap-6 flex-col md:flex-row items-center',
+                  !isFilterOpen && 'hidden md:flex'
                 )}
               >
                 <CustomSelect
@@ -182,7 +199,7 @@ const Events = () => {
                   }
                 />
 
-                <div className="flex items-center">
+                <div className="flex items-center md:w-fit w-[90vw]">
                   <TooltipProvider>
                     <Tooltip delayDuration={500}>
                       <TooltipTrigger asChild>

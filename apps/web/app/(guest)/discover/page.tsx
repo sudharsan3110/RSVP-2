@@ -18,10 +18,11 @@ import { ArrowDownNarrowWideIcon, ArrowUpNarrowWideIcon } from 'lucide-react';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useRef, useState } from 'react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { cn } from '@/lib/utils';
 
 const DiscoverEvents = () => {
   const pageEndRef = useRef<HTMLDivElement>(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [filters, setFilters] = useQueryStates(
     {
@@ -82,7 +83,7 @@ const DiscoverEvents = () => {
         </h1>
 
         <section className="flex flex-col gap-6">
-          <section className="flex w-full flex-col items-center justify-between md:flex-row">
+          <section className="flex w-full flex-col items-center justify-between md:flex-row gap-4">
             <div className="flex w-full flex-1 items-center gap-6 md:mr-12 md:max-w-2xl">
               <div className="relative flex w-full">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -98,24 +99,27 @@ const DiscoverEvents = () => {
               </div>
 
               <div className="md:hidden">
-                <Button size="icon" variant={!isFilterOpen ? 'destructive' : 'ghost'} asChild>
-                  {!isFilterOpen ? (
+                <Button size="icon" variant={isFilterOpen ? 'destructive' : 'ghost'} asChild>
+                  {isFilterOpen ? (
                     <XMarkIcon
                       data-testid="close"
                       className="h-6 w-6"
-                      onClick={() => setIsFilterOpen(true)}
+                      onClick={() => setIsFilterOpen(false)}
                     />
                   ) : (
                     <FunnelIcon
                       data-testid="funnel"
                       className="h-6 w-6"
-                      onClick={() => setIsFilterOpen(false)}
+                      onClick={() => setIsFilterOpen(true)}
                     />
                   )}
                 </Button>
               </div>
             </div>
-            <div className="flex items-center">
+
+            <div
+              className={cn('flex items-center w-full md:w-fit', !isFilterOpen && 'hidden md:flex')}
+            >
               <TooltipProvider>
                 <Tooltip delayDuration={500}>
                   <TooltipTrigger asChild>

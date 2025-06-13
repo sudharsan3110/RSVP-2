@@ -60,7 +60,7 @@ const EditEventForm = () => {
       try {
         await axios.put(eventImageUrl.signedUrl, imageFile, {
           headers: {
-            'Content-Type': eventImageUrl.type,
+            'Content-Type': imageFile.type,
           },
         });
       } catch (error) {
