@@ -1,6 +1,5 @@
 import config from '@/config/config';
 import { API_MESSAGES } from '@/constants/apiMessages';
-import { IAllowStatus } from '@/interface/event';
 import { IAuthenticatedRequest } from '@/interface/middleware';
 import { AttendeeRepository } from '@/repositories/attendee.repository';
 import { CohostRepository } from '@/repositories/cohost.repository';
@@ -11,7 +10,6 @@ import {
   ForbiddenError,
   NotFoundError,
   TokenExpiredError,
-  InternalError,
 } from '@/utils/apiError';
 import { SuccessResponse } from '@/utils/apiResponse';
 import catchAsync from '@/utils/catchAsync';
@@ -21,7 +19,6 @@ import logger from '@/utils/logger';
 import EmailService from '@/utils/sendEmail';
 import {
   attendeePayloadSchema,
-  UpcomingEventsQuery,
   upcomingEventsQuerySchema,
 } from '@/validations/attendee.validation';
 import { eventParamsSchema } from '@/validations/cohost.validation';
@@ -211,13 +208,16 @@ export const updateEventController = controller(UpdateEventSchema, async (req, r
 
   if (hasOtherChanges) {
     const attendees = await AttendeeRepository.findAllAttendees(eventId);
+    const cohosts = await CohostRepository.findAllByEventId(eventId);
+    const creatorEmail = (cohosts || []).find((cohost: any) => cohost.role === 'CREATOR')?.user
+      ?.primaryEmail;
     const bccEmails = attendees.map((attendee: any) => attendee.user?.primaryEmail).filter(Boolean);
 
     if (bccEmails.length > 0 && config.NODE_ENV !== 'development') {
       await EmailService.send({
         id: 6,
         subject: 'Your event has been updated',
-        recipient: bccEmails[0],
+        recipient: creatorEmail,
         bcc: bccEmails,
         body: {
           eventName: updatedEvent.name,
