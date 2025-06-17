@@ -34,7 +34,7 @@ const ScannerPage = () => {
         ticketCode: code,
       });
       if (attendee) {
-        setAttendeeData(attendee);
+        setAttendeeData(attendee.data);
         setError(null);
       } else {
         toast.error('Attendee not found', {

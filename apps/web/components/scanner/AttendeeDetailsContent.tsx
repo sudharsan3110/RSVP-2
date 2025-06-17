@@ -1,4 +1,5 @@
 import { Attendee } from '@/types/attendee';
+import { userAvatarOptions } from '@/utils/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 type Props = {
@@ -6,6 +7,10 @@ type Props = {
 };
 
 const AttendeeDetailsContent = ({ attendee }: Props) => {
+  const profileIcon = userAvatarOptions.find(
+    (option) => option.id === attendee.user?.profileIcon
+  )?.src;
+
   return (
     <section className="space-y-4 font-bold">
       <div className="flex gap-4">
@@ -14,7 +19,7 @@ const AttendeeDetailsContent = ({ attendee }: Props) => {
           <p className="text-xl">{attendee?.user?.fullName}</p>
         </div>
         <Avatar className="h-[60px] w-[60px]">
-          <AvatarImage src={attendee?.user?.profileIconUrl} alt={attendee?.user?.fullName} />
+          <AvatarImage src={profileIcon} alt={attendee?.user?.fullName} />
           <AvatarFallback>{attendee?.user?.initials}</AvatarFallback>
         </Avatar>
       </div>

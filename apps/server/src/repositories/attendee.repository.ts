@@ -36,6 +36,7 @@ export class AttendeeRepository {
             fullName: true,
             primaryEmail: true,
             contact: true,
+            profileIcon: true,
           },
         },
       },

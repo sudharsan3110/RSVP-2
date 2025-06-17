@@ -138,9 +138,7 @@ export const eventAPI = {
     ticketCode: string;
     eventId: string;
   }) => {
-    return api
-      .get(`/event/${eventId}/attendee/qr/${ticketCode}`)
-      .then((res) => res.data as Attendee);
+    return api.get(`/event/${eventId}/attendee/qr/${ticketCode}`).then((res) => res.data);
   },
 
   getAttendeeTicketDetail: async (eventId: string) => {
