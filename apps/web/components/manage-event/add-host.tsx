@@ -148,9 +148,9 @@ const AddCoHost = ({ className }: PropsWithClassName) => {
         </DialogContent>
       </Dialog>
 
-      {isValidEmail(searchQuery) && (
+      {(selectedCoHost || isValidEmail(searchQuery)) && (
         <ConfirmCoHost
-          selectedCoHost={searchQuery}
+          selectedCoHost={selectedCoHost?.user?.primaryEmail || searchQuery}
           isConfirmationDialogOpen={isConfirmationDialogOpen}
           setIsConfirmationDialogOpen={setIsConfirmationDialogOpen}
         />
