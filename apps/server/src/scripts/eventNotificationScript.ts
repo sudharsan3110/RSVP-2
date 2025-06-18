@@ -2,11 +2,17 @@ import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import EmailService from '@/utils/sendEmail';
 import config from '@/config/config';
+import logger from '@/utils/logger';
 
 dotenv.config();
 const prisma = new PrismaClient();
 
 async function processEventNotifications() {
+  const runId = Date.now().toString(36);
+  const t0 = Date.now();
+
+  logger.info({ runId, phase: 'start', utc: new Date().toISOString() });
+
   try {
     const currentTime = new Date();
     currentTime.setMinutes(0, 0, 0);
@@ -50,7 +56,6 @@ async function processEventNotifications() {
             isDeleted: false,
           },
           select: {
-            id: true,
             user: {
               select: {
                 fullName: true,
@@ -62,7 +67,21 @@ async function processEventNotifications() {
       },
     });
 
+    logger.info({ runId, phase: 'query', events: events.length });
+
+    let sent = 0;
+    let failed = 0;
+
     const emailPromises = events.map(async (event) => {
+      const recipients = event.attendees
+        .map((attendee) => attendee.user?.primaryEmail)
+        .filter((e): e is string => !!e);
+
+      if (!recipients.length) {
+        logger.warn({ runId, phase: 'skip', eventId: event.id, reason: 'noRecipients' });
+        return;
+      }
+
       const eventEmailData = {
         id: 6,
         subject: `Your Event ${event.name} Starts Soon!`,
@@ -71,16 +90,30 @@ async function processEventNotifications() {
           updatesText: `Just a quick reminder that your event ${event.name} is starting soon at ${event.startTime}`,
           updatesLink: `${config.CLIENT_URL}/${event.slug}`,
         },
-        bcc: event.attendees.map(
-          (attendee: { user: { primaryEmail: string } }) => attendee.user.primaryEmail
-        ),
+        bcc: recipients.slice(0, 100),
       };
-      return EmailService.send(eventEmailData);
+
+      try {
+        await EmailService.send(eventEmailData);
+        sent += recipients.length;
+        logger.info({ runId, phase: 'sent', eventId: event.id, recipients });
+      } catch (err: any) {
+        failed += recipients.length;
+        logger.error({ runId, phase: 'fail', eventId: event.id, msg: err.message });
+      }
     });
 
     await Promise.all(emailPromises);
-  } catch (error) {
-    console.error('Failed to process event notifications:', error);
+
+    logger.info({
+      runId,
+      phase: 'end',
+      sent,
+      failed,
+      ms: Date.now() - t0,
+    });
+  } catch (error: any) {
+    logger.error({ runId, phase: 'fatal', msg: error.message });
     throw error;
   } finally {
     await prisma.$disconnect();

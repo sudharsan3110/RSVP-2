@@ -20,7 +20,7 @@ server.listen(port, () => {
  * This is only enabled in the production environment.
  */
 if (config.NODE_ENV === 'production') {
-  cron.schedule('0 * * * *', async () => {
+  cron.schedule('*/15 * * * *', async () => {
     processEventNotifications()
       .then(() => {
         logger.info(`Cron Job Triggered at ${new Date().toISOString()}`);
