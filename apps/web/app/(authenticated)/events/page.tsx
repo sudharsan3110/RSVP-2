@@ -81,7 +81,8 @@ const Events = () => {
         <Loader2 data-testid="loader" className="h-10 w-10 animate-spin" />
       </div>
     );
-  const hasActiveFilters = !!(filters.status || filters.search || value);
+
+  const hasActiveFilters = filters.status != 'active' || filters.search != '' || value != '';
 
   const getNoResultsProps = () => {
     const defaultProps = {
