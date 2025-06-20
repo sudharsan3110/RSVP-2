@@ -40,11 +40,13 @@ const Communication = ({ eventId }: CommunicationProps) => {
     resolver: zodResolver(communication),
     defaultValues: {
       content: '',
+      plaintextContent: '',
     },
   });
 
   const { mutate: createCommunication } = useCreateEventCommunication(eventId);
   const { data: communicationsData } = useEventCommunications(eventId);
+  const { setValue } = form;
 
   const onSubmit = (data: CommunicationForm) => {
     createCommunication(data, {
@@ -91,7 +93,14 @@ const Communication = ({ eventId }: CommunicationProps) => {
             name="content"
             render={({ field }) => (
               <FormItem>
-                <Tiptap description={field.value} limit={300} onChange={field.onChange} />
+                <Tiptap
+                  description={field.value}
+                  limit={300}
+                  onChange={(richtext, plaintext) => {
+                    field.onChange(richtext);
+                    setValue('plaintextContent', plaintext);
+                  }}
+                />
               </FormItem>
             )}
           />

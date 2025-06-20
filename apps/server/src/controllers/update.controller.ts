@@ -3,7 +3,7 @@ import { AttendeeRepository } from '@/repositories/attendee.repository';
 import { EventRepository } from '@/repositories/event.repository';
 import { UpdateRepository } from '@/repositories/update.repository';
 import { UserRepository } from '@/repositories/user.repository';
-import { NotFoundError } from '@/utils/apiError';
+import { BadRequestError, NotFoundError } from '@/utils/apiError';
 import { SuccessResponse } from '@/utils/apiResponse';
 import { controller } from '@/utils/controller';
 import logger from '@/utils/logger';
@@ -27,6 +27,9 @@ export const sendMessageController = controller(userUpdateSchema, async (req, re
 
   const getUserDetails = await UserRepository.findById(event.creatorId);
   if (!getUserDetails?.id) throw new NotFoundError('User not found');
+
+  if (data.plaintextContent.length > 300)
+    throw new BadRequestError('Message cannot be greater than 300 characters.');
 
   logger.info('Creating message in sendMessageController ...');
   const notificationData = {

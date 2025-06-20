@@ -157,7 +157,7 @@ export const getUserUpcomingEventController = controller(
  * @returns The newly created event object.
  */
 export const createEventController = controller(CreateEventSchema, async (req, res) => {
-  const data = req.body;
+  const { richtextDescription, plaintextDescription, ...data } = req.body;
   const userId = req.userId;
   if (!userId) throw new TokenExpiredError();
 
@@ -166,9 +166,13 @@ export const createEventController = controller(CreateEventSchema, async (req, r
   if (!getUserData.isCompleted)
     throw new BadRequestError('Please complete your profile before creating event');
 
+  if (plaintextDescription.length > 300)
+    throw new BadRequestError('Description cannot be greater than 300 characters.');
+
   logger.info('Formatting data for create event in createEventController ...');
   const formattedData = {
     ...data,
+    description: richtextDescription,
     creatorId: userId,
     slug: sluggify(data.name),
     venueType: data.venueType.toUpperCase() as VenueType,
@@ -192,13 +196,17 @@ export const createEventController = controller(CreateEventSchema, async (req, r
  */
 export const updateEventController = controller(UpdateEventSchema, async (req, res) => {
   const { eventId } = req.params;
-  const data = req.body;
+  const { richtextDescription, plaintextDescription, ...data } = req.body;
 
   if (!data.venueType) throw new BadRequestError('Venue type cannot be updated');
+
+  if (plaintextDescription.length > 300)
+    throw new BadRequestError('Description cannot be greater than 300 characters.');
 
   logger.info('Updating event in updateEventController ...');
   const updatedEvent = await EventRepository.update(eventId, {
     ...data,
+    description: richtextDescription,
     venueType: data.venueType.toUpperCase() as VenueType,
   });
 

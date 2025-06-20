@@ -41,6 +41,7 @@ const CreateEventForm = () => {
       name,
       category,
       description,
+      plaintextDescription,
       eventImageUrl,
       venueType,
       hostPermissionRequired,
@@ -55,7 +56,8 @@ const CreateEventForm = () => {
     const submissionData: CreateEventSubmissionType = {
       name,
       category,
-      description,
+      richtextDescription: description,
+      plaintextDescription,
       eventImageUrl: eventImageUrl.url ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,

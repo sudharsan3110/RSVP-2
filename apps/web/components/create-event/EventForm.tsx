@@ -45,6 +45,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
     getValues,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isDirty },
   } = form;
 
@@ -119,7 +120,14 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Description</FormLabel>
-                <Tiptap description={field.value} limit={300} onChange={field.onChange} />
+                <Tiptap
+                  description={field.value}
+                  limit={300}
+                  onChange={(richtext, plaintext) => {
+                    field.onChange(richtext);
+                    setValue('plaintextDescription', plaintext);
+                  }}
+                />
               </FormItem>
             )}
           />

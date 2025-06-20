@@ -52,6 +52,12 @@ export const EventSchema = z.object({
 
 export const CreateEventSchema = z.object({
   body: EventSchema.strict()
+    .omit({ description: true })
+    .strict()
+    .extend({
+      richtextDescription: z.string(),
+      plaintextDescription: z.string(),
+    })
     .refine(
       (data) => {
         if (data.venueType === VenueType.PHYSICAL) {
@@ -109,7 +115,10 @@ export const CreateEventSchema = z.object({
 });
 
 export const UpdateEventSchema = z.object({
-  body: EventSchema.partial(),
+  body: EventSchema.omit({ description: true }).partial().extend({
+    richtextDescription: z.string(),
+    plaintextDescription: z.string(),
+  }),
   params: z.object({ eventId: uuidSchema }),
 });
 
@@ -138,6 +147,7 @@ export const eventsPlannedByUserReqSchema = z.object({
 export const userUpdateSchema = z.object({
   body: z.object({
     content: z.string(),
+    plaintextContent: z.string(),
   }),
   params: z.object({
     eventId: z.string().uuid(),

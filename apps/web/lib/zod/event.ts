@@ -23,6 +23,7 @@ export const createEventFormSchema = z
       required_error: 'To time is required',
     }),
     description: z.string(),
+    plaintextDescription: z.string().optional(),
     venueType: z.nativeEnum(VenueType),
     location: z.string().optional(),
     hostPermissionRequired: z.boolean(),
@@ -101,7 +102,8 @@ export type CreateEventFormType = z.infer<typeof createEventFormSchema>;
 export type CreateEventSubmissionType = {
   name: string;
   category: string;
-  description: string;
+  richtextDescription: string;
+  plaintextDescription?: string;
   eventImageUrl: string;
   venueType: VenueType;
   venueAddress?: string;

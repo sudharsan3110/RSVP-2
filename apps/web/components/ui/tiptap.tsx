@@ -22,7 +22,7 @@ const Tiptap = ({
   limit,
 }: {
   description: string;
-  onChange: (richtext: string) => void;
+  onChange: (richtext: string, plaintext: string) => void;
   limit: number;
 }) => {
   const [editorInFocus, setEditorInFocus] = useState(false);
@@ -56,7 +56,7 @@ const Tiptap = ({
     ],
     content: description,
     onUpdate({ editor }) {
-      onChange(editor.getHTML());
+      onChange(editor.getHTML(), editor.getText().replace(/[\n\r\t]/g, ''));
     },
     editorProps: {
       attributes: {
