@@ -122,12 +122,7 @@ const CustomiseEventCard = ({ className, event, isSuccess }: CustomiseEventCarDP
             </h2>
             <p className="text-sm text-secondary">Hosted By - {event.creator?.fullName}</p>
           </header>
-          <div className="flex items-center gap-3.5">
-            <MapPinIcon className="size-5 shrink-0" />
-            <p className="line-clamp-2 max-w-sm truncate font-medium text-white">
-              {event.venueAddress ?? 'To be announced'}
-            </p>
-          </div>
+          {renderVenueInfo()}
           <div className="flex gap-3.5 text-sm">
             <CalendarIcon className="mt-[3px] size-5 shrink-0" />
             <div className="flex flex-wrap gap-3.5">
