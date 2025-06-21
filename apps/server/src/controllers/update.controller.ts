@@ -56,13 +56,17 @@ export const sendMessageController = controller(userUpdateSchema, async (req, re
     .map((user) => String(user.userId));
 
   const usersList = await UserRepository.findAllByIds(attendeeIds);
+
+  let emailNotificationText = data.plaintextContent.slice(0, 50);
+  if (data.plaintextContent.length > 50) emailNotificationText += '..';
+
   const emailData = {
     id: 6,
     subject: RSVP_SUBJECT_MSG,
     recipient: notificationDeta.user.email,
     body: {
       eventName: event.name,
-      updatesText: notificationDeta.content,
+      updatesText: emailNotificationText,
       updatesLink: `${config.CLIENT_URL}/${event.slug}/communication`,
     },
     bcc: usersList.map((user) => user.primaryEmail),
