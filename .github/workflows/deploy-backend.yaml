@@ -1,6 +1,4 @@
 name: Deploy Backend App
-env:
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 on:
   workflow_dispatch:
   push:
