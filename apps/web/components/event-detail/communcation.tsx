@@ -5,7 +5,7 @@ import { useEventCommunications } from '@/lib/react-query/communication';
 import { Event } from '@/types/events';
 import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { ClockIcon, LinkIcon, MessageCircleIcon, UsersIcon, UserIcon } from 'lucide-react';
+import { ClockIcon, LinkIcon, MessageCircleIcon, UsersIcon, UserIcon, Loader2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -32,7 +32,7 @@ interface CommunicationsData {
 }
 
 const Communication = ({ event, totalAttendees }: CommunicationProps) => {
-  const { data: communicationsData } = useEventCommunications(event.id);
+  const { data: communicationsData, isLoading } = useEventCommunications(event.id);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -80,15 +80,15 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
       {/* Event Info Summary - 3 Grid Layout */}
       <Card className="bg-dark-900 border-dark-700 overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex justify-between gap-0">
+          <div className="flex justify-between gap-0 md:flex-row flex-col">
             {/* Image Section */}
-            <div className="relative h-48 w-fit flex">
+            <div className="relative md:h-48 w-fit flex md:flex-row flex-col">
               <Image
                 src={event.eventImageUrl}
                 alt={event.name}
                 width={100}
                 height={100}
-                className="object-cover aspect-square h-full w-auto rounded-l-lg"
+                className="object-cover aspect-square h-full w-auto md:rounded-l-lg rounded-t-lg"
               />
               <div className="p-6">
                 {event.category && (
@@ -174,7 +174,13 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
           </Badge>
         </div>
 
-        {communicationsData?.data?.length > 0 ? (
+        {isLoading && (
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        )}
+
+        {communicationsData?.data?.length > 0 && !isLoading ? (
           <div className="space-y-4 max-w-3xl">
             {(communicationsData as CommunicationsData)?.data?.map(
               (msg: CommunicationMessage, index: number) => (
@@ -221,7 +227,7 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
               <MessageCircleIcon className="h-12 w-12 text-secondary mx-auto mb-4" />
               <p className="text-secondary text-lg">No communications yet.</p>
               <p className="text-secondary text-sm mt-2">
-                Messages from attendees will appear here
+                Messages from hosts will appear here
               </p>
             </CardContent>
           </Card>
