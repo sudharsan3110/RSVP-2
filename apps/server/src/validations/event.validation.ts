@@ -44,7 +44,7 @@ export const EventSchema = z.object({
   venueAddress: z.string().max(256).optional(),
   venueUrl: z.string().max(256).optional(),
   hostPermissionRequired: z.boolean(),
-  capacity: z.number().int().positive().max(100),
+  capacity: z.number().int().positive(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
   eventDate: z.coerce.date(),
