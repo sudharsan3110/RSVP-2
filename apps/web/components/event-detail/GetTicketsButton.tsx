@@ -97,9 +97,7 @@ const GetTicketsButton = ({
     return (
       <div className="flex w-full flex-col gap-4">
         <Link href={`${eventSlug}/communication`}>
-          <Button className="mt-4 w-full rounded-full px-4 py-2">
-            Updates
-          </Button>
+          <Button className="mt-4 w-full rounded-full px-4 py-2">Updates</Button>
         </Link>
         <Link href={`/ticket/${eventId}`}>
           <Button variant="subtle" className="w-full rounded-full px-4 py-2">
