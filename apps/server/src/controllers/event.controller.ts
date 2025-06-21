@@ -396,7 +396,7 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
   };
 
   const newAttendee = await AttendeeRepository.create(attendeeData);
-  const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
+  const url = `${config.CLIENT_URL}/ticket/${newAttendee.eventId}`;
 
   const emailData = {
     id: 5,
