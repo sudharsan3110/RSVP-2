@@ -53,14 +53,16 @@ const TicketPage = () => {
             <Link href={event?.venueUrl || ''} target="_blank" className="w-full md:w-1/2">
               <Button className="h-12 w-full rounded-[6px]">
                 <Presentation className="mr-2 size-6" />
-                See Meeting
+                Meeting Link
               </Button>
             </Link>
-          ) : eventData?.event?.isPhysical ? (
-            <Button className="h-12 w-full rounded-[6px] md:w-1/2">
-              <MapPinIcon className="mr-2 size-6" />
-              Get Directions
-            </Button>
+          ) : eventData?.event?.isPhysical && eventData.event.venueUrl ? (
+            <Link target="_blank" href={eventData?.event?.venueUrl} className="w-full md:w-1/2">
+              <Button className="h-12 w-full rounded-[6px]">
+                <MapPinIcon className="mr-2 size-6" />
+                Get Directions
+              </Button>
+            </Link>
           ) : null}
           <Button
             className="h-12 w-full rounded-[6px] border bg-dark-900 md:w-1/2"

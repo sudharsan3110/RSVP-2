@@ -166,7 +166,7 @@ export const createEventController = controller(CreateEventSchema, async (req, r
   if (!getUserData.isCompleted)
     throw new BadRequestError('Please complete your profile before creating event');
 
-  if (plaintextDescription.length > 300)
+  if (plaintextDescription && plaintextDescription.length > 300)
     throw new BadRequestError('Description cannot be greater than 300 characters.');
 
   logger.info('Formatting data for create event in createEventController ...');
@@ -200,7 +200,7 @@ export const updateEventController = controller(UpdateEventSchema, async (req, r
 
   if (!data.venueType) throw new BadRequestError('Venue type cannot be updated');
 
-  if (plaintextDescription.length > 300)
+  if (plaintextDescription && plaintextDescription.length > 300)
     throw new BadRequestError('Description cannot be greater than 300 characters.');
 
   logger.info('Updating event in updateEventController ...');

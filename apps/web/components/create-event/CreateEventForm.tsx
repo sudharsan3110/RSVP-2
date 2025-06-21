@@ -44,6 +44,7 @@ const CreateEventForm = () => {
       plaintextDescription,
       eventImageUrl,
       venueType,
+      locationMapUrl,
       hostPermissionRequired,
       capacity,
       location,
@@ -61,7 +62,12 @@ const CreateEventForm = () => {
       eventImageUrl: eventImageUrl.url ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
-      venueUrl: venueType === VenueType.Virtual ? location : undefined,
+      venueUrl:
+        venueType === VenueType.Virtual
+          ? location
+          : venueType === VenueType.Physical
+            ? locationMapUrl
+            : undefined,
       hostPermissionRequired,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),

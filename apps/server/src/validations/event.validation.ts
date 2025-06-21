@@ -42,7 +42,7 @@ export const EventSchema = z.object({
   eventImageUrl: z.string().max(256),
   venueType: z.enum([VenueType.PHYSICAL, VenueType.VIRTUAL, VenueType.LATER]),
   venueAddress: z.string().max(256).optional(),
-  venueUrl: z.string().url().max(256).optional(),
+  venueUrl: z.string().max(256).optional(),
   hostPermissionRequired: z.boolean(),
   capacity: z.number().int().positive().max(100),
   startTime: z.coerce.date(),
@@ -56,12 +56,12 @@ export const CreateEventSchema = z.object({
     .strict()
     .extend({
       richtextDescription: z.string(),
-      plaintextDescription: z.string(),
+      plaintextDescription: z.string().optional(),
     })
     .refine(
       (data) => {
         if (data.venueType === VenueType.PHYSICAL) {
-          return data.venueAddress !== null && data.venueUrl == null;
+          return data.venueAddress !== null;
         }
         if (data.venueType === VenueType.VIRTUAL) {
           return data.venueUrl !== null && data.venueAddress == null;
@@ -117,7 +117,7 @@ export const CreateEventSchema = z.object({
 export const UpdateEventSchema = z.object({
   body: EventSchema.omit({ description: true }).partial().extend({
     richtextDescription: z.string(),
-    plaintextDescription: z.string(),
+    plaintextDescription: z.string().optional(),
   }),
   params: z.object({ eventId: uuidSchema }),
 });

@@ -8,7 +8,7 @@ import { VenueType } from '@/types/events';
 import { eventCategoryOptions, evenTimeOptions } from '@/utils/constants';
 import { BuildingOfficeIcon, LinkIcon } from '@heroicons/react/16/solid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Clock1, LoaderCircle } from 'lucide-react';
+import { Clock1, Link, LoaderCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import FormCombobox from '../common/form/FormCombobox';
 import FormDatePicker from '../common/form/FormDatePicker';
@@ -181,9 +181,23 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               <FormInput
                 name="location"
                 control={control}
-                placeholder={venueType === VenueType.Physical ? 'Address' : 'Event Link'}
+                placeholder={
+                  venueType === VenueType.Physical ? 'One Line Address Of Venue' : 'Event Link'
+                }
                 className="mt-2"
               />
+            )}
+            {venueType == VenueType.Physical && (
+              <FormInput
+                name="locationMapUrl"
+                control={control}
+                placeholder="Map link To Venue"
+                className="mt-2 [&_input]:rounded-l-none"
+              >
+                <span className="flex items-center justify-center rounded-l-[6px] bg-dark-500 px-2.5 py-2 whitespace-nowrap">
+                  <Link className="w-4 h-4" />
+                </span>
+              </FormInput>
             )}
           </div>
           <FormSwitch

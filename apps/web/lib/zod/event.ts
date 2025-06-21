@@ -26,6 +26,21 @@ export const createEventFormSchema = z
     plaintextDescription: z.string().optional(),
     venueType: z.nativeEnum(VenueType),
     location: z.string().optional(),
+    locationMapUrl: z
+      .string()
+      .optional()
+      .refine(
+        (val) => {
+          if (val == '' || !val) return true;
+          else {
+            const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+            return urlPattern.test(val);
+          }
+        },
+        {
+          message: 'Please enter a valid URL',
+        }
+      ),
     hostPermissionRequired: z.boolean(),
     capacity: z.coerce
       .number({

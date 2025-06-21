@@ -28,6 +28,7 @@ const EditEventForm = () => {
       plaintextDescription,
       eventImageUrl,
       venueType,
+      locationMapUrl,
       hostPermissionRequired,
       capacity,
       location,
@@ -46,7 +47,12 @@ const EditEventForm = () => {
       eventImageUrl: eventImageUrl.url ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
-      venueUrl: venueType === VenueType.Virtual ? location : undefined,
+      venueUrl:
+        venueType === VenueType.Virtual
+          ? location
+          : venueType === VenueType.Physical
+            ? locationMapUrl
+            : undefined,
       hostPermissionRequired,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
@@ -85,6 +91,7 @@ const EditEventForm = () => {
     description: event?.description ?? '',
     venueType: event?.venueType ?? VenueType.Physical,
     location: event?.venueAddress ?? event?.venueUrl ?? '',
+    locationMapUrl: event?.venueUrl ?? '',
     hostPermissionRequired: event?.hostPermissionRequired ?? false,
     fromTime: dayjs(event?.startTime).format('HH:mm'),
     fromDate: event?.eventDate ?? allowedDate,
