@@ -3,6 +3,7 @@
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useGetEventById } from '@/lib/react-query/event';
+import { Loader2 } from 'lucide-react';
 import { notFound, useParams } from 'next/navigation';
 
 const CheckCohostLayout = ({ children }: { children: React.ReactNode }) => {
@@ -12,7 +13,12 @@ const CheckCohostLayout = ({ children }: { children: React.ReactNode }) => {
 
   const { data, isLoading, isSuccess, status } = useGetEventById(id);
 
-  if (isLoading) return <LoadingScreen className="min-h-screen" />;
+  if (isLoading)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
 
   if (status === 'error') return notFound();
 

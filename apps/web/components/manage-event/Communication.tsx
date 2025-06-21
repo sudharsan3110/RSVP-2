@@ -44,9 +44,14 @@ const Communication = ({ eventId }: CommunicationProps) => {
     },
   });
 
-  const { mutate: createCommunication } = useCreateEventCommunication(eventId);
+  const { mutate: createCommunication, isPending } = useCreateEventCommunication(eventId);
   const { data: communicationsData } = useEventCommunications(eventId);
-  const { setValue } = form;
+  const { setValue, watch } = form;
+
+  const content = watch('content');
+  const plaintextContent = watch('plaintextContent');
+
+  const hasContent = plaintextContent?.trim().length > 0;
 
   const onSubmit = (data: CommunicationForm) => {
     createCommunication(data, {
@@ -107,8 +112,8 @@ const Communication = ({ eventId }: CommunicationProps) => {
               </FormItem>
             )}
           />
-          <Button className="float-end mt-2 rounded-[6px]" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? <LoaderCircle className="animate-spin" /> : <>Send</>}
+          <Button className="float-end mt-2 rounded-[6px]" disabled={isPending || !hasContent}>
+            {isPending ? <LoaderCircle className="animate-spin" /> : <>Send</>}
           </Button>
         </FormProvider>
       </section>
