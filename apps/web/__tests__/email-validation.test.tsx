@@ -134,7 +134,6 @@ describe('Email Validation Tests', () => {
     const mutateCallData: any[] = [];
 
     mockMutate.mockImplementation((data, options) => {
-      console.log('Mutate called with:', data);
       mutateCallData.push(data);
 
       if (options && options.onSuccess) {
@@ -158,10 +157,6 @@ describe('Email Validation Tests', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     if (mutateCallData.length === 0) {
-      console.log(
-        'Mutate was not called - this suggests the form wasnt dirty or had validation errors'
-      );
-
       const updatedInput = await screen.getAllByRole('textbox')[1];
 
       const allText = screen.getAllByText(/./i).map((el) => el.textContent);

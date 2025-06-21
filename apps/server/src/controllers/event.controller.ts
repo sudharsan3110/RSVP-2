@@ -362,7 +362,6 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
 
   const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId, null);
   if (existingAttendee) {
-    console.log(existingAttendee.status);
     const isUserTicketCancelled =
       existingAttendee.isDeleted && existingAttendee.status === Status.CANCELLED;
     if (isUserTicketCancelled) {
@@ -397,23 +396,6 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
   };
 
   const newAttendee = await AttendeeRepository.create(attendeeData);
-  const url = `${config.CLIENT_URL}/generateQr/${newAttendee.eventId}/${newAttendee.userId}`;
-
-  const emailData = {
-    id: 5,
-    subject: 'Event Registration Confirmation',
-    recipient: user.primaryEmail,
-    body: {
-      email: user.primaryEmail,
-      qrLink: url,
-    },
-  };
-  if (config.NODE_ENV !== 'development') {
-    await EmailService.send(emailData);
-  } else {
-    logger.info('Email notification:', emailData);
-  }
-
   return new SuccessResponse('success', newAttendee).send(res);
 });
 
