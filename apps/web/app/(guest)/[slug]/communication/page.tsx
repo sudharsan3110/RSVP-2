@@ -7,7 +7,7 @@ const EventDetailPage = ({ params }: { params: { slug: string } }) => {
   const { data } = useGetEventBySlug(params.slug);
   return (
     <Container className="container-main pt-8">
-      {data && <Communication event={data?.event} />}
+      {data && <Communication event={data?.event} totalAttendees={data?.totalAttendees} />}
     </Container>
   );
 };

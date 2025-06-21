@@ -61,7 +61,7 @@ const Tiptap = ({
     editorProps: {
       attributes: {
         class:
-          'prose  max-w-none mt-2 p-2 prose-headings:text-white prose-strong:text-white prose-em:text-white prose-a:text-white prose-p:text-white [&_p]:w-full prose-headings:my-2 prose-ul:my-2 prose-ol:my-2 prose-hr:my-2 min-h-40 border rounded-md leading-none text-white border-none focus:outline-none',
+          'prose max-w-none mt-2 p-2 prose-headings:text-white prose-strong:text-white prose-em:text-white prose-a:text-white prose-p:text-white [&_p]:w-full prose-headings:my-2 prose-ul:my-2 prose-ol:my-2 prose-hr:my-2 min-h-40 border rounded-md text-white border-none focus:outline-none',
       },
     },
   });

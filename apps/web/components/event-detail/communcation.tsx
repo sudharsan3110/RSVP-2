@@ -12,6 +12,7 @@ import Link from 'next/link';
 
 interface CommunicationProps {
   event: Event;
+  totalAttendees: number;
   updatedAt?: string;
 }
 
@@ -30,7 +31,7 @@ interface CommunicationsData {
   data: CommunicationMessage[];
 }
 
-const Communication = ({ event }: CommunicationProps) => {
+const Communication = ({ event, totalAttendees }: CommunicationProps) => {
   const { data: communicationsData } = useEventCommunications(event.id);
 
   const formatTime = (timestamp: string) => {
@@ -64,7 +65,6 @@ const Communication = ({ event }: CommunicationProps) => {
   const timeInfo = formatTimeRange();
 
   // Calculate remaining seats and capacity info
-  const totalAttendees = event.totalAttendees || 0;
   const capacity = event.capacity || 0;
   const remainingSeats = capacity - totalAttendees;
   const cohosts = event.cohosts?.length ?? 0;
@@ -78,7 +78,7 @@ const Communication = ({ event }: CommunicationProps) => {
       </div>
 
       {/* Event Info Summary - 3 Grid Layout */}
-      <Card className="bg-dark-900 border-dark-700">
+      <Card className="bg-dark-900 border-dark-700 overflow-hidden">
         <CardContent className="p-0">
           <div className="flex justify-between gap-0">
             {/* Image Section */}
