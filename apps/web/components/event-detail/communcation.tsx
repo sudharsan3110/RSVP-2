@@ -226,9 +226,7 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
             <CardContent className="p-8 text-center">
               <MessageCircleIcon className="h-12 w-12 text-secondary mx-auto mb-4" />
               <p className="text-secondary text-lg">No communications yet.</p>
-              <p className="text-secondary text-sm mt-2">
-                Messages from hosts will appear here
-              </p>
+              <p className="text-secondary text-sm mt-2">Messages from hosts will appear here</p>
             </CardContent>
           </Card>
         )}
