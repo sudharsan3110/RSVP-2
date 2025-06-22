@@ -131,7 +131,6 @@ export class EventRepository {
     const eventsPaginator = new Paginator('event');
     const { page = 1, limit = 10, sortBy = 'startTime', sortOrder = 'desc' } = pagination;
     const currentDateTime = new Date();
-    console.log('Current Date and Time:', currentDateTime);
 
     const where: Prisma.EventWhereInput = {
       ...(userId && { creatorId: userId }),

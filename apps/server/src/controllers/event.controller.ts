@@ -235,10 +235,7 @@ export const updateEventController = controller(UpdateEventSchema, async (req, r
         },
       });
     } else {
-      logger.info('Email notification (event update):', {
-        bcc: bccEmails,
-        event: updatedEvent.name,
-      });
+      logger.info('Email notification (event update):');
     }
   }
 

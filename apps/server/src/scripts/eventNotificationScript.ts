@@ -84,7 +84,7 @@ async function processEventNotifications() {
 
       const eventEmailData = {
         id: 6,
-        subject: `Your Event ${event.name} Starts Soon!`,
+        subject: `${event.name} Starts Soon!`,
         body: {
           eventName: event.name,
           updatesText: `Just a quick reminder that your event ${event.name} is starting soon at ${event.startTime}`,

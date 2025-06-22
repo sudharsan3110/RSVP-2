@@ -99,7 +99,7 @@ export class UserRepository {
    * @returns The user object if the token is valid, otherwise null.
    */
   static async verifyToken(tokenId: string) {
-    const user = await prisma.users.update({
+    const user = await prisma.users.updateMany({
       where: { magicToken: tokenId, isDeleted: false },
       data: { magicToken: null },
     });

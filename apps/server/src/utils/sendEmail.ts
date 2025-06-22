@@ -13,12 +13,10 @@ class EmailService {
     const isProd = config.NODE_ENV === 'production';
 
     if (!isProd) {
-      // Logs, no API call
       logger.debug('[dev] mock-email ↓\n' + JSON.stringify(emailData, null, 2));
       return { mocked: true };
     }
 
-    // Make real API call in prod
     try {
       const response = await axios.post(config.EMAIL_API_URL, emailData, {
         headers: {
