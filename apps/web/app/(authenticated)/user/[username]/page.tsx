@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
@@ -9,11 +9,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/components/common/Icon';
 import Container from '@/components/common/Container';
 import { useUserDetailsByUsername } from '@/lib/react-query/user';
+import { userAvatarOptions } from '@/utils/constants';
 
 const Page = () => {
   const params = useParams();
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
   const { data: userDetails } = useUserDetailsByUsername(username || '');
+
+  const profilePictureUrl = useMemo(() => {
+    const profileUrl = userAvatarOptions.find(
+      (option) => option.id === userDetails?.data?.data.profileIcon
+    );
+    return profileUrl?.src ?? userAvatarOptions[0]?.src;
+  }, [userDetails?.data?.data.profileIcon]);
 
   const date_string = userDetails?.data?.data.created_at;
   const date_object = dayjs(date_string);
@@ -26,7 +34,7 @@ const Page = () => {
             <div className="flex items-center justify-start gap-4 sm:flex-col lg:flex-row">
               <div className="relative h-32 w-32">
                 <Image
-                  src="/images/user-avatar-curly-hair-beard.svg"
+                  src={profilePictureUrl}
                   alt={'user-image'}
                   fill
                   className="rounded-full object-cover"

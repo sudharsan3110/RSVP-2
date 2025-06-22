@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 
 const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees: number } }) => {
   const { event: eventInfo, totalAttendees } = eventData;
+  console.log('Event Detail Data:', eventInfo, totalAttendees);
   const event = new Event(eventInfo);
   const [formattedStartDate, setFormattedStartDate] = useState('');
   const [formattedStartTime, setFormattedStartTime] = useState('');
@@ -127,18 +128,25 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
             <p className="font-semibold">Hosted {cohosts > 1 && '& Cohosted'} By</p>
             {cohosts > 0 &&
               event?.cohosts?.map((cohost, index) => (
-                <div className="mt-3 flex items-center" key={index}>
-                  <Image
-                    src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
-                    alt="Host Avatar"
-                    width={48}
-                    height={48}
-                    className="rounded-full border-primary border-2 object-cover"
-                  />
-                  <p className="ml-3 text-sm font-medium capitalize text-secondary">
-                    {cohost.user?.fullName?.toLowerCase()}
-                  </p>
-                </div>
+                <Link
+                  key={index}
+                  href={`/user/${cohost?.user?.userName}`}
+                  className="block mt-3"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div className="mt-3 flex items-center">
+                    <Image
+                      src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
+                      alt="Host Avatar"
+                      width={48}
+                      height={48}
+                      className="rounded-full border-primary border-2 object-cover"
+                    />
+                    <p className="ml-3 text-sm font-medium capitalize text-secondary">
+                      {cohost.user?.fullName?.toLowerCase()}
+                    </p>
+                  </div>
+                </Link>
               ))}
           </section>
           {event.description !== '' ? (

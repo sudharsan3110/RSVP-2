@@ -28,7 +28,7 @@ export const updateProfileSchema = z.object({
 
 export const usernameSchema = z.object({
   params: z.object({
-    userName: z.string(),
+    username: z.string(),
   }),
 });
 

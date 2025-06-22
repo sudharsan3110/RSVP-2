@@ -34,10 +34,10 @@ export const updateUserProfileController = controller(updateProfileSchema, async
  * @returns The user's public profile data.
  */
 export const getUserPublicController = controller(usernameSchema, async (req, res) => {
-  const { userName } = req.params;
+  const { username } = req.params;
 
   logger.info('Getting user by username in getUserPublicController ...');
-  const user = await UserRepository.findByUserName(userName);
+  const user = await UserRepository.findByUserName(username);
   if (!user) throw new NotFoundError('User not found');
 
   const { refreshToken, magicToken, ...publicUserProfile } = user;
