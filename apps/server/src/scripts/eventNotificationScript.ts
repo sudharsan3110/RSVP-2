@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import EmailService from '@/utils/sendEmail';
 import config from '@/config/config';
 import logger from '@/utils/logger';
+import { formatToIST } from '@/utils/date';
 
 dotenv.config();
 const prisma = new PrismaClient();
@@ -15,24 +16,14 @@ async function processEventNotifications() {
 
   try {
     const currentTime = new Date();
-    currentTime.setMinutes(0, 0, 0);
-
     const oneHourLaterFromCurrentTime = new Date(currentTime.getTime() + 3600000);
-    const twoHoursLaterFromCurrentTime = new Date(currentTime.getTime() + 7200000);
-    const twentyFourHoursLaterFromCurrentTime = new Date(currentTime.getTime() + 86400000);
-    const twentyFiveHoursLaterFromCurrentTime = new Date(currentTime.getTime() + 90000000);
 
     const events = await prisma.event.findMany({
       where: {
-        OR: [
-          { startTime: { gte: oneHourLaterFromCurrentTime, lt: twoHoursLaterFromCurrentTime } },
-          {
-            startTime: {
-              gte: twentyFourHoursLaterFromCurrentTime,
-              lt: twentyFiveHoursLaterFromCurrentTime,
-            },
-          },
-        ],
+        startTime: { gte: currentTime, lt: oneHourLaterFromCurrentTime },
+        sendReminderEmail: false,
+        isActive: true,
+        isDeleted: false,
         attendees: {
           some: {
             hasAttended: false,
@@ -71,6 +62,7 @@ async function processEventNotifications() {
 
     let sent = 0;
     let failed = 0;
+    const successfulEventIds: string[] = [];
 
     const emailPromises = events.map(async (event) => {
       const recipients = event.attendees
@@ -82,12 +74,14 @@ async function processEventNotifications() {
         return;
       }
 
+      const startTimeIST = formatToIST(event.startTime);
+
       const eventEmailData = {
         id: 6,
         subject: `${event.name} Starts Soon!`,
         body: {
           eventName: event.name,
-          updatesText: `Just a quick reminder that your event ${event.name} is starting soon at ${event.startTime}`,
+          updatesText: `Just a quick reminder that your event ${event.name} is starting soon at ${startTimeIST}`,
           updatesLink: `${config.CLIENT_URL}/${event.slug}`,
         },
         bcc: recipients,
@@ -95,6 +89,7 @@ async function processEventNotifications() {
 
       try {
         await EmailService.send(eventEmailData);
+        successfulEventIds.push(event.id);
         sent += recipients.length;
         logger.info({ runId, phase: 'sent', eventId: event.id, recipients });
       } catch (err: any) {
@@ -104,6 +99,13 @@ async function processEventNotifications() {
     });
 
     await Promise.all(emailPromises);
+
+    if (successfulEventIds.length > 0) {
+      await prisma.event.updateMany({
+        where: { id: { in: successfulEventIds } },
+        data: { sendReminderEmail: true },
+      });
+    }
 
     logger.info({
       runId,
