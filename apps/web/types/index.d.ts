@@ -8,10 +8,10 @@ type FormSelectOption = {
 };
 
 type FormCapacityOption = {
-  value : number, 
-  label : string,
-  isOthers? : boolean
-}
+  value: number;
+  label: string;
+  isOthers?: boolean;
+};
 
 type EmailAttachmentOptions = {
   filename: string;

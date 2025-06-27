@@ -89,6 +89,6 @@ const Tiptap = forwardRef<EditorRefType | null, TipTapProps>(
   }
 );
 
-Tiptap.displayName = "Tiptap";
+Tiptap.displayName = 'Tiptap';
 
 export default Tiptap;
