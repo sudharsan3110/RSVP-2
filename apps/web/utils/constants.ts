@@ -90,7 +90,7 @@ export const capacityOptions: FormCapacityOption[] = [
   { value: 80, label: '80' },
   { value: 100, label: '100' },
   { value: 200, label: '200' },
-  { value: 0, label: 'Others', isOthers: true },
+  { value: 0, label: 'Custom', isOthers: true },
 ];
 
 export const eventCategoryColors = {

@@ -231,7 +231,7 @@ export default function CustomSelectInput({
                   className="cursor-pointer bg-muted/50"
                 >
                   <div className="flex flex-col w-full">
-                    <span className="font-medium">Use "{inputValue}"</span>
+                    <span className="font-medium">Use {inputValue}</span>
                     <span className="text-xs text-muted-foreground">
                       Press Enter or click to confirm
                     </span>

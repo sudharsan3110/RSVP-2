@@ -272,9 +272,11 @@ const ResultsSection = ({
             className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
             data-testid="events-list"
           >
-            {events?.map((eventData) => (
-              <EventCard event={eventData} key={eventData.id} type="manage" />
-            ))}
+            {data?.pages
+              .flatMap((page) => page.events)
+              .map((eventData) => {
+                return <EventCard event={eventData} key={eventData.id} type="manage" />;
+              })}
             {isFetchingNextPage &&
               Array.from({ length: 3 }).map((_, index) => (
                 <Skeleton key={index} className="w-full min-h-[20rem] rounded-md" />

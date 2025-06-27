@@ -175,7 +175,9 @@ const DiscoverEvents = () => {
                 <>
                   {data?.pages
                     .flatMap((page) => page.events)
-                    .map((event: Event) => <EventCard key={event.id} event={event} type="guest" />)}
+                    .map((event: Event) => {
+                      return <EventCard key={event.id} event={event} type="guest" />;
+                    })}
                   {isFetchingNextPage &&
                     Array.from({ length: 10 }).map((_, index) => (
                       <Skeleton key={index} className="w-full" />

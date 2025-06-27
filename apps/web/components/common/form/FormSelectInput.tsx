@@ -2,10 +2,10 @@
 
 import type React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Control, FieldPath, FieldValues } from 'react-hook-form';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Control, FieldPath, FieldValues, useController } from 'react-hook-form';
+import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -32,7 +32,7 @@ interface FormSelectInputProps<
   label?: string;
   options: SelectOption[];
   placeholder?: string;
-  defaultValue?: number;
+  defaultValue?: TFieldValues[TName];
   className?: string;
   ariaLabel?: string;
   allowCustomInput?: boolean;
@@ -59,8 +59,18 @@ function FormSelectInput<
   const [open, setOpen] = useState(false);
   const [customInputMode, setCustomInputMode] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState(options);
+  const [displayValue, setDisplayValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const isTypingRef = useRef(false);
+
+  const {
+    field,
+    fieldState: { error },
+  } = useController({
+    name,
+    control,
+    defaultValue,
+  });
 
   const updateFilteredOptions = useCallback(
     (inputValue: string) => {
@@ -79,225 +89,176 @@ function FormSelectInput<
     [options, customInputMode]
   );
 
+  useEffect(() => {
+    if (field.value === undefined && defaultValue !== undefined && !isTypingRef.current) {
+      field.onChange(defaultValue);
+      const selectedOption = options.find((opt) => opt.value === (defaultValue as number));
+      setCustomInputMode(!!selectedOption?.isOthers);
+    }
+  }, [field, defaultValue, options]);
+
+  useEffect(() => {
+    const newDisplayValue = customInputMode
+      ? field.value?.toString() || ''
+      : options.find((opt) => opt.value === field.value)?.label || field.value?.toString() || '';
+    setDisplayValue(newDisplayValue);
+  }, [field.value, customInputMode, options]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      updateFilteredOptions(displayValue);
+    }, 100);
+    return () => clearTimeout(handler);
+  }, [displayValue, updateFilteredOptions]);
+
+  const handleInputChange = (newValue: string) => {
+    isTypingRef.current = true;
+    const parsed = Number(newValue);
+    const valueToSet = !isNaN(parsed) ? parsed : undefined;
+
+    field.onChange(valueToSet);
+    if (!open) {
+      setOpen(true);
+    }
+    setTimeout(() => {
+      isTypingRef.current = false;
+    }, 100);
+  };
+
+  const handleSelectOption = (option: SelectOption) => {
+    if (option.isOthers) {
+      setCustomInputMode(true);
+      field.onChange(0);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+    } else {
+      setCustomInputMode(false);
+      field.onChange(option.value);
+      setOpen(false);
+    }
+  };
+
+  const handleAcceptCustomValue = () => {
+    const parsed = Number(displayValue);
+    if (!isNaN(parsed)) {
+      field.onChange(parsed);
+    }
+    setOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (allowCustomInput && customInputMode && displayValue) {
+        handleAcceptCustomValue();
+      } else if (!open) {
+        setOpen(true);
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+    } else if (e.key === 'ArrowDown' && !open) {
+      e.preventDefault();
+      setOpen(true);
+    }
+  };
+
+  const isCustomValue =
+    allowCustomInput &&
+    customInputMode &&
+    displayValue &&
+    !options.some((opt) => opt.value === Number(displayValue)) &&
+    !isNaN(Number(displayValue));
+
   return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => {
-        useEffect(() => {
-          if (field.value === undefined && defaultValue !== undefined && !isTypingRef.current) {
-            field.onChange(defaultValue);
-            const selectedOption = options.find((opt) => opt.value === defaultValue);
-            setCustomInputMode(!!selectedOption?.isOthers);
-          }
-        }, [field, defaultValue]);
-
-        const displayValue = customInputMode
-          ? field.value?.toString() || ''
-          : options.find((opt) => opt.value === field.value)?.label ||
-            field.value?.toString() ||
-            '';
-
-        useEffect(() => {
-          const handler = setTimeout(() => {
-            updateFilteredOptions(displayValue);
-          }, 100);
-          return () => clearTimeout(handler);
-        }, [displayValue, updateFilteredOptions]);
-
-        const handleInputChange = (newValue: string) => {
-          isTypingRef.current = true;
-          const parsed = Number(newValue);
-          if (!isNaN(parsed)) {
-            field.onChange(parsed);
-          } else {
-            field.onChange(undefined);
-          }
-          if (!open) {
-            setOpen(true);
-          }
-          setTimeout(() => {
-            isTypingRef.current = false;
-          }, 100);
-        };
-
-        const handleInputFocus = () => {
-          setOpen(true);
-        };
-
-        const handleInputBlur = () => {
-          if (
-            allowCustomInput &&
-            customInputMode &&
-            displayValue &&
-            !options.some((opt) => opt.value === Number(displayValue))
-          ) {
-            setTimeout(() => setOpen(false), 150);
-          }
-          isTypingRef.current = false;
-        };
-
-        const handleSelectOption = (option: SelectOption) => {
-          if (option.isOthers) {
-            setCustomInputMode(true);
-            field.onChange(0);
-            inputRef.current?.focus();
-          } else {
-            setCustomInputMode(false);
-            field.onChange(option.value);
-            setOpen(false);
-            inputRef.current?.blur();
-          }
-        };
-
-        const handleAcceptCustomValue = () => {
-          const parsed = Number(displayValue);
-          if (!isNaN(parsed)) {
-            field.onChange(parsed);
-          }
-          setOpen(false);
-          inputRef.current?.blur();
-        };
-
-        const handleClear = () => {
-          setCustomInputMode(false);
-          field.onChange(undefined);
-          inputRef.current?.focus();
-        };
-
-        const handleKeyDown = (e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') {
-            if (allowCustomInput && customInputMode && displayValue) {
-              handleAcceptCustomValue();
-            } else if (!open) {
-              setOpen(true);
-            }
-          } else if (e.key === 'Escape') {
-            setOpen(false);
-            inputRef.current?.blur();
-          } else if (e.key === 'ArrowDown' && !open) {
-            setOpen(true);
-          }
-        };
-
-        const isCustomValue =
-          allowCustomInput &&
-          customInputMode &&
-          displayValue &&
-          !options.some((opt) => opt.value === Number(displayValue)) &&
-          !isNaN(Number(displayValue));
-
-        return (
-          <FormItem className="w-full">
-            {label && <FormLabel>{label}</FormLabel>}
-            <FormControl>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <div className={cn('relative', className)}>
-                    <Input
-                      ref={inputRef}
-                      type="text"
-                      placeholder={placeholder}
-                      value={displayValue}
-                      onChange={(e) => handleInputChange(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      onFocus={handleInputFocus}
-                      onBlur={handleInputBlur}
-                      className="pr-20"
-                      aria-label={ariaLabel}
-                      readOnly={!customInputMode}
-                      disabled={disabled}
-                    />
-                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                      {displayValue && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 hover:bg-muted"
-                          onClick={handleClear}
-                          disabled={disabled}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 hover:bg-muted"
-                        onClick={() => setOpen(!open)}
-                        disabled={disabled}
+    <FormItem className="w-full">
+      {label && <FormLabel>{label}</FormLabel>}
+      <FormControl>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
+          <PopoverTrigger asChild>
+            <div className={cn('relative', className)}>
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder={placeholder}
+                value={displayValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onClick={() => setOpen(true)}
+                className="pr-10 cursor-pointer"
+                aria-label={ariaLabel}
+                readOnly={!customInputMode}
+                disabled={disabled}
+                autoComplete="off"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+                <ChevronDown
+                  className={cn(
+                    'h-3 w-3 transition-transform text-muted-foreground',
+                    open && 'rotate-180'
+                  )}
+                />
+              </div>
+            </div>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-full min-w-[var(--radix-popover-trigger-width)] p-0"
+            align="start"
+            sideOffset={4}
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+            onCloseAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <Command>
+              <CommandList>
+                {isCustomValue && (
+                  <CommandGroup>
+                    <CommandItem
+                      value={`custom-${displayValue}`}
+                      onSelect={handleAcceptCustomValue}
+                      className="cursor-pointer bg-muted/50"
+                    >
+                      <div className="flex flex-col w-full">
+                        <span className="font-medium">Use {displayValue}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Press Enter or click to confirm
+                        </span>
+                      </div>
+                    </CommandItem>
+                  </CommandGroup>
+                )}
+                {filteredOptions.length > 0 && (
+                  <CommandGroup>
+                    {filteredOptions.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.value.toString()}
+                        onSelect={() => handleSelectOption(option)}
+                        className="cursor-pointer"
                       >
-                        <ChevronDown
-                          className={cn('h-3 w-3 transition-transform', open && 'rotate-180')}
-                        />
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-full min-w-[var(--radix-popover-trigger-width)] p-0"
-                  align="start"
-                  sideOffset={4}
-                  onInteractOutside={(e) => {
-                    if (inputRef.current?.contains(e.target as Node)) {
-                      e.preventDefault();
-                    }
-                  }}
-                >
-                  <Command>
-                    <CommandList>
-                      {isCustomValue && (
-                        <CommandGroup>
-                          <CommandItem
-                            value={`custom-${displayValue}`}
-                            onSelect={handleAcceptCustomValue}
-                            className="cursor-pointer bg-muted/50"
-                          >
-                            <div className="flex flex-col w-full">
-                              <span className="font-medium">Use "{displayValue}"</span>
-                              <span className="text-xs text-muted-foreground">
-                                Press Enter or click to confirm
-                              </span>
-                            </div>
-                          </CommandItem>
-                        </CommandGroup>
-                      )}
-                      {filteredOptions.length > 0 && (
-                        <CommandGroup>
-                          {filteredOptions.map((option) => (
-                            <CommandItem
-                              key={option.value}
-                              value={option.value.toString()}
-                              onSelect={() => handleSelectOption(option)}
-                              className="cursor-pointer"
-                            >
-                              <div className="flex flex-col">
-                                <span>{option.label}</span>
-                                {option.value.toString() !== option.label && !option.isOthers && (
-                                  <span className="text-xs text-muted-foreground">
-                                    {option.value}
-                                  </span>
-                                )}
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      )}
-                      {filteredOptions.length === 0 && !isCustomValue && (
-                        <CommandEmpty>{emptyMessage}</CommandEmpty>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
-    />
+                        <div className="flex flex-col">
+                          <span>{option.label}</span>
+                          {option.value.toString() !== option.label && !option.isOthers && (
+                            <span className="text-xs text-muted-foreground">{option.value}</span>
+                          )}
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
+                {filteredOptions.length === 0 && !isCustomValue && (
+                  <CommandEmpty>{emptyMessage}</CommandEmpty>
+                )}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </FormControl>
+      {error && <p className="text-sm font-medium text-destructive">{error.message}</p>}
+    </FormItem>
   );
 }
 
