@@ -1,8 +1,9 @@
 import z from 'zod';
+import { disposableEmailValidator } from '../utils/disposableEmailBlocklist';
 
 export const SigninSchema = z.object({
   body: z.object({
-    email: z.string().min(1, { message: 'email is required' }).email(),
+    email: disposableEmailValidator,
   }),
 });
 

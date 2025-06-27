@@ -19,9 +19,10 @@ import FormInput from '../common/form/FormInput';
 import { Button } from '../ui/button';
 import FormProvider from '../ui/form-provider';
 import { LoaderCircle } from 'lucide-react';
+import { disposableEmailValidator } from '@/lib/zod/disposible-mail';
 
 const signInFormSchema = z.object({
-  email: z.string().email(),
+  email: disposableEmailValidator,
 });
 
 export type SignInFormType = z.infer<typeof signInFormSchema>;

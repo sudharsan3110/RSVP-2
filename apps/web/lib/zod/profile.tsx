@@ -1,11 +1,10 @@
 import { z } from 'zod';
+import { disposableEmailValidator } from './disposible-mail';
 
 export const secondaryEmailFormSchema = z
   .object({
     email: z.string().email().optional(),
-    secondaryEmail: z
-      .string()
-      .email()
+    secondaryEmail: disposableEmailValidator
       .nullable()
       .optional()
       .transform((val) => (val === '' ? null : val)),

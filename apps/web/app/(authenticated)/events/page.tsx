@@ -24,8 +24,14 @@ interface HandleSearchEvent {
   };
 }
 
+type Filters = {
+  page: number;
+  status: string;
+  sort: string;
+  sortOrder: string;
+  search: string;
+};
 const Events = () => {
-  const pageEndRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
@@ -37,52 +43,154 @@ const Events = () => {
     { history: 'push' }
   );
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handleSearch = (e: HandleSearchEvent) => {
+    setFilters((prev) => ({ ...prev, search: e.target.value }));
+  };
+
+  const handleSort = () => {
+    setFilters((prev) => ({ ...prev, sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' }));
+  };
+
+  return (
+    <Container className="mt-8">
+      <header className="flex flex-col justify-between gap-4 sm:flex-row mb-12">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold">
+            Manage Your <span className="text-primary">Events</span>
+          </h1>
+        </div>
+      </header>
+      <main>
+        <section className="flex flex-col gap-6">
+          <section className="flex w-full flex-col items-center justify-between md:flex-row">
+            <div className="flex w-full flex-1 items-center md:mr-12 md:max-w-2xl gap-4">
+              <div className="relative flex w-full">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
+                </div>
+                <Input
+                  type="text"
+                  className="block w-full rounded-full bg-dark-500 py-2 pl-10 pr-3 leading-5"
+                  placeholder="Event Name..."
+                  onChange={handleSearch}
+                  value={filters.search}
+                />
+              </div>
+
+              <div className="md:hidden">
+                <Button size="icon" variant={isFilterOpen ? 'destructive' : 'ghost'} asChild>
+                  {isFilterOpen ? (
+                    <XMarkIcon
+                      data-testid="close"
+                      className="h-6 w-6"
+                      onClick={() => setIsFilterOpen(false)}
+                    />
+                  ) : (
+                    <FunnelIcon
+                      data-testid="funnel"
+                      className="h-6 w-6"
+                      onClick={() => setIsFilterOpen(true)}
+                    />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                'mt-6 md:mt-0 md:mx-4 flex gap-6 flex-col md:flex-row items-center',
+                !isFilterOpen && 'hidden md:flex'
+              )}
+            >
+              <CustomSelect
+                value={filters.status}
+                options={[
+                  { value: 'all', label: 'All' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                ]}
+                placeholder="Select Status"
+                ariaLabel="Select Event Status"
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, status: value === 'all' ? '' : value }))
+                }
+              />
+
+              <div className="flex items-center md:w-fit w-[90vw]">
+                <TooltipProvider>
+                  <Tooltip delayDuration={500}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        radius="sm"
+                        variant="tertiary"
+                        onClick={handleSort}
+                        className="rounded-r-none bg-transparent"
+                      >
+                        {filters.sortOrder === 'asc' ? (
+                          <ArrowUpNarrowWideIcon size={16} />
+                        ) : (
+                          <ArrowDownNarrowWideIcon size={16} />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {filters.sortOrder === 'asc'
+                        ? 'Sort Order: Ascending'
+                        : 'Sort Order: Descending'}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <CustomSelect
+                  value={filters.sort}
+                  options={[
+                    { value: 'date', label: 'Date' },
+                    { value: 'attendees', label: 'Attendees' },
+                  ]}
+                  placeholder="Sort By"
+                  ariaLabel="Sort By"
+                  onValueChange={(value) => setFilters((prev) => ({ ...prev, sort: value }))}
+                  className="border-l-0 rounded-l-none"
+                />
+              </div>
+            </div>
+          </section>
+          <ResultsSection filters={filters} setFilters={setFilters} />
+        </section>
+      </main>
+    </Container>
+  );
+};
+
+const ResultsSection = ({
+  filters,
+  setFilters,
+}: {
+  filters: Filters;
+  setFilters: (filters: Filters) => void;
+}) => {
   const debouncedSearchQuery = useDebounce(filters.search, 600);
+  const hasActiveFilters = filters.status != 'active' || filters.search != '';
+
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useGetMyEventsInifinite({
       ...filters,
       sortOrder: filters.sortOrder as 'asc' | 'desc' | undefined,
       search: debouncedSearchQuery,
     });
-  const [value, setValue] = useState('');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '500px',
-      }
-    );
+  const pageEndRef = useRef<HTMLDivElement>(null);
 
-    if (pageEndRef.current) {
-      observer.observe(pageEndRef.current);
-    }
-
-    return () => {
-      if (pageEndRef.current) {
-        observer.unobserve(pageEndRef.current);
-      }
-    };
-  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
-
-  const handleSearch = (e: HandleSearchEvent) => {
-    setFilters((prev) => ({ ...prev, search: e.target.value }));
+  const handleClearFilters = () => {
+    setFilters({
+      page: 1,
+      status: '',
+      sort: '',
+      sortOrder: '',
+      search: '',
+    });
   };
-
-  if (isLoading)
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 data-testid="loader" className="h-10 w-10 animate-spin" />
-      </div>
-    );
-
-  const hasActiveFilters = filters.status != 'active' || filters.search != '' || value != '';
 
   const getNoResultsProps = () => {
     const defaultProps = {
@@ -117,148 +225,65 @@ const Events = () => {
     return defaultProps;
   };
 
-  const handleClearFilters = () => {
-    setFilters({
-      page: 1,
-      status: '',
-      sort: '',
-      sortOrder: '',
-      search: '',
-    });
-    setValue('');
-  };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '500px',
+      }
+    );
 
-  const handleSort = () => {
-    setFilters((prev) => ({ ...prev, sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' }));
-  };
+    if (pageEndRef.current) {
+      observer.observe(pageEndRef.current);
+    }
 
-  if (error) return <div>{error.message}</div>;
+    return () => {
+      if (pageEndRef.current) {
+        observer.unobserve(pageEndRef.current);
+      }
+    };
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
+
+  const events = data?.pages.flatMap((page) => page.events);
+
+  if (isLoading)
+    return (
+      <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 9 }).map((_, index) => (
+          <Skeleton key={index} className="w-full min-h-[20rem] rounded-md" />
+        ))}
+      </div>
+    );
 
   return (
-    <Container className="mt-8">
-      <header className="flex flex-col justify-between gap-4 sm:flex-row mb-12">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold">
-            Manage Your <span className="text-primary">Events</span>
-          </h1>
-        </div>
-      </header>
-      {data?.pages[0]?.events?.length != 0 ? (
-        <main>
-          <section className="flex flex-col gap-6">
-            <section className="flex w-full flex-col items-center justify-between md:flex-row">
-              <div className="flex w-full flex-1 items-center md:mr-12 md:max-w-2xl gap-4">
-                <div className="relative flex w-full">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <MagnifyingGlassIcon className="z-10 h-5 w-5 text-white" />
-                  </div>
-                  <Input
-                    type="text"
-                    className="block w-full rounded-full bg-dark-500 py-2 pl-10 pr-3 leading-5"
-                    placeholder="Event Name..."
-                    onChange={handleSearch}
-                    value={filters.search}
-                  />
-                </div>
-
-                <div className="md:hidden">
-                  <Button size="icon" variant={isFilterOpen ? 'destructive' : 'ghost'} asChild>
-                    {isFilterOpen ? (
-                      <XMarkIcon
-                        data-testid="close"
-                        className="h-6 w-6"
-                        onClick={() => setIsFilterOpen(false)}
-                      />
-                    ) : (
-                      <FunnelIcon
-                        data-testid="funnel"
-                        className="h-6 w-6"
-                        onClick={() => setIsFilterOpen(true)}
-                      />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className={cn(
-                  'mt-6 md:mt-0 md:mx-4 flex gap-6 flex-col md:flex-row items-center',
-                  !isFilterOpen && 'hidden md:flex'
-                )}
-              >
-                <CustomSelect
-                  value={filters.status}
-                  options={[
-                    { value: 'all', label: 'All' },
-                    { value: 'active', label: 'Active' },
-                    { value: 'inactive', label: 'Inactive' },
-                  ]}
-                  placeholder="Select Status"
-                  ariaLabel="Select Event Status"
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, status: value === 'all' ? '' : value }))
-                  }
-                />
-
-                <div className="flex items-center md:w-fit w-[90vw]">
-                  <TooltipProvider>
-                    <Tooltip delayDuration={500}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          radius="sm"
-                          variant="tertiary"
-                          onClick={handleSort}
-                          className="rounded-r-none bg-transparent"
-                        >
-                          {filters.sortOrder === 'asc' ? (
-                            <ArrowUpNarrowWideIcon size={16} />
-                          ) : (
-                            <ArrowDownNarrowWideIcon size={16} />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {filters.sortOrder === 'asc'
-                          ? 'Sort Order: Ascending'
-                          : 'Sort Order: Descending'}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <CustomSelect
-                    value={filters.sort}
-                    options={[
-                      { value: 'date', label: 'Date' },
-                      { value: 'attendees', label: 'Attendees' },
-                    ]}
-                    placeholder="Sort By"
-                    ariaLabel="Sort By"
-                    onValueChange={(value) => setFilters((prev) => ({ ...prev, sort: value }))}
-                    className="border-l-0 rounded-l-none"
-                  />
-                </div>
-              </div>
-            </section>
-          </section>
+    <>
+      {events?.length === 0 ? (
+        <section className="mx-auto my-12 w-full text-center" data-testid="no-events">
+          <NoResults {...getNoResultsProps()} />
+        </section>
+      ) : (
+        <>
           <div
             className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
             data-testid="events-list"
           >
-            {data?.pages
-              .flatMap((page) => page.events)
-              .map((eventData) => <EventCard event={eventData} key={eventData.id} type="manage" />)}
+            {events?.map((eventData) => (
+              <EventCard event={eventData} key={eventData.id} type="manage" />
+            ))}
             {isFetchingNextPage &&
               Array.from({ length: 3 }).map((_, index) => (
                 <Skeleton key={index} className="w-full min-h-[20rem] rounded-md" />
               ))}
           </div>
           <div ref={pageEndRef} className="h-4 w-full" />
-        </main>
-      ) : (
-        <section className="mx-auto my-12 w-full text-center" data-testid="no-events">
-          <NoResults {...getNoResultsProps()} />
-        </section>
+        </>
       )}
-    </Container>
+    </>
   );
 };
 
