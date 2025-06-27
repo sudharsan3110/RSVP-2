@@ -100,9 +100,12 @@ export class UserRepository {
    */
   static async verifyToken(userId: string, tokenId: string) {
     const user = await prisma.users.update({
-      where: { id: userId, magicToken: tokenId, isDeleted: false },
+      where: { id: userId },
       data: { magicToken: null },
     });
+
+    if (user.magicToken !== tokenId || user.isDeleted) return null;
+
     return user;
   }
 
