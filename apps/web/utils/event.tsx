@@ -58,3 +58,14 @@ export const isCurrentUserCohost = (userData?: User, cohosts: Cohost[] = []): bo
       cohost.user.userName === userData.userName
   );
 };
+
+export const checkIfUserIsNotCohost = (userData?: User, cohosts: Cohost[] = []): boolean => {
+  if (!userData) return false;
+  return !cohosts.some(
+    (cohost) =>
+      cohost.user &&
+      (cohost.role === Role.MANAGER || cohost.role === Role.CREATOR) &&
+      userData &&
+      cohost.user.userName === userData.userName
+  );
+};

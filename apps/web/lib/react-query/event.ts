@@ -250,12 +250,12 @@ export const useVerifyAttendee = () => {
   });
 };
 
-export const useGetAttendeeTicketDetails = (eventId: string) => {
+export const useGetAttendeeTicketDetails = (eventId: string, enable: boolean) => {
   return useQuery({
     queryKey: ['event', eventId, 'ticket-details'],
     queryFn: () => eventAPI.getAttendeeTicketDetail(eventId),
     retry: 0,
-    enabled: !!eventId,
+    enabled: !!eventId && enable,
   });
 };
 

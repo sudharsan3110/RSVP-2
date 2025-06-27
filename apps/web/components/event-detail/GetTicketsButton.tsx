@@ -10,7 +10,7 @@ import Link from 'next/link';
 import SigninDialog from '../auth/SigninDialog';
 import { Button } from '../ui/button';
 import { Cohost } from '@/types/cohost';
-import { isCurrentUserCohost } from '@/utils/event';
+import { checkIfUserIsNotCohost, isCurrentUserCohost } from '@/utils/event';
 import { LoaderCircle } from 'lucide-react';
 
 type GetTicketsButtonProps = {
@@ -32,19 +32,20 @@ const GetTicketsButton = ({
 }: GetTicketsButtonProps) => {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { mutate, isSuccess, isPending: createAttendeeLoading } = useCreateAttendee();
+
+  const isCohost = isCurrentUserCohost(userData, cohosts ?? []);
+  const isNotCohost = checkIfUserIsNotCohost(userData, cohosts ?? []);
   const {
     isSuccess: attendeeDataSuccess,
     isLoading: isAttendeeLoading,
     data: attendeeData,
-  } = useGetAttendeeTicketDetails(eventId);
+  } = useGetAttendeeTicketDetails(eventId, isNotCohost);
   const {
     mutate: cancelRegistration,
     isSuccess: cancelRegistrationSuccess,
     reset: resetCancelRegistration,
     isPending: isCancelling,
   } = useSoftDeleteAttendee();
-
-  const isCohost = isCurrentUserCohost(userData, cohosts);
 
   const handleGetTickets = async () => {
     resetCancelRegistration();

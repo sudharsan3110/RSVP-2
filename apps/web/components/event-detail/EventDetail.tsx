@@ -2,15 +2,14 @@
 import { Event } from '@/types/events';
 import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import dayjs from 'dayjs';
 import { ClockIcon, LinkIcon, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
 import AvatarGroup from './AvatarGroup';
 import GetTicketsButton from './GetTicketsButton';
-import { useEffect, useState } from 'react';
 
 const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees: number } }) => {
   const { event: eventInfo, totalAttendees } = eventData;
