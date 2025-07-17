@@ -67,7 +67,13 @@ const ProfileForm = ({ user }: Props) => {
           />
           <ProfilePictureEditPopover control={form.control} />
         </div>
-        <FormInput control={form.control} name="fullName" label="Full name" type="text" />
+        <FormInput
+          control={form.control}
+          name="fullName"
+          label="Full name"
+          type="text"
+          isRequired
+        />
         <FormInput control={form.control} name="location" label="Location" type="text" />
         <div className="space-y-1.5">
           <FormTextArea control={form.control} name="bio" label="Bio" />

@@ -70,7 +70,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
             className="lg:hidden"
             label="Event Image"
           />
-          <FormInput label="Event Name" name="name" control={control} />
+          <FormInput label="Event Name" name="name" control={control} isRequired />
           <FormCombobox
             control={control}
             label="Category"
@@ -138,7 +138,10 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               name="venueType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Location</FormLabel>
+                  <FormLabel className="text-white" isRequired>
+                    Location
+                    <FormMessage />
+                  </FormLabel>
                   <ToggleGroup
                     size={'sm'}
                     type="single"
@@ -186,6 +189,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
                   venueType === VenueType.Physical ? 'One Line Address Of Venue' : 'Meeting Link'
                 }
                 className="mt-2"
+                isRequired
               />
             )}
             {venueType == VenueType.Physical && (

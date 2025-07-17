@@ -46,6 +46,7 @@ const PhoneNumberForm = ({ user }: Props) => {
           name="contact"
           label="Phone Number"
           aria-label="Phone Number"
+          isRequired
         />
 
         <div className="ml-auto flex items-center gap-2">
