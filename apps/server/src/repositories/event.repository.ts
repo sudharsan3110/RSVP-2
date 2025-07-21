@@ -218,7 +218,7 @@ export class EventRepository {
    */
   static async findAllPopularEvents(take: number) {
     const currentDateTime = new Date();
-  
+
     const popularEventGroups = await prisma.attendee.groupBy({
       by: ['eventId'],
       where: {
@@ -228,7 +228,10 @@ export class EventRepository {
           isActive: true,
           isDeleted: false,
           hostPermissionRequired: false,
-          OR: [{ startTime: { gte: currentDateTime } }, { startTime: { lt: currentDateTime }, endTime: { gt: currentDateTime } }],
+          OR: [
+            { startTime: { gte: currentDateTime } },
+            { startTime: { lt: currentDateTime }, endTime: { gt: currentDateTime } },
+          ],
         },
       },
       _count: { id: true },
@@ -239,14 +242,14 @@ export class EventRepository {
         _count: { id: 'desc' },
       },
     });
-  
-    const popularEventIds = popularEventGroups.map(g => g.eventId);
-  
+
+    const popularEventIds = popularEventGroups.map((g) => g.eventId);
+
     if (popularEventIds.length === 0) return [];
-  
+
     const events = await prisma.event.findMany({
       where: {
-        id: { in: popularEventIds }
+        id: { in: popularEventIds },
       },
       include: {
         creator: {
@@ -259,14 +262,14 @@ export class EventRepository {
       },
       take: take,
     });
-  
+
     // Step 3: Preserve the popularity order
-    const eventMap = new Map(events.map(e => [e.id, e]));
+    const eventMap = new Map(events.map((e) => [e.id, e]));
     return popularEventIds
-      .map(id => eventMap.get(id))
-      .filter((e): e is typeof events[0] => e !== undefined);
+      .map((id) => eventMap.get(id))
+      .filter((e): e is (typeof events)[0] => e !== undefined);
   }
-  
+
   /**
    * Creates a new event.
    * @param eventDetails - The details of the event to create.

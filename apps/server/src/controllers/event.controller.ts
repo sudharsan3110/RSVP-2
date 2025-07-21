@@ -204,6 +204,18 @@ export const updateEventController = controller(UpdateEventSchema, async (req, r
     throw new BadRequestError('Description cannot be greater than 300 characters.');
 
   logger.info('Updating event in updateEventController ...');
+  const event = await EventRepository.findById(eventId);
+
+  // current is private and converting to public
+  if (event?.hostPermissionRequired == true && data.hostPermissionRequired == false) {
+    const where: Prisma.AttendeeWhereInput = {
+      eventId,
+      status: Status.WAITING,
+      isDeleted: false,
+    };
+    await AttendeeRepository.updateMultipleAttendeesStatus(where, Status.GOING);
+  }
+
   const updatedEvent = await EventRepository.update(eventId, {
     ...data,
     description: richtextDescription,

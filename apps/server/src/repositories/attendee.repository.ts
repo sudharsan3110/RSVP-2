@@ -310,6 +310,23 @@ export class AttendeeRepository {
   }
 
   /**
+   * Updates the allowed status and status of multiple attendees for a specific event.
+   * @param where - The where clause for filtering attendees.
+   * @param status - The new status.
+   * @returns The updated attendees.
+   */
+  static async updateMultipleAttendeesStatus(where: Prisma.AttendeeWhereInput, status: Status) {
+    where.isDeleted = false;
+    return await prisma.attendee.updateMany({
+      where,
+      data: {
+        allowedStatus: true,
+        status,
+      },
+    });
+  }
+
+  /**
    * Cancels an attendee record by ID. (Soft Delete)
    * @param id - The unique ID of the attendee.
    * @returns The updated attendee object with `status` set to `CANCELLED`.

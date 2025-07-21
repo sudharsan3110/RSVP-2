@@ -11,6 +11,16 @@ import dayjs from 'dayjs';
 import { useParams } from 'next/navigation';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../ui/alert-dialog';
+import { useState } from 'react';
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -19,8 +29,10 @@ const EditEventForm = () => {
   const eventId = useParams().id as string;
   const { data, isLoading } = useGetEventById(eventId);
   const { mutate, isPending } = useUpdateEvent();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [formPayload, setFormPayload] = useState<CreateEventFormType | null>(null);
 
-  async function onSubmit(data: CreateEventFormType) {
+  async function onSubmit(formPayload: CreateEventFormType) {
     const {
       name,
       category,
@@ -36,7 +48,17 @@ const EditEventForm = () => {
       fromDate,
       toTime,
       toDate,
-    } = data;
+    } = formPayload;
+
+    if (
+      alertOpen == false &&
+      data?.event?.hostPermissionRequired === true &&
+      hostPermissionRequired === false
+    ) {
+      setAlertOpen(true);
+      setFormPayload(formPayload);
+      return;
+    }
 
     const submissionData: UpdateEventSubmissionType = {
       id: eventId,
@@ -122,8 +144,48 @@ const EditEventForm = () => {
         isLoading={isPending}
         onSubmit={onSubmit}
       />
+      <ChangeVisibility
+        open={alertOpen}
+        onConfirm={() => {
+          if (formPayload) {
+            onSubmit(formPayload);
+          }
+          setAlertOpen(false);
+        }}
+        onCancel={() => {
+          setAlertOpen(false);
+        }}
+      />
     </>
   );
 };
 
 export default EditEventForm;
+
+const ChangeVisibility = ({
+  open,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  return (
+    <AlertDialog open={open} onOpenChange={onCancel}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Change Visibility</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogDescription>
+          Removing "Host Permission Required" will move all waiting attendees to going. Are you sure
+          you want to proceed?
+        </AlertDialogDescription>
+        <div className="flex justify-end gap-2 mt-6">
+          <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Confirm</AlertDialogAction>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
