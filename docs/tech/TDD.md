@@ -1076,6 +1076,47 @@ graph TD
 ---
 | URL | Method | Auth Required | Description |
 |-----|--------|---------------|-------------|
+| `/auth/google-signin` | POST | False | Authenticates a user via Google OAuth by exchanging the authorization code for tokens, verifying the user, and issuing JWT-based session cookies. |
+
+> <details>
+> <summary>Request body</summary>
+> 
+> ```json
+> {
+>   "code": "4/0AVMBsJjtmEI..."
+> }
+> ```
+> </details>
+>
+> <details>
+> <summary>Response body</summary>
+> 
+> ```json
+> {
+>   "data": {
+>     "user": {
+>       "isCompleted": true
+>     }
+>   }
+> }
+> ```
+>
+> **Response:** `200 OK`
+>
+> **Note:**  
+> This endpoint also sets two cookies:
+> - `accessToken` – HTTP-only cookie that expires in 15 minutes
+> - `refreshToken` – HTTP-only cookie that expires in 7 days
+> </details>
+
+---
+| URL | Method | Auth Required | Description |
+|-----|--------|---------------|-------------|
+| `/auth/oauth/google` | GET | False | Generates the Google OAuth URL for frontend login redirection. |
+
+---
+| URL | Method | Auth Required | Description |
+|-----|--------|---------------|-------------|
 | `/auth/verify-signin` | POST | False | Verifies magic link token and generates access tokens |
 
 > <details>

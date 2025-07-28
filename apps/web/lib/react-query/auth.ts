@@ -5,7 +5,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { authAPI, SigninPayload, VerifySigninPayload } from '../axios/auth-API';
+import {
+  authAPI,
+  SigninPayload,
+  GoogleSigninPayload,
+  VerifySigninPayload,
+} from '../axios/auth-API';
 
 interface VerifySignInResponse {
   success: boolean;
@@ -26,6 +31,37 @@ export const useSignInMutation = () => {
       toast.error(error?.response?.data?.message || 'Failed to send magic link. Please try again.');
     },
   });
+};
+
+export const useGoogleSignin = () => {
+  const router = useRouter();
+  return useMutation<AxiosResponse, Error, GoogleSigninPayload>({
+    mutationFn: authAPI.googleSignin,
+    onSuccess: ({ data }) => {
+      if (data.data.user.isCompleted) {
+        router.push('/events');
+      } else {
+        router.push('/profile');
+      }
+    },
+    onError: () => {
+      toast.error('Failed to login. Please try again.');
+    },
+  });
+};
+
+export const useGoogleOAuth = () => {
+  const loginWithGoogle = async () => {
+    try {
+      const res = await authAPI.getGoogleAuthUrl();
+      const redirectUrl = res.data.details.redirect;
+      window.location.href = redirectUrl;
+    } catch {
+      toast.error('Failed to login. Please try again.');
+    }
+  };
+
+  return { loginWithGoogle };
 };
 
 export const useVerifySignin = () => {

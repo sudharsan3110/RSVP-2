@@ -178,8 +178,8 @@ const ChangeVisibility = ({
           <AlertDialogTitle>Change Visibility</AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogDescription>
-          Removing "Host Permission Required" will move all waiting attendees to going. Are you sure
-          you want to proceed?
+          Removing &quot;Host Permission Required&quot; will move all waiting attendees to going.
+          Are you sure you want to proceed?
         </AlertDialogDescription>
         <div className="flex justify-end gap-2 mt-6">
           <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>

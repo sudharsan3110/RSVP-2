@@ -77,6 +77,24 @@ export class UserRepository {
   }
 
   /**
+   * Creates a new user through Google Oauth.
+   * @param primaryEmail - The primary email of the new user.
+   * @param fullName - The full name of the new user.
+   * @returns The newly created user object.
+   */
+  static async createUserByGoogleOAuth(primaryEmail: string, fullName?: string) {
+    const userName = generateUsernameByEmail(primaryEmail);
+    const newUser = await prisma.users.create({
+      data: {
+        primaryEmail,
+        fullName,
+        userName,
+      },
+    });
+    return newUser;
+  }
+
+  /**
    * Creates a magic token for a user.
    * @param userId - The unique ID of the user.
    * @returns The generated magic token.

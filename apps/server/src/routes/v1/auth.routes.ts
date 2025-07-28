@@ -3,6 +3,8 @@ import {
   logoutController,
   signinController,
   verifySigninController,
+  googleSigninController,
+  googleOAuthUrlController
 } from '@/controllers/auth.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { Router } from 'express';
@@ -10,6 +12,10 @@ import { Router } from 'express';
 const authRouter: Router = Router();
 
 authRouter.post('/signin', signinController);
+
+authRouter.post('/google-signin', googleSigninController);
+
+authRouter.get('/oauth/google', googleOAuthUrlController);
 
 authRouter.post('/verify-signin', verifySigninController);
 

@@ -20,6 +20,9 @@ const envSchema = z.object({
   AWS_SECRET_KEY: z.string(),
   AWS_REGION: z.string(),
   AWS_BUCKET_NAME: z.string(),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_REDIRECT_URI: z.string().url(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -50,6 +53,9 @@ const config = {
   AWS_SECRET_KEY: envVars.data.AWS_SECRET_KEY,
   AWS_REGION: envVars.data.AWS_REGION,
   AWS_BUCKET_NAME: envVars.data.AWS_BUCKET_NAME,
+  GOOGLE_CLIENT_ID: envVars.data.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: envVars.data.GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI: envVars.data.GOOGLE_REDIRECT_URI,
 };
 
 export default config;
