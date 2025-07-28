@@ -31,6 +31,7 @@ const ProfileForm = ({ user }: Props) => {
       website: user?.website ?? '',
       instagram: user?.instagram ?? '',
     },
+    mode: 'onChange',
   });
 
   const bio = form.watch('bio');

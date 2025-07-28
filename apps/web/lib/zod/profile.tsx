@@ -30,6 +30,8 @@ export const phoneNumberFormSchema = z.object({
 });
 
 export type PhoneNumberFormType = z.infer<typeof phoneNumberFormSchema>;
+const xProfileRegex = /^[A-Za-z0-9_]{1,15}$/;
+const instagramProfileRegex = /^(?!.*\.\.)(?!^\.)[A-Za-z0-9_.]{2,30}(?<!\.)$/;
 
 export const profileFormSchema = z.object({
   fullName: z
@@ -41,8 +43,18 @@ export const profileFormSchema = z.object({
     .refine((val) => !val || !/^[\d\s]+$/.test(val.trim()), 'Cannot contain only numbers'),
   bio: z.string().max(500).default(''),
   profileIcon: z.coerce.number().optional(),
-  twitter: z.string().optional(),
-  instagram: z.string().optional(),
+  twitter: z
+    .string()
+    .optional()
+    .refine((val) => !val || xProfileRegex.test(val), {
+      message: 'Invalid X username',
+    }),
+  instagram: z
+    .string()
+    .optional()
+    .refine((val) => !val || instagramProfileRegex.test(val), {
+      message: 'Invalid Instagram username',
+    }),
   website: z
     .string()
     .optional()

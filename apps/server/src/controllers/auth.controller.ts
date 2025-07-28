@@ -155,7 +155,9 @@ export const googleOAuthUrlController = controller(emptySchema, async (req, res)
  */
 export const verifySigninController = controller(verifySigninSchema, async (req, res) => {
   const { token } = req.body;
+
   const decodedToken = verifyAccessToken(token);
+
   if (!decodedToken) throw new TokenExpiredError();
 
   logger.info('Verifying token in verifySigninController ...');

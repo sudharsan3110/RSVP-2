@@ -24,8 +24,8 @@ function Home() {
 
   return (
     <>
-      <Container className="relative flex w-full flex-col items-center justify-center space-y-10 bg-cover py-[7rem] xl:py-[9rem] text-white">
-        <h1 className="relative z-10 text-center text-4xl font-bold !leading-tight md:text-5xl xl:text-6xl animate-fade-in">
+      <Container className="relative flex w-full flex-col items-center justify-center  bg-cover py-[7rem] xl:py-[9rem] min-h-screen text-white xl:my-auto">
+        <h1 className="relative z-10 text-center text-4xl font-bold !leading-tight w-full md:text-5xl xl:text-6xl animate-fade-in">
           Dive into events starting here.
           <br className="hidden md:block" />
           <p className="text-gradient inline">Create, Share, </p>

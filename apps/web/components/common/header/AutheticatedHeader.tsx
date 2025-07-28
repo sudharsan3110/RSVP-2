@@ -59,7 +59,7 @@ const AutheticatedHeader = () => {
       >
         <Container className="mx-auto flex justify-between gap-8 lg:gap-12">
           <Link href="/">
-            <Logo />
+            <Logo className="min-w-[100px]" />
           </Link>
           <div className="flex flex-1">
             <div className="hidden gap-3 md:flex">
