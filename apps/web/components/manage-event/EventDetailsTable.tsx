@@ -36,7 +36,7 @@ export default function EventDetailsTable() {
   });
 
   const attendees = data?.attendees ?? [];
-  const totalPages = data?.total ?? 0;
+  const totalPages = Math.ceil((data?.total ?? 0) / 10);
 
   // Debounced search handler
   const handleSearch = (value: string) => {
