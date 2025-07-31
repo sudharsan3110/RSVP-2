@@ -6,12 +6,12 @@ import { Download, TriangleAlert } from 'lucide-react';
 import Container from '@/components/common/Container';
 import ProfileForm from '@/components/profile/ProfileForm';
 import SecondaryEmailForm from '@/components/profile/SecondaryEmailForm';
-import PhoneNumberForm from '@/components/profile/ContactForm';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useMemo } from 'react';
 import ProfileFormSkeleton from '@/components/profile/ProfileFormLoading';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { DeactivateAccountDialog } from '@/components/profile/DeactivateAccountDialog';
+import PhoneNumberForm from '@/components/profile/PhoneNumberForm';
 
 const ProfilePage = () => {
   const { data, isSuccess, isLoading } = useCurrentUser();
