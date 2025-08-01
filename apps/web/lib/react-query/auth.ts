@@ -11,7 +11,7 @@ import {
   GoogleSigninPayload,
   VerifySigninPayload,
 } from '../axios/auth-API';
-
+import { clearLocalStorage } from '@/hooks/useLocalStorage'
 interface VerifySignInResponse {
   success: boolean;
   data: { user: User };
@@ -70,11 +70,14 @@ export const useVerifySignin = () => {
     mutationFn: authAPI.verifySignin,
     onSuccess: ({ data }) => {
       const redirectUrl = window.localStorage.getItem('redirect');
+      const eventFormData = window.localStorage.getItem('eventFormData');
 
-      if (redirectUrl) {
-        router.push(redirectUrl);
+      if (eventFormData) {
+        router.push('/create-event');
       } else {
-        if (data.data.user.isCompleted) {
+        if (redirectUrl){
+          router.push(redirectUrl);}
+        else if(data.data.user.isCompleted){
           router.push('/events');
         } else {
           router.push('/profile');
@@ -102,6 +105,7 @@ export const useSignout = () => {
   return useMutation({
     mutationFn: authAPI.signout,
     onSuccess: () => {
+      clearLocalStorage();
       queryClient.clear();
       router.push('/');
       router.refresh();

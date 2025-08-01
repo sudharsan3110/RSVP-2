@@ -20,15 +20,29 @@ import Tiptap from '../ui/tiptap';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import EventPreview from './EventPreview';
 import FormSelectInput from '../common/form/FormSelectInput';
-
+import SigninDialog from '../auth/SigninDialog';
+import { useEffect, } from 'react';
 type Props = {
   defaultValues: CreateEventFormType;
   isEditing?: boolean;
   isLoading: boolean;
   onSubmit: (data: CreateEventFormType) => void;
+  requireSignIn?: boolean;
+  setLocalStorage?: (value: any) => void;
+  setFormData?: (reset: any) => void;
+  hasLocalStorage?: boolean;
 };
 
-const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Props) => {
+const EventForm = ({ 
+  defaultValues, 
+  isEditing = false, 
+  isLoading, 
+  onSubmit, 
+  requireSignIn,
+  setLocalStorage,
+  setFormData,
+  hasLocalStorage = false,
+}: Props) => {
   const allowedDate = new Date();
   allowedDate.setHours(0, 0, 0, 0);
   allowedDate.setDate(allowedDate.getDate() + 1);
@@ -37,9 +51,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
     resolver: zodResolver(createEventFormSchema),
     defaultValues: defaultValues,
   });
-
   const buttonText = isEditing ? 'Update Event' : 'Create Event';
-
   const {
     control,
     watch,
@@ -50,6 +62,34 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
     formState: { errors, isDirty },
   } = form;
 
+  useEffect(() => {
+    if (setFormData && hasLocalStorage) {
+      setFormData(reset)
+    }
+  }, [setFormData, hasLocalStorage]);
+ 
+  useEffect(() => {
+   if (setLocalStorage) {
+      const subscription = watch((value) => {
+        setLocalStorage(value);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [watch, setLocalStorage]);
+  const hasFormData = () => {
+    const values = watch();
+    return values.name || values.category || values.description || values.location || values.eventImageUrl.file;
+  };
+
+
+  const isButtonDisabled = () => {
+    if (isLoading) return true;
+    if (isEditing) {
+        return !isDirty;
+    } else{
+      return !hasFormData() && !hasLocalStorage;
+    } 
+  };
   const venueType = watch('venueType');
 
   const handleFormSubmit = async (data: CreateEventFormType) => {
@@ -61,7 +101,9 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
     <Form {...form}>
       <section className="flex items-start justify-between gap-20">
         <form
-          onSubmit={handleSubmit(handleFormSubmit)}
+          onSubmit={requireSignIn ? (e) => {
+            e.preventDefault();
+          } : handleSubmit(handleFormSubmit)}
           className="flex max-w-[585px] grow flex-col gap-[1.125rem]"
         >
           <FormImageUpload
@@ -242,13 +284,26 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               {errors.eventImageUrl.message}
             </p>
           )}
-          <Button
-            type="submit"
-            disabled={isLoading || !isDirty}
-            className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
-          >
-            {isLoading ? <LoaderCircle className="animate-spin" /> : <>{buttonText}</>}
-          </Button>
+          {requireSignIn ? (
+            <SigninDialog variant="signin">
+              <Button
+                type="button"
+                disabled={isButtonDisabled()}
+                className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
+              >
+                {isLoading ? <LoaderCircle className="animate-spin" /> : <>{buttonText}</>}
+              </Button>
+            </SigninDialog>
+
+          ) : (
+            <Button
+              type="submit"
+              disabled={isButtonDisabled()}
+              className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
+            >
+              {isLoading ? <LoaderCircle className="animate-spin" /> : <>{buttonText}</>}
+            </Button>
+          )}
         </form>
         <EventPreview className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 py-7 lg:block" />
       </section>

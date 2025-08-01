@@ -22,7 +22,6 @@ import useScroll from '@/hooks/useScroll';
 import { useCurrentUser, useSignout } from '@/lib/react-query/auth';
 import { userAvatarOptions } from '@/utils/constants';
 import { LogOutIcon, UserIcon } from 'lucide-react';
-
 const AutheticatedHeader = () => {
   const isScrolled = useScroll();
   const { mutate } = useSignout();

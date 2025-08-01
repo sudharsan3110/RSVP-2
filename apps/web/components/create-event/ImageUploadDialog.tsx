@@ -15,7 +15,7 @@ import { ReactNode, useCallback, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Progress } from '../ui/progress';
 import { Icons } from '../common/Icon';
-
+import axios from 'axios';
 type Props = {
   children: ReactNode;
 };
@@ -55,8 +55,17 @@ const ImageUploadDialog = ({ children }: Props) => {
         setUploadProgress(100);
         const signedUrl = data.data.signedUrl;
         const fileUrl = URL.createObjectURL(file);
+        const url = data.data?.url;
+        if (file && signedUrl) {
+          await axios.put(signedUrl, file, {
+            headers: {
+              'Content-Type': file.type,
+            },
+          });
+          setValue('eventImageUrl', { url, signedUrl, file: fileUrl });
+        }
         setImage(fileUrl);
-        const actualUrl = signedUrl.split('?')[0];
+        const actualUrl = signedUrl ? signedUrl.split('?')[0] : null;
         setUrl(actualUrl);
         setSignedUrl(signedUrl);
       } catch (error) {

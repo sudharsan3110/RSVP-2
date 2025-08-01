@@ -185,8 +185,8 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
           <div className="flex flex-col items-center justify-center">
             <Image
               priority
-              height={186}
-              width={216}
+              height={188}
+              width={219}
               src={'/images/verify-email.svg'}
               alt="verify-email icon"
             />

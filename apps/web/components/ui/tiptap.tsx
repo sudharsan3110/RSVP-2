@@ -14,7 +14,7 @@ import Blockquote from '@tiptap/extension-blockquote';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState,useEffect } from 'react';
 
 type TipTapProps = {
   description: string;
@@ -70,7 +70,11 @@ const Tiptap = forwardRef<EditorRefType | null, TipTapProps>(
     });
 
     useImperativeHandle(ref, () => ({ editor }));
-
+    useEffect(() => {
+      if (editor && description !== editor.getHTML()) {
+        editor.commands.setContent(description);
+      }
+    }, [description]);
     if (!editor) return null;
 
     return (

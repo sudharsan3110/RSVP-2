@@ -31,15 +31,15 @@ const EventPreview = ({ className, children, venueType }: EventPreviewProps) => 
 
   return (
     <section className={className}>
-      {image.file && (
+      {image.url && (
         <figure className="relative mx-auto mb-4 w-full max-w-3xl aspect-square">
           <div className="relative w-full h-full overflow-hidden rounded-lg">
             <div
               className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
-              style={{ backgroundImage: `url(${image.file})` }}
+              style={{ backgroundImage: `url(${image.url})` }}
             />
             <img
-              src={image.file}
+              src={image.url}
               alt="Event Image"
               className="relative z-10 mx-auto h-full object-contain"
             />
@@ -82,7 +82,7 @@ const EventPreview = ({ className, children, venueType }: EventPreviewProps) => 
           <span className="ml-1 font-medium">{watch('toTime') || '-'}</span>
         </div>
       </section>
-      {!image.file && (
+      {!image.url && (
         <ImageUploadDialog>
           <Button type="button" variant="secondary" radius="sm" className="mt-4 w-full">
             Add Image

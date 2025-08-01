@@ -31,16 +31,15 @@ function Home() {
           <p className="text-gradient inline">Create, Share, </p>
           and Sell Tickets Easily.
         </h1>
-        <SigninDialog variant={'signup'}>
-          <Button
-            variant={'gradient'}
-            className="text-white relative z-10 h-auto cursor-pointer py-3 md:px-9 md:py-4 md:text-lg !mt-5 animate-fade-in hover:scale-105 transition-transform duration-300 ease-in-out"
-            size={'lg'}
-            onClick={() => router.push('/create-event')}
-          >
-            Host a Event
-          </Button>
-        </SigninDialog>
+        <Button
+          variant={'gradient'}
+          className="text-white relative z-10 h-auto cursor-pointer py-3 md:px-9 md:py-4 md:text-lg !mt-5 animate-fade-in hover:scale-105 transition-transform duration-300 ease-in-out"
+          size={'lg'}
+          onClick={() => router.push('/create-event')}
+        >
+          Host a Event
+        </Button>
+
         <Image
           src="/images/hero-background-mobile.svg"
           loading="eager"

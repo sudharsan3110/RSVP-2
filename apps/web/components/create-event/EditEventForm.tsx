@@ -2,11 +2,9 @@
 
 import { UpdateEventSubmissionType } from '@/lib/axios/event-API';
 import { useGetEventById, useUpdateEvent } from '@/lib/react-query/event';
-import { fileFromUrl } from '@/lib/utils';
 import { CreateEventFormType } from '@/lib/zod/event';
 import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
-import axios from 'axios';
 import dayjs from 'dayjs';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -31,7 +29,7 @@ const EditEventForm = () => {
   const { mutate, isPending } = useUpdateEvent();
   const [alertOpen, setAlertOpen] = useState(false);
   const [formPayload, setFormPayload] = useState<CreateEventFormType | null>(null);
-
+   
   async function onSubmit(formPayload: CreateEventFormType) {
     const {
       name,
@@ -80,25 +78,6 @@ const EditEventForm = () => {
       startTime: combineDateAndTime(fromDate, fromTime),
       endTime: combineDateAndTime(toDate, toTime),
     };
-
-    // Upload image if it's a new image
-    if (eventImageUrl.file && eventImageUrl.signedUrl) {
-      const imageFile = await fileFromUrl(eventImageUrl.file, 'event-image');
-      try {
-        await axios.put(eventImageUrl.signedUrl, imageFile, {
-          headers: {
-            'Content-Type': imageFile.type,
-          },
-        });
-      } catch (error) {
-        console.error('Error uploading image', error);
-      }
-    }
-
-    // If the image is not changed, we don't need to upload it again
-    else if (eventImageUrl.file) {
-      submissionData.eventImageUrl = eventImageUrl.file;
-    }
     mutate(submissionData);
   }
 
@@ -108,6 +87,7 @@ const EditEventForm = () => {
     name: event?.name ?? '',
     category: event?.category ?? '',
     description: event?.description ?? '',
+    plaintextDescription: '',
     venueType: event?.venueType ?? VenueType.Physical,
     location: event?.venueAddress ?? event?.venueUrl ?? '',
     locationMapUrl: event?.venueUrl ?? '',
@@ -120,7 +100,7 @@ const EditEventForm = () => {
     eventImageUrl: {
       signedUrl: '',
       file: event?.eventImageUrl ?? '',
-      url: '',
+      url: event?.eventImageUrl ?? '',
       type: '',
     },
   };

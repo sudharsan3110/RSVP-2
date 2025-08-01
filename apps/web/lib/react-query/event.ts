@@ -11,7 +11,7 @@ import {
   UpdateEventSubmissionType,
 } from '../axios/event-API';
 import { CreateEventSubmissionType } from '../zod/event';
-
+import { clearLocalStorage } from '@/hooks/useLocalStorage';
 interface ErrorResponse {
   message?: string;
 }
@@ -77,6 +77,7 @@ export const useCreateEvent = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, CreateEventSubmissionType>({
     mutationFn: eventAPI.createEvent,
     onSuccess: ({ data }) => {
+      clearLocalStorage();
       toast.success('Event created successfully');
       const url = `/${data.data.slug}`;
       router.push(url);

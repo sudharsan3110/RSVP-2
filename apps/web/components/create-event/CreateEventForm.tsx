@@ -1,14 +1,15 @@
 'use client';
 
 import { useCreateEvent } from '@/lib/react-query/event';
-import { fileFromUrl } from '@/lib/utils';
+import { useCurrentUser } from '@/lib/react-query/auth';
 import { CreateEventFormType, CreateEventSubmissionType } from '@/lib/zod/event';
 import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
-import axios from 'axios';
 import { useState } from 'react';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+
 const allowedDate = new Date();
 allowedDate.setHours(0, 0, 0, 0);
 allowedDate.setDate(allowedDate.getDate() + 1);
@@ -17,6 +18,7 @@ const defaultValues: CreateEventFormType = {
   name: '',
   category: '',
   description: '',
+  plaintextDescription: '',
   venueType: VenueType.Physical,
   location: '',
   hostPermissionRequired: false,
@@ -34,8 +36,14 @@ const defaultValues: CreateEventFormType = {
 };
 
 const CreateEventForm = () => {
+  const { data: user } = useCurrentUser();
   const { mutate } = useCreateEvent();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);  
+  const { hasLocalStorage, setFormData,setLocalStorage } = useLocalStorage({
+    defaultValues,
+  });
+
+  
   async function onSubmit(data: CreateEventFormType) {
     const {
       name,
@@ -74,17 +82,8 @@ const CreateEventForm = () => {
       endTime: combineDateAndTime(toDate, toTime),
     };
 
-    if (data.eventImageUrl.file && data.eventImageUrl.signedUrl) {
-      setIsLoading(true);
-      // const imageFile = await fileFromUrl(data.eventImageUrl.file, 'event-image');
-      // await axios.put(data.eventImageUrl.signedUrl, imageFile, {
-      //   headers: {
-      //     'Content-Type': imageFile.type,
-      //   },
-      // });
-      mutate(submissionData);
-      setIsLoading(false);
-    }
+    mutate(submissionData);
+
   }
 
   return (
@@ -93,7 +92,15 @@ const CreateEventForm = () => {
         <p className="font-medium text-secondary">Fill in the form below to create a new event</p>
       </div>
       <Separator className="my-9 bg-separator" />
-      <EventForm defaultValues={defaultValues} isLoading={isLoading} onSubmit={onSubmit} />
+      <EventForm 
+        defaultValues={defaultValues} 
+        isLoading={isLoading} 
+        onSubmit={onSubmit} 
+        requireSignIn={!user}
+        setLocalStorage={setLocalStorage}
+        setFormData={setFormData}
+        hasLocalStorage={hasLocalStorage}
+      />
     </>
   );
 };

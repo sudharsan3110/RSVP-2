@@ -4,7 +4,6 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = [
   '/ticket',
   '/profile',
-  '/create-event',
   '/events',
   '/scanner',
   '/user',
