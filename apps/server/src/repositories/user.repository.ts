@@ -90,7 +90,7 @@ export class UserRepository {
    */
   static async createUserByGoogleOAuth(primaryEmail: string, fullName?: string) {
     const userName = generateUsernameByEmail(primaryEmail);
-    const newUser = await prisma.users.create({
+    const newUser = await prisma.user.create({
       data: {
         primaryEmail,
         fullName,
