@@ -76,24 +76,15 @@ const EventForm = ({
       return () => subscription.unsubscribe();
     }
   }, [watch, setLocalStorage]);
-  const hasFormData = () => {
-    const values = watch();
-    return (
-      values.name ||
-      values.category ||
-      values.description ||
-      values.location ||
-      values.eventImageUrl.file
-    );
-  };
+  
+  useEffect(() => {
+    if(setFormData){
+      setFormData(reset); 
+    }
+  }, [reset]);
 
   const isButtonDisabled = () => {
-    if (isLoading) return true;
-    if (isEditing) {
-      return !isDirty;
-    } else {
-      return !hasFormData() && !hasLocalStorage;
-    }
+    return isLoading || !isDirty 
   };
   const venueType = watch('venueType');
 
