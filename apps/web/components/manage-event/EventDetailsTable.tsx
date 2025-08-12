@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import TablePagination from '../common/Pagination';
 import { DataTable } from '../ui/data-table';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import useDebounce from '@/hooks/useDebounce';
 
 interface FilterState {
   searchTerm: string;
@@ -22,6 +23,8 @@ export default function EventDetailsTable() {
     page: 1,
   });
 
+  const searchTerm = useDebounce(filters.searchTerm, 500);
+
   const params = useParams();
   const eventId = params.id?.toString() || '';
 
@@ -30,7 +33,7 @@ export default function EventDetailsTable() {
     eventId,
     page: filters.page,
     limit: 10,
-    search: filters.searchTerm,
+    search: searchTerm,
     hasAttended: filters.hasAttended,
     sortBy: 'registrationTime',
   });
