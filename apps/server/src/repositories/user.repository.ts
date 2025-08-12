@@ -95,7 +95,6 @@ export class UserRepository {
         primaryEmail,
         fullName,
         userName,
-        isCompleted: true,
       },
     });
     return newUser;

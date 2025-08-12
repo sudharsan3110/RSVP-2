@@ -14,7 +14,7 @@ model User {
   contact        String?  @map("contact") @db.VarChar(15)
   fullName       String?  @map("full_name") @db.VarChar(100)
   userName       String?  @unique @map("user_name") @db.VarChar(100)
-  isCompleted    Boolean  @default(false) @map("is_completed")
+  isCompleted    Boolean  @default(true) @map("is_completed")
   location       String?  @map("location") @db.VarChar(256)
   stateId        String?  @map("state_id") @db.VarChar(36)
   countryId      String?  @map("country_id") @db.VarChar(36)

@@ -6,7 +6,7 @@ CREATE TABLE `users` (
     `contact` VARCHAR(15) NULL,
     `full_name` VARCHAR(100) NULL,
     `user_name` VARCHAR(100) NULL,
-    `is_completed` BOOLEAN NOT NULL DEFAULT false,
+    `is_completed` BOOLEAN NOT NULL DEFAULT true,
     `location` VARCHAR(256) NULL,
     `state_id` VARCHAR(36) NULL,
     `country_id` VARCHAR(36) NULL,
