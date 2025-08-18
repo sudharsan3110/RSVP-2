@@ -126,3 +126,12 @@ export type CreateEventSubmissionType = {
   startTime: Date;
   endTime: Date;
 };
+
+export type EventFromProps = {
+  defaultValues: CreateEventFormType;
+  isEditing?: boolean;
+  isLoading: boolean;
+  onSubmit: (data: CreateEventFormType) => void;
+  requireSignIn?: boolean;
+  setPersistentValue?: (data: CreateEventFormType) => void;
+};

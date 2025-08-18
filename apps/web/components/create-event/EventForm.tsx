@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { createEventFormSchema, CreateEventFormType } from '@/lib/zod/event';
+import { createEventFormSchema, CreateEventFormType, EventFromProps } from '@/lib/zod/event';
 import { VenueType } from '@/types/events';
 import { capacityOptions, eventCategoryOptions, evenTimeOptions } from '@/utils/constants';
 import { BuildingOfficeIcon, LinkIcon } from '@heroicons/react/16/solid';
@@ -22,14 +22,6 @@ import EventPreview from './EventPreview';
 import FormSelectInput from '../common/form/FormSelectInput';
 import SigninDialog from '../auth/SigninDialog';
 import { useEffect, useState } from 'react';
-type Props = {
-  defaultValues: CreateEventFormType;
-  isEditing?: boolean;
-  isLoading: boolean;
-  onSubmit: (data: CreateEventFormType) => void;
-  requireSignIn?: boolean;
-  setPersistentValue?: (data: CreateEventFormType) => void;
-};
 
 const EventForm = ({
   defaultValues,
@@ -38,14 +30,16 @@ const EventForm = ({
   onSubmit,
   requireSignIn,
   setPersistentValue,
-}: Props) => {
+}: EventFromProps) => {
   const allowedDate = new Date();
   allowedDate.setHours(0, 0, 0, 0);
   allowedDate.setDate(allowedDate.getDate() + 1);
   const form = useForm<CreateEventFormType>({
     resolver: zodResolver(createEventFormSchema),
     defaultValues: defaultValues,
+    mode: 'onChange',
   });
+  const [submitted, setSubmitted] = useState(false);
   const buttonText = isEditing ? 'Update Event' : 'Create Event';
   const {
     control,
@@ -54,24 +48,23 @@ const EventForm = ({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isDirty },
+    formState: { errors, isValid, isDirty},
   } = form;
-
   useEffect(() => {
-    setValue('isEditing', isEditing);
-
     const subscription = watch((value) => {
       setPersistentValue?.(value as CreateEventFormType);
     });
     return () => subscription.unsubscribe();
   }, [watch, setPersistentValue]);
 
-  const isButtonDisabled = isLoading || !isDirty;
+  const isButtonDisabled = isEditing ? !isDirty || isLoading : isLoading || !isValid || submitted;
   const venueType = watch('venueType');
 
-  const handleFormSubmit = async (data: CreateEventFormType) => {
-    await onSubmit(data);
-    reset(data);
+  const handleFormSubmit = (data: CreateEventFormType) => {
+      setSubmitted(true);
+      onSubmit(data);
+      reset(data);
+  
   };
 
   return (

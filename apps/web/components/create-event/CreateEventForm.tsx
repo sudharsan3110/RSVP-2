@@ -5,37 +5,48 @@ import { useCurrentUser } from '@/lib/react-query/auth';
 import { CreateEventFormType, CreateEventSubmissionType } from '@/lib/zod/event';
 import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
 import { usePersistentState } from '@/hooks/useLocalStorage';
 import { FORM_CACHE_KEY, EXPIRY_MINUTES } from '@/utils/constants';
-const allowedDate = new Date();
-allowedDate.setHours(0, 0, 0, 0);
-allowedDate.setDate(allowedDate.getDate() + 1);
 
-const defaultValues: CreateEventFormType = {
-  name: '',
-  category: '',
-  description: '',
-  plaintextDescription: '',
-  venueType: VenueType.Physical,
-  location: '',
-  hostPermissionRequired: false,
-  fromTime: '17:00',
-  fromDate: allowedDate,
-  toTime: '20:00',
-  toDate: allowedDate,
-  capacity: 20,
-  eventImageUrl: {
-    signedUrl: '',
-    file: '',
-    url: '',
-    type: '',
-  },
-};
+function getAllowedDate() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 1);
+  return d;
+}
 
 const CreateEventForm = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const defaultValues = useMemo<CreateEventFormType>(() => {
+    const allowedDate = getAllowedDate();
+    return {
+      name: '',
+      category: '',
+      description: '',
+      plaintextDescription: '',
+      venueType: VenueType.Physical,
+      location: '',
+      hostPermissionRequired: false,
+      fromTime: '17:00',
+      fromDate: allowedDate,
+      toTime: '20:00',
+      toDate: allowedDate,
+      capacity: 20,
+      eventImageUrl: {
+        signedUrl: '',
+        file: '',
+        url: '',
+        type: '',
+      },
+    };
+  }, []);
   const { data: user } = useCurrentUser();
   const { mutate } = useCreateEvent();
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +96,7 @@ const CreateEventForm = () => {
     mutate(submissionData);
   }
 
+  if (!mounted) return null;
   return (
     <>
       <div className="mt-1 flex items-baseline justify-between">
