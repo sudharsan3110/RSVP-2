@@ -15,6 +15,7 @@ pnpm -r dev
 
 - Use the `.env_example` file as a reference to set up your environment variables.
 - Rename it to `.env` and populate the required values.
+- `apps/web` and `apps/server` both directories have their own `.env` file to be set up.
 
 ## AWS setup
 
