@@ -56,6 +56,30 @@ const EventForm = ({
     return () => subscription.unsubscribe();
   }, [watch, setPersistentValue]);
 
+  useEffect(() => {
+    const subscription = watch((values, { name }) => {
+      if ((name === 'fromTime' || name === 'fromDate') && values.fromDate && values.fromTime) {
+        const [hours, minutes] = values.fromTime.split(':').map(Number);
+        const endHour = hours + 1;
+
+        const normalizedEndHour = endHour % 24;
+        const endTime = `${normalizedEndHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+        setValue('toTime', endTime);
+
+        if (endHour >= 24) {
+          const nextDay = new Date(values.fromDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          setValue('toDate', nextDay);
+        } else {
+          setValue('toDate', values.fromDate);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const isButtonDisabled = isEditing ? !isDirty || isLoading : isLoading || !isValid || submitted;
   const venueType = watch('venueType');
 
@@ -117,7 +141,7 @@ const EventForm = ({
               control={control}
               label="To"
               name="toTime"
-              defaultValue="20:00"
+              defaultValue="18:00"
               options={evenTimeOptions}
             />
             <FormDatePicker

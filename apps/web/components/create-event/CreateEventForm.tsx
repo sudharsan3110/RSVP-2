@@ -35,7 +35,7 @@ const CreateEventForm = () => {
       hostPermissionRequired: false,
       fromTime: '17:00',
       fromDate: allowedDate,
-      toTime: '20:00',
+      toTime: '18:00',
       toDate: allowedDate,
       capacity: 20,
       eventImageUrl: {
