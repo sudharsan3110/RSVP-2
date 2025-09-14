@@ -41,6 +41,7 @@ export const createEventFormSchema = z
     //   }
     // ),
     hostPermissionRequired: z.boolean(),
+    discoverable: z.boolean(),
     capacity: z.coerce
       .number({
         required_error: 'Capacity is required',
@@ -122,6 +123,7 @@ export type CreateEventSubmissionType = {
   venueAddress?: string;
   venueUrl?: string;
   hostPermissionRequired: boolean;
+  discoverable: boolean;
   capacity: number;
   startTime: Date;
   endTime: Date;

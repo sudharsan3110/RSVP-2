@@ -21,6 +21,7 @@ export class Event {
   venueAddress?: string;
   venueUrl?: string;
   hostPermissionRequired: boolean;
+  discoverable: boolean;
   capacity?: number;
   isActive: boolean;
   isCancelled?: boolean;
@@ -50,6 +51,7 @@ export class Event {
     this.venueAddress = data.venueAddress;
     this.venueUrl = data.venueUrl;
     this.hostPermissionRequired = data.hostPermissionRequired ?? false;
+    this.discoverable = data.discoverable ?? true;
     this.capacity = data.capacity;
     this.isActive = data.isActive ?? true;
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();

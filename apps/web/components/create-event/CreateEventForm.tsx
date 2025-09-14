@@ -33,6 +33,7 @@ const CreateEventForm = () => {
       venueType: VenueType.Physical,
       location: '',
       hostPermissionRequired: false,
+      discoverable: true,
       fromTime: '17:00',
       fromDate: allowedDate,
       toTime: '18:00',
@@ -64,6 +65,7 @@ const CreateEventForm = () => {
       venueType,
       locationMapUrl,
       hostPermissionRequired,
+      discoverable,
       capacity,
       location,
       fromTime,
@@ -87,6 +89,7 @@ const CreateEventForm = () => {
             ? locationMapUrl
             : undefined,
       hostPermissionRequired,
+      discoverable,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
       endTime: combineDateAndTime(toDate, toTime),

@@ -254,6 +254,15 @@ const EventForm = ({
             label="Required Approval"
             description="Needs host permission to join event"
           />
+          <FormSwitch
+            control={control}
+            name="discoverable"
+            className="!mt-1 data-[state=checked]:bg-[linear-gradient(188deg,#AC6AFF_53.34%,#DF7364_116.65%)]"
+            thumbClassName="bg-white"
+            containerClassName="flex flex-row justify-between items-start gap-3"
+            label="Public Event"
+            description="Event will be displayed on Discover page."
+          />
           <FormSelectInput
             control={control}
             label="Capacity"

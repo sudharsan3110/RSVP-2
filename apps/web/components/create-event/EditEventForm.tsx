@@ -39,6 +39,7 @@ const EditEventForm = () => {
       venueType,
       locationMapUrl,
       hostPermissionRequired,
+      discoverable,
       capacity,
       location,
       fromTime,
@@ -73,6 +74,7 @@ const EditEventForm = () => {
             ? locationMapUrl
             : undefined,
       hostPermissionRequired,
+      discoverable,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
       endTime: combineDateAndTime(toDate, toTime),
@@ -91,6 +93,7 @@ const EditEventForm = () => {
     location: event?.venueAddress ?? event?.venueUrl ?? '',
     locationMapUrl: event?.venueUrl ?? undefined,
     hostPermissionRequired: event?.hostPermissionRequired ?? false,
+    discoverable: event?.discoverable ?? false,
     fromTime: dayjs(event?.startTime).format('HH:mm'),
     fromDate: event?.startTime ?? allowedDate,
     toTime: dayjs(event?.endTime).format('HH:mm'),
