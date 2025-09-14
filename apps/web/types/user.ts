@@ -1,5 +1,6 @@
 import { userAvatarOptions } from '@/utils/constants';
 
+export type SocialPlatform = 'PERSONAL_WEBSITE' | 'INSTAGRAM' | 'TWITTER';
 export class User {
   id: string;
   primaryEmail: string;

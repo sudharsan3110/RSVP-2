@@ -11,6 +11,7 @@ import {
   HTTP_NOT_FOUND,
   HTTP_UNAUTHORIZED,
   HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_SERVER_ERROR,
 } from '@/utils/testConstants';
 import logger from '@/utils/logger';
 
@@ -104,6 +105,59 @@ beforeEach(() => {
 });
 
 describe('User Router Endpoints', () => {
+  describe(`GET /users/:username (findByUserName)`, () => {
+    const mockUser = {
+      id: 'user-123',
+      userName: 'johndoe',
+      fullName: 'John Doe',
+      bio: 'Software Developer',
+      location: 'New York',
+      socialLinks: [
+        { type: 'INSTAGRAM', handle: 'johndoe' },
+        { type: 'PERSONAL_WEBSITE', handle: 'johndoe.com' },
+      ],
+    };
+    const USERNAME_ENDPOINT = '/user/johndoe';
+    it('should return user details when a valid username is provided', async () => {
+      vi.spyOn(Users as any, 'findByUserName').mockResolvedValue(mockUser);
+      const res = await request(app).get(USERNAME_ENDPOINT);
+      expect(res.status).toBe(HTTP_OK);
+      expect(res.body).toHaveProperty('username', mockUser);
+    });
+
+    it('should return 404 when user is not found', async () => {
+      vi.spyOn(Users as any, 'findByUserName').mockResolvedValue(null);
+      const res = await request(app).get(`/user/nonexistentuser`);
+      expect(res.status).toBe(HTTP_NOT_FOUND);
+      expect(res.body).toHaveProperty('message', 'User not found');
+    });
+
+    it('should return user details without authentication (as a public route)', async () => {
+      const appNoAuth = express();
+      appNoAuth.use(express.json());
+
+      appNoAuth.use((_req: Request, res: Response, _next: NextFunction) => {
+        return res.status(HTTP_UNAUTHORIZED).json({ message: 'Invalid or expired token' });
+      });
+      appNoAuth.use('/users', userRouter);
+      vi.spyOn(Users as any, 'findByUserName').mockResolvedValue(mockUser);
+
+      const res = await request(appNoAuth).get(USERNAME_ENDPOINT);
+
+      expect(res.status).toBe(HTTP_OK);
+      expect(res.body).toHaveProperty('username', mockUser);
+    });
+
+    it('should return 500 when database error occurs', async () => {
+      vi.spyOn(Users as any, 'findByUserName').mockRejectedValue(new Error('Database error'));
+
+      const res = await request(app).get(USERNAME_ENDPOINT);
+
+      expect(res.status).toBe(HTTP_INTERNAL_SERVER_ERROR);
+      expect(res.body).toHaveProperty('message', 'Internal server error');
+    });
+  });
+
   describe('POST /users/profile', () => {
     const ENDPOINT_UPDATE_PROFILE = '/users/profile';
 

@@ -31,8 +31,19 @@ export class UserRepository {
   static async findByUserName(userName: string) {
     const user = await prisma.user.findUnique({
       where: { userName, isDeleted: false },
-      include: {
-        socialLinks: true,
+      select: {
+        socialLinks: {
+          select: {
+            handle: true,
+            type: true,
+          },
+        },
+        bio: true,
+        createdAt: true,
+        fullName: true,
+        location: true,
+        userName: true,
+        profileIcon: true,
       },
     });
     return user;
