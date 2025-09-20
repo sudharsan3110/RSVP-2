@@ -173,6 +173,11 @@ export const eventAPI = {
     return response.data.data.map((event: Event) => new Event(event));
   },
 
+  getEventImageSignedUrl: async (filename: string): Promise<string> => {
+    const { data } = await api.get('/event/upload-image', { params: { filename } });
+    return data.data.signedUrl as string;
+  },
+
   /* Cohost API */
   getEventCohosts: async (eventId: string): Promise<Cohost[]> => {
     const { data } = await api.get(`/cohosts/events/${eventId}`);

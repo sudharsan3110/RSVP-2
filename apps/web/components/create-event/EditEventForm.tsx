@@ -64,7 +64,7 @@ const EditEventForm = () => {
       category,
       richtextDescription: description,
       plaintextDescription,
-      eventImageUrl: eventImageUrl.url ?? '',
+      eventImageUrl: eventImageUrl ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
       venueUrl:
@@ -99,12 +99,7 @@ const EditEventForm = () => {
     toTime: dayjs(event?.endTime).format('HH:mm'),
     toDate: event?.endTime ?? allowedDate,
     capacity: event?.capacity ?? 0,
-    eventImageUrl: {
-      signedUrl: '',
-      file: event?.eventImageUrl ?? '',
-      url: event?.eventImageUrl ?? '',
-      type: '',
-    },
+    eventImageUrl: event?.eventImageUrl ?? '',
   };
 
   if (isLoading) {

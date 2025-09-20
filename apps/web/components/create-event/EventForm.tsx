@@ -22,7 +22,6 @@ import EventPreview from './EventPreview';
 import FormSelectInput from '../common/form/FormSelectInput';
 import SigninDialog from '../auth/SigninDialog';
 import { useEffect, useState } from 'react';
-
 const EventForm = ({
   defaultValues,
   isEditing = false,
@@ -55,6 +54,8 @@ const EventForm = ({
     });
     return () => subscription.unsubscribe();
   }, [watch, setPersistentValue]);
+
+  const image = watch('eventImageUrl');
 
   useEffect(() => {
     const subscription = watch((values, { name }) => {
@@ -105,8 +106,8 @@ const EventForm = ({
           <FormImageUpload
             control={control}
             name="eventImageUrl"
-            className="lg:hidden"
             label="Event Image"
+            labelClassName={image ? 'lg:hidden' : ''}
           />
           <FormInput label="Event Name" name="name" control={control} isRequired />
           <FormCombobox
@@ -276,6 +277,7 @@ const EventForm = ({
             emptyMessage="No options found"
             disabled={false}
           />
+
           <Drawer>
             <DrawerTrigger asChild className="lg:hidden">
               <Button className="h-[44px] px-4 text-white" variant="tertiary">

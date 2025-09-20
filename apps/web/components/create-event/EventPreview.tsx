@@ -5,7 +5,6 @@ import { X } from 'lucide-react';
 import { ReactNode } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '../ui/button';
-import ImageUploadDialog from './ImageUploadDialog';
 
 type EventPreviewProps = {
   className?: string;
@@ -16,30 +15,21 @@ type EventPreviewProps = {
 const EventPreview = ({ className, children, venueType }: EventPreviewProps) => {
   const { watch, setValue } = useFormContext<CreateEventFormType>();
   const image = watch('eventImageUrl');
-
   const removeImage = () => {
-    setValue(
-      'eventImageUrl',
-      {
-        signedUrl: '',
-        file: '',
-        url: '',
-      },
-      { shouldDirty: true, shouldTouch: true }
-    );
+    setValue('eventImageUrl', '', { shouldDirty: true, shouldTouch: true });
   };
 
   return (
     <section className={className}>
-      {image.url && (
+      {image && (
         <figure className="relative mx-auto mb-4 w-full max-w-3xl aspect-square">
           <div className="relative w-full h-full overflow-hidden rounded-lg">
             <div
               className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
-              style={{ backgroundImage: `url(${image.url})` }}
+              style={{ backgroundImage: `url(${image})` }}
             />
             <img
-              src={image.url}
+              src={image}
               alt="Event Image"
               className="relative z-10 mx-auto h-full object-contain"
             />
@@ -82,13 +72,6 @@ const EventPreview = ({ className, children, venueType }: EventPreviewProps) => 
           <span className="ml-1 font-medium">{watch('toTime') || '-'}</span>
         </div>
       </section>
-      {!image.url && (
-        <ImageUploadDialog>
-          <Button type="button" variant="secondary" radius="sm" className="mt-4 w-full">
-            Add Image
-          </Button>
-        </ImageUploadDialog>
-      )}
     </section>
   );
 };

@@ -50,12 +50,7 @@ export const createEventFormSchema = z
       .int()
       .positive()
       .min(1, { message: 'Capacity should be at least 1' }),
-    eventImageUrl: z.object({
-      file: z.string().nullable(),
-      url: z.string().nullable(),
-      signedUrl: z.string().nullable(),
-      type: z.string().nullable().optional(),
-    }),
+    eventImageUrl: z.string().url().nullable(),
     fromDateTime: z.string().optional(),
     toDateTime: z.string().optional(),
   })
@@ -85,7 +80,7 @@ export const createEventFormSchema = z
     const toDateTime = combineDateAndTime(data.toDate, data.toTime);
     const now = new Date();
 
-    const image = data.eventImageUrl.file || data.eventImageUrl.url;
+    const image = data.eventImageUrl;
     if (!image) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

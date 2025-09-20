@@ -48,10 +48,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
         <div className="relative mx-auto h-[300px] w-full object-cover sm:h-[350px] sm:w-[600px] md:h-[400px] md:w-[800px] lg:h-[600px] lg:w-[970px]">
           <figure className="relative h-full w-full">
             <div className="relative w-full h-full overflow-hidden rounded-lg">
-              <div
-                className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
-                style={{ backgroundImage: `url(${event?.eventImageUrl})` }}
-              />
+              <div className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105" />
               <Image
                 src={event.eventImageUrl}
                 width={1920}

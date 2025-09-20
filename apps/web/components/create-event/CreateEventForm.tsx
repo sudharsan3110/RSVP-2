@@ -39,12 +39,7 @@ const CreateEventForm = () => {
       toTime: '18:00',
       toDate: allowedDate,
       capacity: 20,
-      eventImageUrl: {
-        signedUrl: '',
-        file: '',
-        url: '',
-        type: '',
-      },
+      eventImageUrl: '',
     };
   }, []);
   const { data: user } = useCurrentUser();
@@ -79,7 +74,7 @@ const CreateEventForm = () => {
       category,
       richtextDescription: description,
       plaintextDescription,
-      eventImageUrl: eventImageUrl.url ?? '',
+      eventImageUrl: eventImageUrl ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
       venueUrl:

@@ -1,6 +1,6 @@
 import { Attendee } from '@/types/attendee';
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -298,6 +298,31 @@ export const usePopularEvents = (limit?: number) => {
   return useQuery({
     queryKey: ['popular-events', limit],
     queryFn: () => eventAPI.getPopularEvents(limit),
+  });
+};
+
+export const useUploadEventImage = () => {
+  return useMutation<
+    { actualUrl: string },
+    AxiosError<ErrorResponse>,
+    { file: File; onProgress?: (progress: number) => void }
+  >({
+    mutationFn: async ({ file, onProgress }) => {
+      const signedUrl = await eventAPI.getEventImageSignedUrl(file.name);
+
+      await axios.put(signedUrl, file, {
+        headers: { 'Content-Type': file.type },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(progress);
+          }
+        },
+      });
+
+      const actualUrl = signedUrl.split('?')[0];
+      return { actualUrl };
+    },
   });
 };
 
