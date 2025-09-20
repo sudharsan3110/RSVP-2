@@ -2,7 +2,7 @@ import config from '@/config/config';
 import { JwtPayload, sign, verify } from 'jsonwebtoken';
 
 export const generateAccessToken = (payload: JwtPayload): string => {
-  return sign(payload, config.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+  return sign(payload, config.ACCESS_TOKEN_SECRET, { expiresIn: '10m' });
 };
 
 export const generateRefreshToken = (payload: JwtPayload): string => {

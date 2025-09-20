@@ -191,7 +191,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
               alt="verify-email icon"
             />
             <p className="mt-6 text-3xl font-semibold">Check your email!</p>
-            <p className="mt-3 text-center">{`We've just sent an email to you at ${email}. Click to verify.`}</p>
+            <p className="mt-3 text-center">{`We've just sent an email to you at ${email}. Click to verify. The verification link will expire in 10 minutes.`}</p>
             <Button
               className="mt-10 w-full bg-primary px-4 py-[10px] font-semibold text-white"
               disabled={isResendDisabled}
