@@ -163,8 +163,21 @@ export const getUserUpcomingEventController = controller(
       ...filters,
     });
 
+    const hostedEvents = await EventRepository.getEventByCreatorId({
+      creatorId: userId,
+      ...filters,
+    });
+
+    const mergedEvents = [...registeredEvents.events, ...hostedEvents].sort((a, b) => {
+      if (filters.startDate) {
+        return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+      } else {
+        return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+      }
+    });
+
     const data = {
-      events: registeredEvents.events,
+      events: mergedEvents,
       metadata: registeredEvents.metadata,
     };
     return new SuccessResponse('Registered events retrieved successfully', data).send(res);

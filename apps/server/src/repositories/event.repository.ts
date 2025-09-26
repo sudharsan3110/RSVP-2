@@ -351,4 +351,42 @@ export class EventRepository {
       data: { isDeleted: true, isActive: false },
     });
   }
+
+  /**
+   * Fetches the events by creator id.
+   * The unique ID of the event.
+   * @param creatorId - The unique ID of the creator.
+   * @param startDate - Events hosted after this date.
+   * @param endDate - Event hosted before this date.
+   * @returns Array of events hosted by user based on filters..
+   */
+  static async getEventByCreatorId({
+    creatorId,
+    startDate,
+    endDate,
+  }: {
+    creatorId: string;
+    startDate?: Date;
+    endDate?: Date;
+  }) {
+    const whereClause: Prisma.EventWhereInput = {
+      creatorId,
+    };
+
+    if (startDate) {
+      whereClause.startTime = {
+        gte: startDate,
+      };
+    }
+
+    if (endDate) {
+      whereClause.endTime = {
+        lt: endDate,
+      };
+    }
+
+    return await prisma.event.findMany({
+      where: whereClause,
+    });
+  }
 }
