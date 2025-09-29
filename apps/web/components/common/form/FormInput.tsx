@@ -46,6 +46,11 @@ function FormInput<
                 className={cn('rounded-[6px] bg-dark-900 text-white', inputClassName)}
                 {...props}
                 {...field}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
           </FormControl>
