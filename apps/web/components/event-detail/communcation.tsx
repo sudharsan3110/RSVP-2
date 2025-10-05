@@ -25,6 +25,7 @@ interface CommunicationMessage {
   content: string;
   time: string;
   updatedAt: string;
+  createdAt: string;
 }
 
 interface CommunicationsData {
@@ -33,6 +34,10 @@ interface CommunicationsData {
 
 const Communication = ({ event, totalAttendees }: CommunicationProps) => {
   const { data: communicationsData, isLoading } = useEventCommunications(event.id);
+
+  const messages = Array.isArray(communicationsData)
+    ? communicationsData
+    : communicationsData?.data || [];
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -170,7 +175,7 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-semibold">Messages</h4>
           <Badge variant="secondary" className="text-xs">
-            {communicationsData?.data?.length || 0} messages
+            {messages.length} messages
           </Badge>
         </div>
 
@@ -180,46 +185,47 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
           </div>
         )}
 
-        {communicationsData?.data?.length > 0 && !isLoading ? (
+        {messages.length > 0 && !isLoading ? (
           <div className="space-y-4 max-w-3xl">
-            {(communicationsData as CommunicationsData)?.data?.map(
-              (msg: CommunicationMessage, index: number) => (
-                <Card
-                  key={index}
-                  className="bg-dark-800 border-dark-600 hover:bg-dark-700 transition-colors"
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={getProfilePictureUrl(msg.user?.profileIcon ?? 1)}
-                          alt={msg.user?.fullName}
-                        />
-                        <AvatarFallback>{msg.user?.fullName.charAt(0)}</AvatarFallback>
-                      </Avatar>
+            {messages.map((msg: CommunicationMessage, index: number) => (
+              <Card
+                key={index}
+                className="bg-dark-800 border-dark-600 hover:bg-dark-700 transition-colors"
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={getProfilePictureUrl(msg.user?.profileIcon ?? 1)}
+                        alt={msg.user?.fullName || 'User'}
+                      />
+                      <AvatarFallback>{msg.user?.fullName?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
 
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-semibold text-white">{msg.user?.fullName}</span>
-                          </div>
-                          <div className="text-xs text-secondary">
-                            {formatDate(msg.updatedAt)} at {formatTime(msg.updatedAt)}
-                          </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-white">
+                            {msg.user?.fullName || 'Unknown User'}
+                          </span>
                         </div>
-
-                        <div
-                          className="prose prose-invert text-white max-w-none"
-                          dangerouslySetInnerHTML={{
-                            __html: msg.content,
-                          }}
-                        />
+                        <div className="text-xs text-secondary">
+                          {formatDate(msg.updatedAt || msg.createdAt)} at{' '}
+                          {formatTime(msg.updatedAt || msg.createdAt)}
+                        </div>
                       </div>
+
+                      <div
+                        className="prose prose-invert text-white max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: msg.content,
+                        }}
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ) : (
           <Card className="bg-dark-900 border-dark-700">
