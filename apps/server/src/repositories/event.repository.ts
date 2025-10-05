@@ -387,6 +387,14 @@ export class EventRepository {
 
     return await prisma.event.findMany({
       where: whereClause,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
   }
 }

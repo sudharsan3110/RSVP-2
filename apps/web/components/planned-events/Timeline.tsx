@@ -57,7 +57,7 @@ const Timeline = ({ events }: { events?: Event[] }) => {
                       <div className="flex flex-col gap-2">
                         <CardHeader className="flex flex-col items-start justify-between space-y-1.5 border-b-0 py-0 pl-0">
                           <Badge variant="outline" className="text-sm -ml-0.5 mb-1 font-medium">
-                            {event.category}
+                            {event.category?.name}
                           </Badge>
                           <CardTitle className="text-xl font-bold leading-[25.2px] mb-1 tracking-tight">
                             {event.name}

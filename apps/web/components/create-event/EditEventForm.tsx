@@ -86,7 +86,7 @@ const EditEventForm = () => {
 
   const defaultValues: CreateEventFormType = {
     name: event?.name ?? '',
-    category: event?.category ?? '',
+    category: event?.category?.name ?? '',
     description: event?.description ?? '',
     plaintextDescription: '',
     venueType: event?.venueType ?? VenueType.Physical,

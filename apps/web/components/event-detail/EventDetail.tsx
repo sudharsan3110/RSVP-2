@@ -64,7 +64,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
       <article className="my-6 flex flex-col items-start md:my-12">
         {event.category ? (
           <Badge className="mb-4 text-sm font-medium tracking-wide capitalize text-white">
-            {event?.category}
+            {event?.category?.name}
           </Badge>
         ) : null}
         <p className="text-2xl font-bold md:text-4xl">{event?.name}</p>

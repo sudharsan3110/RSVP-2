@@ -78,7 +78,7 @@ export const TEST_EVENT: Event = new Event({
   startTime: TEST_EVENT_DATES.startTime,
   endTime: TEST_EVENT_DATES.endTime,
   eventDate: TEST_EVENT_DATES.eventDate,
-  category: 'Technology',
+  category: { id: '1', name: 'Technology' },
   eventImageUrl: '/images/tech-conf.jpg',
   venueType: VenueType.Physical,
   venueAddress: 'Tech Hub',

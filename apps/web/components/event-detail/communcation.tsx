@@ -93,7 +93,7 @@ const Communication = ({ event, totalAttendees }: CommunicationProps) => {
               <div className="p-6">
                 {event.category && (
                   <Badge className="mb-2 text-xs font-medium tracking-wide capitalize text-white">
-                    {event.category}
+                    {event?.category?.name}
                   </Badge>
                 )}
                 <h4 className="font-semibold text-white text-lg mb-3">{event.name}</h4>

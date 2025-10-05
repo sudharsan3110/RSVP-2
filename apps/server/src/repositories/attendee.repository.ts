@@ -139,7 +139,11 @@ export class AttendeeRepository {
     const attendees = await prisma.attendee.findMany({
       where: whereClause,
       include: {
-        event: true,
+        event: {
+          include: {
+            category: { select: { id: true, name: true } },
+          },
+        },
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -153,7 +157,7 @@ export class AttendeeRepository {
     const totalCount = await prisma.attendee.count({ where: whereClause });
 
     return {
-      events: attendees.map((attendee) => attendee.event),
+      events: attendees.map((attendee) => ({ ...attendee.event })),
       metadata: {
         totalItems: totalCount,
         totalPages: Math.ceil(totalCount / limit),

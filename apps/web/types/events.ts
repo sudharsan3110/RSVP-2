@@ -11,7 +11,10 @@ export class Event {
   creatorId: string;
   name: string;
   slug: string;
-  category?: string;
+  category?: {
+    id: string;
+    name: string;
+  };
   startTime: Date;
   endTime: Date;
   eventDate: Date;
