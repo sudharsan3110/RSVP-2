@@ -1,0 +1,13 @@
+{
+  "buildCommand": "cd apps/help-center && npm run build",
+  "outputDirectory": "apps/help-center/dist",
+  "framework": "astro",
+  "rewrites": [
+    {
+      "source": "/blog/:path*",
+      "destination": "/blog/:path*/index.html"
+    }
+  ],
+  "trailingSlash": false,
+  "cleanUrls": true
+}

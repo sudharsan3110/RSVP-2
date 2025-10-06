@@ -4,7 +4,10 @@ import tailwind from "@astrojs/tailwind";
 import pagefind from "astro-pagefind";
 
 export default defineConfig({
-  build: { format: "file" },
+  build: { 
+    format: "directory",
+    assets: "_astro"
+  },
   markdown: {
     shikiConfig: {
       theme: "dracula",
