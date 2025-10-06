@@ -3,6 +3,7 @@ import { authRouter } from './auth.routes';
 import { userRouter } from './users.routes';
 import { eventRouter } from './event.routes';
 import { cohostRouter } from './cohost.routes';
+import { stateRouter } from '../state.routes';
 import { socialLinksRouter } from './socialLinks.routes';
 import { countryRouter } from './country.routes';
 
@@ -12,6 +13,7 @@ router.use('/auth', authRouter);
 router.use('/users', userRouter);
 router.use('/event', eventRouter);
 router.use('/cohosts', cohostRouter);
+router.use('/states', stateRouter);
 router.use('/countries', countryRouter);
 router.use('/socials', socialLinksRouter);
 
