@@ -2,6 +2,118 @@ import Changelog from '@/types/changelog';
 
 export const changelogs: Changelog[] = [
   {
+    releaseDate: new Date('2025-10-07'),
+    bannerImageUrl: '/images/version/0.2.0.png',
+    version: '0.3.0',
+    contributors: [
+      'azeemuddinaziz',
+      'Pratiyushkumar',
+      'Soumava-221B',
+      'aashishdubey1',
+      'sudharsan3110',
+      'Ayushsanjdev',
+      'hassanrahim26',
+      'anupkgurung',
+      'rituraj-OO7',
+      'Himanshu-Dhawale',
+    ],
+    sections: [
+      {
+        title: 'Features',
+        items: [
+          {
+            summary:
+              'Implemented a toggle to designate events as private, restricting access exclusively to shared links.',
+            contributors: ['azeemuddinaziz'],
+          },
+          {
+            summary:
+              'Introduced image cropping functionality during upload to enhance control and presentation.',
+            contributors: ['sudharsan3110'],
+          },
+          {
+            summary:
+              'Added comprehensive support for SocialLinks and Categories, including new APIs and validation, to strengthen data integrity.',
+            contributors: ['anupkgurung', 'azeemuddinaziz'],
+          },
+        ],
+      },
+      {
+        title: 'Enhancements',
+        items: [
+          {
+            summary:
+              'Made host profiles publicly accessible and refined underlying logic to improve user experience.',
+            contributors: ['Ayushsanjdev'],
+          },
+          {
+            summary:
+              'Integrated Google Calendar and iCal support for registered events via both the application and email notifications.',
+            contributors: ['surajmaity1'],
+          },
+          {
+            summary:
+              'Implemented attendee notifications for major event updates, including venue, date, and time, accompanied by enhanced email templates.',
+            contributors: ['Pratiyushkumar'],
+          },
+          {
+            summary:
+              'Configured events to automatically set the end time one hour subsequent to the start time, streamlining event creation.',
+            contributors: ['hassanrahim26'],
+          },
+          {
+            summary: 'Published updated RSVP blog content to provide guidance on the RSVP process.',
+            contributors: ['sudharsan3110'],
+          },
+          {
+            summary:
+              'Added functionality to remove uploaded event images during creation or editing.',
+            contributors: ['Soumava-221B'],
+          },
+        ],
+      },
+      {
+        title: 'Bug Fixes',
+        items: [
+          {
+            summary:
+              'Resolved login issues arising from primary email uniqueness constraints following account deactivation.',
+            contributors: ['aashishdubey1'],
+          },
+          {
+            summary:
+              'Corrected multiple issues, including image removal upon pressing the Enter key, avatar name retrieval errors, Map Link validation, and event creation on the current date.',
+            contributors: ['Soumava-221B'],
+          },
+          {
+            summary:
+              'Fixed an issue preventing hosts from viewing their events within the Upcoming tab.',
+            contributors: ['rituraj-OO7'],
+          },
+          {
+            summary: 'Ensured Magic Links expire accurately after the designated validity period.',
+            contributors: ['hassanrahim26'],
+          },
+          {
+            summary: 'Restored the previously missing Category field during event creation.',
+            contributors: ['rituraj-OO7', 'Himanshu-Dhawale'],
+          },
+          {
+            summary:
+              'Updated image URL handling and resolved rendering inconsistencies across all pages.',
+            contributors: ['sudharsan3110'],
+          },
+          {
+            summary: 'Resolved invalid date errors triggered by selecting the same date twice.',
+            contributors: ['Ayushsanjdev'],
+          },
+        ],
+      },
+    ],
+    improvements: [],
+    bugFixes: [],
+  },
+  {
     releaseDate: new Date('2025-08-06'),
     bannerImageUrl: '/images/version/0.2.0.png',
     version: '0.2.0',
