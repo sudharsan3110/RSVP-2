@@ -4,9 +4,8 @@ import tailwind from "@astrojs/tailwind";
 import pagefind from "astro-pagefind";
 
 export default defineConfig({
-  build: { 
+  build: {
     format: "directory",
-    assets: "_astro"
   },
   markdown: {
     shikiConfig: {
