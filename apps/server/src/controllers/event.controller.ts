@@ -40,6 +40,7 @@ import {
   verifyQrSchema,
 } from '@/validations/event.validation';
 import { Attendee, AttendeeStatus, Prisma, VenueType } from '@prisma/client';
+import { CalendarEvent, google, ics, outlook } from 'calendar-link';
 import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
 
@@ -463,6 +464,15 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
   const newAttendee = await AttendeeRepository.create(attendeeData);
   const url = `${config.CLIENT_URL}/ticket/${newAttendee.eventId}`;
 
+  const calendarEvent: CalendarEvent = {
+    uid: event.id,
+    title: event.name,
+    description: event.description || '',
+    start: event.startTime,
+    end: event.endTime,
+    location: event.venueUrl || '',
+  };
+
   const emailData = {
     id: 5,
     subject: 'Ticket Confirmed',
@@ -472,6 +482,9 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
       name: user.fullName ?? 'Guest',
       eventName: event.name,
       badgeNumber: newAttendee.qrToken,
+      googleCalendarLink: google(calendarEvent),
+      iCalendarLink: ics(calendarEvent),
+      outlookCalendarLink: outlook(calendarEvent),
     },
   };
   if (config.NODE_ENV !== 'development') {
