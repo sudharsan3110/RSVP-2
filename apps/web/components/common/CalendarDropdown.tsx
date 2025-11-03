@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { useGetEventById } from '@/lib/react-query/event';
+import { CalendarPlus } from 'lucide-react';
 
 export const CalendarDropdown = ({ eventId }: { eventId: string }) => {
   const { data: eventData } = useGetEventById(eventId);
@@ -59,7 +60,7 @@ export const CalendarDropdown = ({ eventId }: { eventId: string }) => {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger>
-        <Button className="w-full rounded-full px-4 py-2">Add to Calendar</Button>
+        <CalendarPlus className="w-12 h-12 bg-primary rounded-xl p-2 text-white transition-colors hover:text-black" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-56 rounded-lg"

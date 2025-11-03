@@ -158,23 +158,25 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
         </section>
 
         <section className="w-full md:w-[481px]">
-          <section className="w-full rounded-lg bg-dark-900 p-6 shadow-lg md:w-[481px]">
+          <section className="w-full flex flex-col  rounded-lg h-48 bg-dark-900 p-6 shadow-lg md:w-[481px]">
             {!event?.isActive ? (
               <p className="text-red-500">Event has been cancelled</p>
             ) : (
               <>
                 <h2 className="text-xl font-bold">Registration</h2>
-                <p className="mt-2 font-semibold">
-                  {remainingSeats > 0
-                    ? `${remainingSeats} Seats are Remaining.`
-                    : 'No Seats Remaining.'}
-                </p>
-                {totalAttendees > 0 && (
-                  <div className="flex items-center pb-2 pt-4">
-                    <AvatarGroup additionalCount={additionalCount} limit={userAvatarLimit} />
-                    <p className="ml-3 text-sm font-semibold">{totalAttendees} going</p>
-                  </div>
-                )}
+                <div className="flex flex-row items-center justify-between">
+                  <p className="mt-5 font-semibold">
+                    {remainingSeats > 0
+                      ? `${remainingSeats} Seats are Remaining.`
+                      : 'No Seats Remaining.'}
+                  </p>
+                  {totalAttendees > 0 && (
+                    <div className="flex items-center pb-2 pt-4">
+                      <AvatarGroup additionalCount={additionalCount} limit={userAvatarLimit} />
+                      <p className="ml-3 text-sm font-semibold">{totalAttendees} going</p>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             {/* {event?.hostPermissionRequired && (

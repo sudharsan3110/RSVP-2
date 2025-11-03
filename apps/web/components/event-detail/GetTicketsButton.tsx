@@ -11,7 +11,7 @@ import SigninDialog from '../auth/SigninDialog';
 import { Button } from '../ui/button';
 import { Cohost } from '@/types/cohost';
 import { checkIfUserIsNotCohost, isCurrentUserCohost } from '@/utils/event';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, TicketCheck, MessageCircleMore, X } from 'lucide-react';
 import { CalendarDropdown } from '../common/CalendarDropdown';
 
 type GetTicketsButtonProps = {
@@ -100,23 +100,21 @@ const GetTicketsButton = ({
     attendeeData?.allowedStatus
   ) {
     return (
-      <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full mt-4 flex-row items-center justify-around gap-4">
         <Link href={`${eventSlug}/communication`}>
-          <Button className="mt-4 w-full rounded-full px-4 py-2">Updates</Button>
+          <MessageCircleMore className="w-12 h-12 bg-primary rounded-xl p-2 text-white transition-colors hover:text-black" />
         </Link>
         <CalendarDropdown eventId={eventId} />
         <Link href={`/ticket/${eventId}`}>
-          <Button variant="subtle" className="w-full rounded-full px-4 py-2">
-            Show Tickets
-          </Button>
+          <TicketCheck className="w-12 h-12 bg-primary rounded-xl p-2 text-white transition-colors hover:text-black" />
         </Link>
         <Button
           variant={isCancelling ? 'subtle' : 'destructive'}
-          className="w-full rounded-full px-4 py-2"
+          className="w-[50px] h-[50px] rounded-xl"
           onClick={handleCancelRegistration}
           disabled={isCancelling}
         >
-          {isCancelling ? <LoaderCircle className="animate-spin" /> : <>Cancel Registration</>}
+          {isCancelling ? <LoaderCircle className="animate-spin" /> : <X />}
         </Button>
       </div>
     );
@@ -137,7 +135,7 @@ const GetTicketsButton = ({
   return (
     <Button
       variant={createAttendeeLoading ? 'subtle' : 'default'}
-      className="mt-4 w-full rounded-full px-4 py-2"
+      className="mt-4 w-full rounded-full px-4 py-2 h-[50px]"
       onClick={handleGetTickets}
       disabled={createAttendeeLoading}
     >

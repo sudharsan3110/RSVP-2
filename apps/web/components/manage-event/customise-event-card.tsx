@@ -11,7 +11,15 @@ import { useCurrentUser } from '@/lib/react-query/auth';
 import { formatDateTime } from '@/lib/utils';
 import { Event } from '@/types/events';
 import { isCurrentUserCohost, venueDisplay } from '@/utils/event';
-import { CalendarIcon, Check, ClockIcon, LinkIcon, MapPinIcon } from 'lucide-react';
+import {
+  CalendarIcon,
+  Check,
+  ClockIcon,
+  LinkIcon,
+  MapPinIcon,
+  PencilIcon,
+  Share2,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
@@ -144,20 +152,26 @@ const CustomiseEventCard = ({ className, event, isSuccess }: CustomiseEventCarDP
         {!isCohost && (
           <Link href={`/events/${id}/edit`} className="w-full sm:flex-1">
             <Button className="w-full sm:flex-1" radius="sm" variant="tertiary">
-              Edit Event
+              <div className="flex flex-row item-center gap-3 ">
+                <PencilIcon />
+                <div>Edit Event</div>{' '}
+              </div>
             </Button>
           </Link>
         )}
         <Button className="w-full sm:flex-1" radius="sm" variant="tertiary" onClick={handleShare}>
           {showCopied ? (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-3">
               <div className="flex items-center justify-center rounded-md bg-purple-500/20 p-1">
                 <Check className="size-3.5 text-primary" />
               </div>
               <span>Link Copied</span>
             </div>
           ) : (
-            'Share Event'
+            <div className="flex flex-row item-center gap-3 ">
+              <Share2 />
+              <div>Share Event</div>{' '}
+            </div>
           )}
         </Button>
       </CardFooter>
