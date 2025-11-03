@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/components/common/Icon';
 import Container from '@/components/common/Container';
 import { useUserDetailsByUsername } from '@/lib/react-query/user';
-import { userAvatarOptions } from '@/utils/constants';
+import { userAvatarOptions, INVALID_DATE } from '@/utils/constants';
 import { SocialPlatform } from '@/types/user';
 import { getIcon, getSocialLink } from '@/utils/user';
 
@@ -25,9 +25,11 @@ const Page = () => {
     return profileUrl?.src ?? userAvatarOptions[0]?.src;
   }, [userDetails?.data?.data.profileIcon]);
 
-  const date_string = userDetails?.data?.data.created_at;
-  const date_object = dayjs(date_string);
-  const formatted_date = date_object.format('dddd, MMMM DD');
+  const date_string = userDetails?.data?.data.createdAt;
+  const formatted_date =
+    date_string && dayjs(date_string).isValid()
+      ? dayjs(date_string).format('dddd, MMMM DD')
+      : INVALID_DATE;
 
   return (
     <Container className="container-main py-16">

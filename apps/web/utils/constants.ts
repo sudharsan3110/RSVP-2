@@ -145,3 +145,4 @@ export const VERCEL_AVATAR_BASE_URL = `https://avatar.vercel.sh`;
 
 export const FORM_CACHE_KEY = 'EVENTFORM';
 export const EXPIRY_MINUTES = 20;
+export const INVALID_DATE = 'Invalid Date Format';
