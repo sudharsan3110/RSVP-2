@@ -13,6 +13,7 @@ import { Cohost } from '@/types/cohost';
 import { checkIfUserIsNotCohost, isCurrentUserCohost } from '@/utils/event';
 import { LoaderCircle, TicketCheck, MessageCircleMore, X } from 'lucide-react';
 import { CalendarDropdown } from '../common/CalendarDropdown';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type GetTicketsButtonProps = {
   cohosts?: Cohost[];
@@ -100,22 +101,48 @@ const GetTicketsButton = ({
     attendeeData?.allowedStatus
   ) {
     return (
-      <div className="flex w-full mt-4 flex-row items-center justify-around gap-4">
-        <Link href={`${eventSlug}/communication`}>
-          <MessageCircleMore className="w-12 h-12 bg-primary rounded-xl p-2 text-white transition-colors hover:text-black" />
-        </Link>
-        <CalendarDropdown eventId={eventId} />
-        <Link href={`/ticket/${eventId}`}>
-          <TicketCheck className="w-12 h-12 bg-primary rounded-xl p-2 text-white transition-colors hover:text-black" />
-        </Link>
-        <Button
-          variant={isCancelling ? 'subtle' : 'destructive'}
-          className="w-[50px] h-[50px] rounded-xl"
-          onClick={handleCancelRegistration}
-          disabled={isCancelling}
-        >
-          {isCancelling ? <LoaderCircle className="animate-spin" /> : <X />}
-        </Button>
+      <div className="flex w-full mt-4 px-4 flex-row items-center justify-around gap-2">
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href={`${eventSlug}/communication`}>
+                <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary bg-black text-primary transition-all hover:bg-primary hover:text-white">
+                  <MessageCircleMore className="h-6 w-6" />
+                </div>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Updates</TooltipContent>
+          </Tooltip>
+          <CalendarDropdown eventId={eventId} />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href={`/ticket/${eventId}`}>
+                <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary bg-black text-primary transition-all hover:bg-primary hover:text-white">
+                  <TicketCheck className="h-6 w-6" />
+                </div>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Show Ticket</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isCancelling ? 'subtle' : 'ghost'}
+                className="h-12 w-12 shrink-0 rounded-full border-2 bg-red-500 p-0 hover:bg-red-600"
+                onClick={handleCancelRegistration}
+                disabled={isCancelling}
+              >
+                {isCancelling ? (
+                  <LoaderCircle className="animate-spin text-white" />
+                ) : (
+                  <X className="w-3/4 h-3/4 p-1 text-white stroke-1" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Cancel Registration</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     );
   }
