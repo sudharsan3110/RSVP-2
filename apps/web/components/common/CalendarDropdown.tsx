@@ -63,7 +63,7 @@ export const CalendarDropdown = ({ eventId }: { eventId: string }) => {
       <DropdownMenuTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary bg-black text-primary transition-all hover:bg-primary hover:text-white"> 
+            <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary bg-black text-primary transition-all hover:bg-primary hover:text-white">
               <CalendarPlus className="h-6 w-6 " />
             </div>
           </TooltipTrigger>
