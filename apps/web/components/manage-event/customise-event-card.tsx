@@ -120,7 +120,9 @@ const CustomiseEventCard = ({ className, event, isSuccess }: CustomiseEventCarDP
             <h2 className="line-clamp-2 text-left text-xl font-semibold text-white">
               {event.name}
             </h2>
-            <p className="text-sm text-secondary">Hosted By - {event.creator?.fullName}</p>
+            <p className="text-sm text-secondary">
+              Hosted By - {event.creator?.fullName || event.creator?.userName || 'Unknown Host'}
+            </p>
           </header>
           {renderVenueInfo()}
           <div className="flex gap-3.5 text-sm">

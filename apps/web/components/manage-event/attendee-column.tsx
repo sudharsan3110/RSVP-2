@@ -21,7 +21,9 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
             <AvatarFallback>{guest.user?.fullName?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{guest.user?.fullName}</div>
+            <div className="font-medium">
+              {guest.user?.fullName || guest.user?.userName || 'Unknown Host'}
+            </div>
           </div>
         </div>
       );

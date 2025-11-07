@@ -12,14 +12,15 @@ export const recentRegistrationColumns: ColumnDef<Attendee>[] = [
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => (
-      <div className="flex">
+      <div className="flex items-center">
         <Avatar>
           <AvatarImage src={getProfilePictureUrl(row.original?.user?.profileIcon ?? 0)} />
           <AvatarFallback>{row.original?.user?.initials}</AvatarFallback>
         </Avatar>
         <div className="ml-3">
-          <p className="font-medium text-white">{row.original?.user?.fullName}</p>
-          <p className="text-xs text-foreground">@{row.original?.user?.userName}</p>
+          <div className="font-medium">
+            {row.original?.user?.fullName || row.original?.user?.userName || 'Unknown Host'}
+          </div>
         </div>
       </div>
     ),
