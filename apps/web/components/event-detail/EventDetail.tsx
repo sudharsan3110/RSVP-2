@@ -148,7 +148,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
             <article className="mt-12">
               <h2 className="text-2xl font-bold">About Event</h2>
               <div
-                className="prose prose-invert text-white"
+                className="prose-ol:m-0 prose-li:m-0 prose-p:m-0 prose-h1:m-0 prose-h2:m-0 prose prose-invert text-white"
                 dangerouslySetInnerHTML={{
                   __html: event.description || '<p>Description not available.</p>',
                 }}
