@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "migrate": "prisma migrate dev",
-    "generate": "npx prisma generate",
+    "generate": "prisma generate",
     "typecheck": "tsc --noEmit"
   },
   "jest": {
