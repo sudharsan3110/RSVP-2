@@ -92,6 +92,7 @@ export const TEST_EVENT: Event = new Event({
     fullName: 'Event Creator',
     userName: 'eventcreator',
     profileIcon: 'creator-icon',
+    isDeleted: false,
   },
   cohosts: TEST_COHOSTS,
 });

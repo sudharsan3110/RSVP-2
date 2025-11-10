@@ -36,6 +36,7 @@ export class Event {
     fullName: string;
     userName: string;
     profileIcon: string;
+    isDeleted: boolean;
   };
   cohosts?: Cohost[];
 

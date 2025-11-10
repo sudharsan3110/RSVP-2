@@ -69,6 +69,7 @@ export class EventRepository {
               profileIcon: true,
               fullName: true,
               userName: true,
+              isDeleted: true,
             },
           },
           attendees: {
@@ -103,6 +104,7 @@ export class EventRepository {
             profileIcon: true,
             fullName: true,
             userName: true,
+            isDeleted: true,
           },
         },
         hosts: {
@@ -116,6 +118,7 @@ export class EventRepository {
                 profileIcon: true,
                 fullName: true,
                 userName: true,
+                isDeleted: true,
               },
             },
           },
@@ -207,6 +210,7 @@ export class EventRepository {
             profileIcon: true,
             fullName: true,
             userName: true,
+            isDeleted: true,
           },
         },
         hosts: {
@@ -218,6 +222,7 @@ export class EventRepository {
                 profileIcon: true,
                 fullName: true,
                 userName: true,
+                isDeleted: true,
               },
             },
           },

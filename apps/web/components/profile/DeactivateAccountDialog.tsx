@@ -16,9 +16,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { useDeactivateAccount } from '@/lib/react-query/user';
+import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 interface DeactivateAccountDialogProps {
   userId: string;
+}
+
+interface ErrorResponse {
+  message: string;
+  status: number;
 }
 
 export function DeactivateAccountDialog({ userId }: DeactivateAccountDialogProps) {
@@ -29,6 +36,11 @@ export function DeactivateAccountDialog({ userId }: DeactivateAccountDialogProps
     deactivateAccount(userId, {
       onSuccess: () => {
         setIsOpen(false);
+      },
+      onError: (error: Error) => {
+        const axiosError = error as AxiosError<ErrorResponse>;
+        const errorMessage = axiosError?.response?.data?.message;
+        toast.error(errorMessage);
       },
     });
   };

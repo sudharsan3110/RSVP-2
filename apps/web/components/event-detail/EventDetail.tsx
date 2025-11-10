@@ -9,9 +9,12 @@ import { useEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
 import AvatarGroup from './AvatarGroup';
 import GetTicketsButton from './GetTicketsButton';
+import { useRouter } from 'next/navigation';
+import { userAPI } from '@/lib/axios/user-API';
 import { formatDate } from '@/utils/formatDate';
 
 const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees: number } }) => {
+  const router = useRouter();
   const { event: eventInfo, totalAttendees } = eventData;
   const event = new Event(eventInfo);
   const [formattedStartDate, setFormattedStartDate] = useState('');
@@ -33,6 +36,23 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
   const capacity = event.capacity ?? 0;
 
   const remainingSeats = capacity - totalAttendees;
+
+  const handleUserClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    userName: string | undefined
+  ) => {
+    e.preventDefault();
+
+    if (!userName) return;
+
+    if (event.creator?.userName === userName && event.creator?.isDeleted) {
+      return;
+    }
+
+    router.push(`/user/${userName}`);
+    return;
+  };
+
   return (
     <main>
       <div className="relative w-full overflow-hidden">
@@ -121,28 +141,59 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
           </section>
           <section className="mt-6 p-3 pl-0">
             <p className="font-semibold">Hosted {cohosts > 1 && '& Cohosted'} By</p>
-            {cohosts > 0 &&
-              event?.cohosts?.map((cohost, index) => (
-                <Link
-                  key={index}
-                  href={`/user/${cohost?.user?.userName}`}
-                  className="block mt-3"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <div className="mt-3 flex items-center">
-                    <Image
-                      src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
-                      alt="Host Avatar"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-primary border-2 object-cover"
-                    />
-                    <p className="ml-3 text-sm font-medium capitalize text-secondary">
-                      {cohost.user?.fullName?.toLowerCase() || cohost.user?.userName}
+
+            <div className="mt-3">
+              <Link
+                href={`/user/${event.creator?.userName}`}
+                className={`block mt-3 textDecoration-none`}
+                onClick={(e) => {
+                  handleUserClick(e, event?.creator?.userName);
+                }}
+              >
+                <div className="flex items-center">
+                  <Image
+                    src={getProfilePictureUrl(event?.creator?.profileIcon ?? 1)}
+                    alt="Creator Avatar"
+                    width={48}
+                    height={48}
+                    className="rounded-full border-primary border-2 object-cover"
+                  />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium capitalize">
+                      {event?.creator?.fullName?.toLowerCase() ||
+                        event?.creator?.userName ||
+                        'Deleted User'}
                     </p>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </Link>
+            </div>
+
+            {cohosts > 0 &&
+              event?.cohosts
+                ?.filter((cohost) => cohost.role !== 'CREATOR')
+                .map((cohost, index) => (
+                  <Link
+                    key={index}
+                    href={`/user/${event.creator?.userName}`}
+                    className="block mt-3"
+                    style={{ textDecoration: 'none' }}
+                    onClick={(e) => handleUserClick(e, cohost?.user?.userName)}
+                  >
+                    <div className="mt-3 flex items-center">
+                      <Image
+                        src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
+                        alt="Host Avatar"
+                        width={48}
+                        height={48}
+                        className="rounded-full border-primary border-2 object-cover"
+                      />
+                      <p className="ml-3 text-sm font-medium capitalize text-secondary">
+                        {cohost.user?.fullName?.toLowerCase() || cohost.user?.userName}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
           </section>
           {event.description !== '' ? (
             <article className="mt-12">

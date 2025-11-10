@@ -2,6 +2,7 @@ import { prisma } from '@/utils/connection';
 import { generateUniqueUsername } from '@/utils/function';
 import { generateAccessToken } from '@/utils/jwt';
 import { randomUUID } from 'crypto';
+import { BadRequestError } from '@/utils/apiError';
 
 /**
  * UserRepository class provides methods to interact with the Users table in the database.
@@ -44,6 +45,7 @@ export class UserRepository {
         location: true,
         userName: true,
         profileIcon: true,
+        isDeleted: true,
       },
     });
     return user;
@@ -211,12 +213,26 @@ export class UserRepository {
    * @returns The updated user object.
    */
   static async delete(userId: string) {
-    return await prisma.$transaction(async (tx) => {
-      await tx.event.updateMany({
-        where: { creatorId: userId, isDeleted: false },
-        data: { isDeleted: true, isActive: false },
-      });
+    const currentDate = new Date();
 
+    const upcomingEvents = await prisma.event.findMany({
+      where: {
+        creatorId: userId,
+        startTime: {
+          gte: currentDate,
+        },
+        isDeleted: false,
+        isActive: true,
+      },
+    });
+
+    if (upcomingEvents.length > 0) {
+      throw new BadRequestError(
+        'You have upcoming events. Please cancel them before deleting your account.'
+      );
+    }
+
+    return await prisma.$transaction(async (tx) => {
       await tx.attendee.updateMany({
         where: { userId, isDeleted: false },
         data: { isDeleted: true, status: 'CANCELLED', allowedStatus: false },

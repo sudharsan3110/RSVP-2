@@ -30,9 +30,6 @@ export const useDeactivateAccount = () => {
       router.push('/');
       router.refresh();
     },
-    onError: ({ message }) => {
-      toast.error(message || 'Failed to deactivate account');
-    },
   });
 };
 
