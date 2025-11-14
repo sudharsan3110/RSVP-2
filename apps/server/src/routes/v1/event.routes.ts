@@ -30,6 +30,11 @@ import {
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
 import { HostRole } from '@prisma/client';
+import {
+  addCelebrityController,
+  getCelebritiesByEventIdController,
+  removeCelebrityController,
+} from '@/controllers/celebrity.controller';
 
 const eventRouter: Router = Router();
 
@@ -51,7 +56,7 @@ eventRouter.get('/:eventId', authMiddleware, getEventByIdController);
 eventRouter.patch(
   '/:eventId',
   authMiddleware,
-  eventManageMiddleware([HostRole.CREATOR]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   updateEventController
 );
 
@@ -81,7 +86,7 @@ eventRouter.post('/:eventId/attendees', authMiddleware, createAttendeeController
 eventRouter.get(
   '/:eventId/attendees',
   authMiddleware,
-  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER, HostRole.READ_ONLY]),
   getAttendeeController
 );
 
@@ -125,5 +130,22 @@ eventRouter.patch(
 );
 
 eventRouter.delete('/:eventId/attendee', authMiddleware, deleteAttendeeController);
+
+
+eventRouter.get('/:eventId/celebrities', authMiddleware, getCelebritiesByEventIdController);
+
+eventRouter.post(
+  '/:eventId/celebrities',
+  authMiddleware,
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
+  addCelebrityController
+);
+
+eventRouter.delete(
+  '/:eventId/celebrities/:celebrityId',
+  authMiddleware,
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
+  removeCelebrityController
+);
 
 export { eventRouter };

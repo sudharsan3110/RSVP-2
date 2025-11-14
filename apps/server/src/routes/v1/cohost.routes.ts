@@ -27,7 +27,7 @@ cohostRouter.delete(
 cohostRouter.post(
   '/',
   authMiddleware,
-  eventManageMiddleware([HostRole.CREATOR]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   addEventHostController
 );
 
