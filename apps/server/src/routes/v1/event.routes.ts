@@ -131,7 +131,6 @@ eventRouter.patch(
 
 eventRouter.delete('/:eventId/attendee', authMiddleware, deleteAttendeeController);
 
-
 eventRouter.get('/:eventId/celebrities', authMiddleware, getCelebritiesByEventIdController);
 
 eventRouter.post(
