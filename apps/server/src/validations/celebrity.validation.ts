@@ -15,6 +15,7 @@ export const addCelebritySchema = z.object({
   }),
 });
 
+
 export const removeCelebrityParamsSchema = z.object({
   params: z.object({
     eventId: z.string().uuid(),
