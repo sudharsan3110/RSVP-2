@@ -15,9 +15,6 @@
     "generate": "prisma generate",
     "typecheck": "tsc --noEmit"
   },
-  "jest": {
-    "preset": "@repo/jest-presets/node"
-  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.717.0",
     "@aws-sdk/s3-request-presigner": "^3.722.0",
