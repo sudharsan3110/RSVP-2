@@ -76,8 +76,7 @@ describe('Event Detail Communication', () => {
     expect(screen.getByText('50 attending • 100 capacity')).toBeInTheDocument();
     expect(screen.getByText('50 seats remaining')).toBeInTheDocument();
     expect(screen.getByText('Single host')).toBeInTheDocument();
-    
-    // Check image
+
     const image = screen.getByRole('img', { name: /tech conference/i });
     expect(image).toHaveAttribute('src', 'https://test.com/image.jpg');
   });
@@ -104,10 +103,7 @@ describe('Event Detail Communication', () => {
     });
 
     render(<Communication event={mockEvent} totalAttendees={0} />);
-    
-    // ChatContainer handles loading prop, we can verify it receives it if we update the mock
-    // But since we mocked ChatContainer simply, we might not see loading spinner unless we check props passed to it.
-    // However, the component itself renders regardless of loading, passing isLoading to ChatContainer.
+    // ChatContainer always renders and receives isLoading, even though the mock won't show a spinner.
     expect(screen.getByTestId('chat-container')).toBeInTheDocument();
   });
 
@@ -118,7 +114,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={eventWithCohosts} totalAttendees={10} />);
-    
+
     expect(screen.getByText('2 cohosts')).toBeInTheDocument();
   });
 
@@ -131,15 +127,11 @@ describe('Event Detail Communication', () => {
       isVirtual: true,
     } as unknown as Event;
 
-
-
     render(<Communication event={virtualEvent} totalAttendees={10} />);
-    
+
     const link = screen.getByRole('link', { name: /zoom.us/i });
     expect(link).toHaveAttribute('href', 'https://zoom.us/j/123');
   });
-
-
 
   it('renders event category badge', () => {
     const categoryEvent = {
@@ -148,7 +140,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={categoryEvent} totalAttendees={10} />);
-    
+
     expect(screen.getByText('Workshops')).toBeInTheDocument();
   });
 
@@ -167,11 +159,9 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={multiDayEvent} totalAttendees={10} />);
-    
+
     expect(screen.getByText('Wed, Jan 15 - Thu, Jan 16')).toBeInTheDocument();
   });
-
-
 
   it('renders event category badge', () => {
     const categoryEvent = {
@@ -180,7 +170,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={categoryEvent} totalAttendees={10} />);
-    
+
     expect(screen.getByText('Workshops')).toBeInTheDocument();
   });
 
@@ -191,7 +181,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={eventNoCohosts} totalAttendees={10} />);
-    
+
     expect(screen.getByText('Single host')).toBeInTheDocument();
   });
 
@@ -202,7 +192,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={eventOneCohost} totalAttendees={10} />);
-    
+
     expect(screen.getByText('1 cohost')).toBeInTheDocument();
   });
 
@@ -213,7 +203,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={fullEvent} totalAttendees={10} />);
-    
+
     expect(screen.queryByText(/seats remaining/)).not.toBeInTheDocument();
   });
 
@@ -225,10 +215,9 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={minimalEvent} totalAttendees={5} />);
-    
+
     expect(screen.getByText('Single host')).toBeInTheDocument();
     // Capacity 0 - 5 attendees = -5 remaining. Logic check: remainingSeats > 0.
-    // -5 is not > 0, so badge should not show.
     expect(screen.queryByText(/seats remaining/)).not.toBeInTheDocument();
     expect(screen.getByText('5 attending • 0 capacity')).toBeInTheDocument();
   });
@@ -248,7 +237,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={multiDayEvent} totalAttendees={10} />);
-    
+
     expect(screen.getByText('Wed, Jan 15 - Thu, Jan 16')).toBeInTheDocument();
   });
 
@@ -263,8 +252,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={eventWithUsernameOnly} totalAttendees={10} />);
-    
-    // Check if ChatContainer receives the correct subtitle
+
     expect(screen.getByTestId('chat-container')).toHaveTextContent('Hosted by johndoe');
   });
 
@@ -278,7 +266,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={virtualEventNoUrl} totalAttendees={10} />);
-    
+
     const linkElement = screen.getByText('Google Meet');
     expect(linkElement).toBeInTheDocument();
     expect(linkElement.tagName).toBe('A');
@@ -295,7 +283,7 @@ describe('Event Detail Communication', () => {
     } as unknown as Event;
 
     render(<Communication event={laterEvent} totalAttendees={10} />);
-    
+
     expect(screen.getByText('To be announced')).toBeInTheDocument();
   });
 });
