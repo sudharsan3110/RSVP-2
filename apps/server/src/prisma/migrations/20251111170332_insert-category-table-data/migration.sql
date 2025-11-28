@@ -1,15 +1,15 @@
 
 -- Insert default event categories
 INSERT INTO categories (id, name) VALUES
-('meetup', 'Meetup'),
-('birthday', 'Birthday'),
-('entertainment', 'Entertainment'),
-('conference', 'Conference'),
-('workshop', 'Workshop'),
-('sports', 'Sports'),
-('networking', 'Networking'),
-('exhibition', 'Exhibition'),
-('charity', 'Charity'),
-('art', 'Art & Culture'),
-('education', 'Education'),
-('others', 'Others...');
+(UUID(),'Meetup'),
+(UUID(),'Birthday'),
+(UUID(),'Entertainment'),
+(UUID(),'Conference'),
+(UUID(),'Workshop'),
+(UUID(),'Sports'),
+(UUID(),'Networking'),
+(UUID(),'Exhibition'),
+(UUID(),'Charity'),
+(UUID(),'Art & Culture'),
+(UUID(),'Education'),
+(UUID(),'Others...');
