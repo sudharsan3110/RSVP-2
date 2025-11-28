@@ -10,6 +10,7 @@ on:
 
 jobs:
   standards:
+    if: github.event.pull_request.draft == false || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     environment: ${{ github.base_ref == 'stage' && 'STAGE' || 'PROD' }}
