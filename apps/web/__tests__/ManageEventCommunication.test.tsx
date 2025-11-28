@@ -161,50 +161,34 @@ describe('Manage Event Communication', () => {
     });
 
     render(<Communication eventId="event-pending" />);
-    
-    // Button should be disabled and show loader
+
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
     expect(button.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('handles mutation error gracefully', async () => {
-    // Mock mutation to fail? 
-    // The component doesn't seem to have explicit error handling UI (toast usually handles it globally or via onError).
-    // But we can check if it calls the mutation.
-    // If we want to test error handling, we'd need to know how it's handled.
-    // Assuming standard react-query usage, we can just verify the mutation is called.
-    // Let's test that the form doesn't reset if we don't call onSuccess.
-    
     useCreateEventCommunicationMock.mockReturnValue({
-      mutate: (data: any, options: any) => {
-        // Do NOT call options.onSuccess
-      },
+      mutate: (data: any, options: any) => {},
       isPending: false,
     });
 
     const { container } = render(<Communication eventId="event-error" />);
     const editor = screen.getByTestId('tiptap-editor') as HTMLTextAreaElement;
     fireEvent.change(editor, { target: { value: '<p>Failed update</p>' } });
-    
+
     const form = container.querySelector('form');
     fireEvent.submit(form as HTMLFormElement);
-    
-    // Since onSuccess is not called, the form might not reset (depending on implementation).
-    // The implementation calls reset inside onSuccess.
-    // So we can check if the editor value remains (though our mock editor might not reflect that easily without more complex mocking).
-    // Instead, let's just verify the mutation call.
-    // Actually, let's skip deep error UI testing if not implemented, and focus on validation.
   });
 
   it('validates empty content', async () => {
     const { container } = render(<Communication eventId="event-val" />);
     const sendButton = screen.getByRole('button', { name: /send/i });
     expect(sendButton).toBeDisabled();
-    
+
     const editor = screen.getByTestId('tiptap-editor') as HTMLTextAreaElement;
     fireEvent.change(editor, { target: { value: '   ' } }); // Whitespace
-    
+
     await waitFor(() => {
       expect(sendButton).toBeDisabled();
     });
@@ -215,7 +199,6 @@ describe('Manage Event Communication', () => {
         id: 'msg-no-user',
         content: '<p>No user data</p>',
         createdAt: '2025-01-01T10:00:00.000Z',
-        // user is undefined
       },
       {
         id: 'msg-partial-user',
@@ -291,13 +274,7 @@ describe('Manage Event Communication', () => {
     communicationsResponse.data = undefined;
 
     render(<Communication eventId="event-undefined-data" />);
-
-    // Should not crash, and should not render chat container
     expect(screen.queryByTestId('chat-container')).not.toBeInTheDocument();
-    
-    // Also verify that it doesn't crash when accessing rawMessages derived values
-    // The component renders the form regardless
     expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
   });
 });
-
