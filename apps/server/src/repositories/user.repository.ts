@@ -68,6 +68,22 @@ export class UserRepository {
   }
 
   /**
+   * Finds Many users by their primary email address.
+   * @param primaryEmail - The array of primary emails of the users.
+   * @param isDeleted - Filter by isDeleted. Pass null to ignore this filter.
+   * @returns Array of User records. Returns an empty array when no matches are found.
+   */
+
+  static async findManyByEmails(emails: string[], isDeleted: boolean | null = false) {
+    return prisma.user.findMany({
+      where: {
+        primaryEmail: { in: emails },
+        isDeleted: isDeleted !== null ? isDeleted : undefined,
+      },
+    });
+  }
+
+  /**
    * Finds multiple users by their IDs.
    * @param ids - An array of user IDs.
    * @returns An array of user objects.
@@ -93,6 +109,28 @@ export class UserRepository {
       },
     });
     return newUser;
+  }
+
+  /**
+   * Creates multiple users in a single database transaction.
+   * @param emails - Array of primary emails to create users for.
+   * @returns A list of the newly created user records.
+   */
+
+  static async createMany(emails: string[]) {
+    return prisma.$transaction(async (tx) => {
+      return Promise.all(
+        emails.map((email) => {
+          const userName = generateUniqueUsername();
+          return tx.user.create({
+            data: {
+              primaryEmail: email,
+              userName,
+            },
+          });
+        })
+      );
+    });
   }
 
   /**

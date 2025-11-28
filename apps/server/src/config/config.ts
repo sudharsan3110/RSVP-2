@@ -9,6 +9,7 @@ dotenv.config();
  */
 const envSchema = z.object({
   NODE_ENV: z.enum(['production', 'development', 'test']),
+  MAX_INVITES: z.string(),
   DATABASE_URL: z.string().url(),
   REFRESH_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
@@ -42,6 +43,7 @@ if (!envVars.success) {
  */
 const config = {
   NODE_ENV: envVars.data.NODE_ENV.toLowerCase(),
+  MAX_INVITES: envVars.data.MAX_INVITES,
   DATABASE_URL: envVars.data.DATABASE_URL,
   ACCESS_TOKEN_SECRET: envVars.data.ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET: envVars.data.REFRESH_TOKEN_SECRET,

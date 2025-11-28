@@ -217,6 +217,7 @@ export class EventRepository {
           where: { isDeleted: false },
           select: {
             role: true,
+            userId: true,
             user: {
               select: {
                 profileIcon: true,

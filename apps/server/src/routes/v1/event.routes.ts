@@ -2,6 +2,7 @@ import {
   cancelEventController,
   createAttendeeController,
   createEventController,
+  createInvitesController,
   deleteAttendeeController,
   deleteEventController,
   filterEventController,
@@ -77,6 +78,13 @@ eventRouter.patch(
 );
 
 eventRouter.post('/:eventId/attendees', authMiddleware, createAttendeeController);
+
+eventRouter.post(
+  '/:eventId/invites',
+  authMiddleware,
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
+  createInvitesController
+);
 
 eventRouter.get(
   '/:eventId/attendees',

@@ -1,6 +1,39 @@
 import { VenueType } from '@prisma/client';
 
 /**
+ * Structure for a successful invite or restore entry.
+ */
+export interface IInviteSuccessEntry {
+  email: string;
+}
+
+/**
+ * Structure for a failed invite entry.
+ */
+export interface IInviteFailedEntry {
+  email: string;
+  error: string;
+}
+
+/**
+ * Structure for a skipped invite entry with a reason.
+ */
+export interface IInviteSkippedEntry {
+  email: string;
+  reason: string;
+}
+
+/**
+ * Response structure for the invite attendees controller.
+ */
+export interface IInviteResults {
+  invited: IInviteSuccessEntry[];
+  restored: IInviteSuccessEntry[];
+  failed: IInviteFailedEntry[];
+  skipped: IInviteSkippedEntry[];
+}
+
+/**
  * Interface for filtering and paginating events.
  */
 

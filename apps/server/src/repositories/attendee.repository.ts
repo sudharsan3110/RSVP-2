@@ -64,6 +64,22 @@ export class AttendeeRepository {
   }
 
   /**
+   * Fetches all attendees for the given event and list of user IDs.
+   * @param eventId - The event to filter by.
+   * @param userIds - Array of user IDs to match.
+   * @returns Array of attendee records.
+   */
+
+  static async findAllByEventIdAndUserIds(eventId: string, userIds: string[]) {
+    return prisma.attendee.findMany({
+      where: {
+        eventId,
+        userId: { in: userIds },
+      },
+    });
+  }
+
+  /**
    * Retrieves all attendees for a specific event.
    * @param eventId - The unique ID of the event.
    * @returns An array of attendees for the event.
