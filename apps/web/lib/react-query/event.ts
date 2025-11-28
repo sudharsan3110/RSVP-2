@@ -7,6 +7,7 @@ import {
   eventAPI,
   EventParams,
   GetAttendeeByEventIdParams,
+  InviteGuestsParams,
   PaginationMetadata,
   UpdateEventSubmissionType,
 } from '../axios/event-API';
@@ -20,6 +21,24 @@ interface ErrorResponse {
 const EVENTS_QUERY_KEY = 'events';
 const EVENT_COHOST_KEY = 'cohost';
 const ATTENDEE_QUERY_KEY = 'attendees';
+
+export const useInviteGuests = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, emails }: InviteGuestsParams) => {
+      const response = await eventAPI.inviteGuests({ eventId, emails });
+      return response.data;
+    },
+    onSuccess: (_, { eventId }) => {
+      queryClient.invalidateQueries({
+        queryKey: [ATTENDEE_QUERY_KEY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [EVENTS_QUERY_KEY, eventId],
+      });
+    },
+  });
+};
 
 export const useEventQuery = (id: string) => {
   return useQuery({

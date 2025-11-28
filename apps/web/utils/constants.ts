@@ -5,6 +5,8 @@ export const userAvatarOptions = [
   { id: 4, src: '/images/user-avatar-short-hair-beard.svg' },
 ];
 
+export const MAX_INVITE_EMAILS = 20;
+
 export const EMAIL_IMAGE_FILES: EmailAttachmentOptions[] = [
   {
     filename: 'logo',

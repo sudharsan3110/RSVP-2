@@ -34,6 +34,11 @@ export type EventParams = {
   sortOrder?: 'asc' | 'desc';
 };
 
+export type InviteGuestsParams = {
+  eventId: string;
+  emails: string[];
+};
+
 export const eventAPI = {
   createEvent: async (payload: CreateEventSubmissionType) => {
     return api.post('/event', payload);
@@ -70,6 +75,10 @@ export const eventAPI = {
     return api.get(`/event/${params.eventId}/attendees`, {
       params: apiParams,
     });
+  },
+
+  inviteGuests: async ({ eventId, emails }: InviteGuestsParams) => {
+    return api.post(`/event/${eventId}/invites`, { emails });
   },
 
   getEventAttendeeExcel: async (params: GetAttendeeByEventIdParams) => {

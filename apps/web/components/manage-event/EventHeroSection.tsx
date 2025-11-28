@@ -1,19 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SemiCircleBar from '../ui/SemiCircleBar';
 import { Icons } from '../common/Icon';
 import { Card, CardHeader } from '../ui/card';
-import { useGetAttendeeExcelByEventId, useGetEventById } from '@/lib/react-query/event';
+import {
+  useGetAttendeeExcelByEventId,
+  useGetEventById,
+  useInviteGuests,
+} from '@/lib/react-query/event';
 import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { formatDate } from '@/utils/formatDate';
+import { InviteGuestModal } from './InviteGuestModal';
+import { InviteResultsModal } from './InviteResultModal';
+import { AxiosError } from 'axios';
 
 export const EventHeroSection = () => {
   const eventId = useParams().id?.toString();
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteResults, setInviteResults] = useState(null);
+  const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
 
   const { data } = useGetEventById(eventId!);
   const { mutateAsync, isPending } = useGetAttendeeExcelByEventId();
+  const { mutateAsync: inviteGuests, isPending: isInviting } = useInviteGuests();
 
   const downloadExcel = async () => {
     try {
@@ -37,6 +48,28 @@ export const EventHeroSection = () => {
       toast.success('Downloaded Successfully');
     } catch (error) {
       toast.error('Failed to download');
+    }
+  };
+
+  const handleInviteGuests = async (emails: string[]) => {
+    try {
+      if (!eventId) return;
+
+      const { data } = await inviteGuests({ eventId, emails });
+
+      setInviteResults(data);
+      setIsResultsModalOpen(true);
+
+      const successCount = (data.invited?.length || 0) + (data.restored?.length || 0);
+      if (successCount > 0) {
+        toast.success(`${successCount} invitation${successCount > 1 ? 's' : ''} sent successfully`);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        axiosError.response?.data?.message || 'Failed to send invitations. Please try again.';
+
+      toast.error(errorMessage);
     }
   };
 
@@ -81,23 +114,26 @@ export const EventHeroSection = () => {
             <div className="flex h-[64px] w-[64px] items-center justify-center rounded-lg bg-white">
               <Icons.download className="text-xl" />
             </div>
-            <div className="ml-5">
-              <h3 className="text-left font-bold text-white">
+            <div className="ml-5 text-left">
+              <h3 className="font-bold text-white">
                 {isPending ? 'Downloading...' : 'Download Guest List'}
               </h3>
               <p className="text-sm text-gray-200">Download data of your guest in xlsx.</p>
             </div>
           </button>
 
-          <div className="flex h-[96px] w-full cursor-not-allowed items-center rounded-lg bg-dark-500 p-4 opacity-50">
+          <button
+            onClick={() => setIsInviteModalOpen(true)}
+            className="flex h-[96px] w-full items-center rounded-lg bg-dark-500 p-4 cursor-pointer"
+          >
             <div className="flex h-[64px] w-[64px] items-center justify-center rounded-lg bg-white">
               <Icons.mail className="text-xl" />
             </div>
-            <div className="ml-5">
+            <div className="ml-5 text-left">
               <h3 className="font-bold text-white">Invite Your Guest</h3>
-              <p className="text-sm text-gray-200">Coming soon.</p>
+              <p className="text-sm text-gray-200">Invite guests instantly with email.</p>
             </div>
-          </div>
+          </button>
 
           <div className="flex h-[96px] w-full cursor-not-allowed items-center rounded-lg bg-orange p-4 opacity-50">
             <div className="flex h-[64px] w-[64px] items-center justify-center rounded-lg bg-white">
@@ -110,6 +146,17 @@ export const EventHeroSection = () => {
           </div>
         </div>
       </div>
+      <InviteGuestModal
+        open={isInviteModalOpen}
+        onOpenChange={setIsInviteModalOpen}
+        onInvite={handleInviteGuests}
+        isPending={isInviting}
+      />
+      <InviteResultsModal
+        open={isResultsModalOpen}
+        onOpenChange={setIsResultsModalOpen}
+        results={inviteResults}
+      />
     </div>
   );
 };
