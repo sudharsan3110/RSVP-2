@@ -9,9 +9,5 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./setupTests.ts'],
     reporters: ['verbose', 'html'],
-    coverage: {
-      enabled: true,
-      provider: 'v8',
-    },
   },
 });
