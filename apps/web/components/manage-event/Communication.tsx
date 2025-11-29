@@ -106,7 +106,7 @@ const Communication = ({ eventId }: CommunicationProps) => {
               <FormItem>
                 <Tiptap
                   ref={tiptapEditorRef}
-                  description={field.value}
+                  description={field.value ?? ''}
                   limit={300}
                   onChange={(richtext, plaintext) => {
                     field.onChange(richtext);

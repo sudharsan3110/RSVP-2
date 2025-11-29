@@ -2,6 +2,113 @@ import Changelog from '@/types/changelog';
 
 export const changelogs: Changelog[] = [
   {
+    releaseDate: new Date('2025-11-30'),
+    bannerImageUrl: '/images/version/0.2.0.png',
+    version: '0.4.0',
+    contributors: [
+      'surajmaity1',
+      'anupkgurung',
+      'Soumava-221B',
+      'TanishqSingla',
+      'Pratiyushkumar',
+      'hassanrahim26',
+      'rituraj-OO7',
+      'sasidharan19',
+      'VinayakaHegade',
+      'sudharsan3110',
+      'sanyamjain04',
+      'Chevalier-dev',
+      'Sibasundar103',
+      'aashishdubey1',
+    ],
+    sections: [
+      {
+        title: 'Features',
+        items: [
+          {
+            summary: 'Easy way to add event to calendar directly from event page or email.',
+            contributors: ['surajmaity1'],
+          },
+          {
+            summary: 'Hosts can now invite multiple guests from event page.',
+            contributors: ['aashishdubey1'],
+          },
+        ],
+      },
+      {
+        title: 'Enhancements',
+        items: [
+          {
+            summary:
+              'Account deletion now keeps past events and requires canceling upcoming ones first.',
+            contributors: ['Pratiyushkumar'],
+          },
+          {
+            summary:
+              'Replaced event registration text buttons with icons for a modern, intuitive feel.',
+            contributors: ['sudharsan3110'],
+          },
+          {
+            summary: 'Improved the communication page with a cleaner, more consistent chat design.',
+            contributors: ['sasidharan19', 'vinayakahegade'],
+          },
+          {
+            summary:
+              'Event detail and planned events pages are now 25% faster and more responsive.',
+            contributors: ['VinayakaHegade'],
+          },
+          {
+            summary:
+              'Integrated automated testing to make the codebase more reliable, efficient, and maintainable.',
+            contributors: [
+              'Soumava-221B',
+              'TanishqSingla',
+              'surajmaity1',
+              'sanyamjain04',
+              'Chevalier-dev',
+              'rituraj-OO7',
+              'Sibasundar103',
+              'sudharsan3110',
+              'Pratiyushkumar',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Bug Fixes',
+        items: [
+          {
+            summary: 'Standardized date formatting across the app for improved readability.',
+            contributors: ['rituraj-OO7'],
+          },
+          {
+            summary: 'Public profiles now correctly display users’ joining dates.',
+            contributors: ['sasidharan19'],
+          },
+          {
+            summary: 'Event overview now displays host names.',
+            contributors: ['rituraj-OO7'],
+          },
+          {
+            summary: 'Event creation form now enforces a capacity limit of 1–1000.',
+            contributors: ['hassanrahim26'],
+          },
+          {
+            summary: 'Event descriptions now having consistent spacing between lines.',
+            contributors: ['anupkgurung'],
+          },
+          {
+            summary:
+              'Corrected preview images when sharing event links with friends (removed HTML tags).',
+            contributors: ['Chevalier-dev'],
+          },
+        ],
+      },
+    ],
+    improvements: [],
+    bugFixes: [],
+  },
+  {
     releaseDate: new Date('2025-10-07'),
     bannerImageUrl: '/images/version/0.2.0.png',
     version: '0.3.0',
@@ -144,7 +251,7 @@ export const changelogs: Changelog[] = [
           {
             summary:
               'DB Schema Change for better normalization and scaling - Optimize database structure for improved performance and scalability.',
-            contributors: ['azeemuddinaziz', 'Pratiyushkumar', 'hassanrahim26'],
+            contributors: ['azeemuddinaziz', 'Pratiyushkumar', 'hassanrahim26', 'Soumava-221B'],
           },
         ],
       },

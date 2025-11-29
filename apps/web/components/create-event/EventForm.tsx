@@ -163,7 +163,7 @@ const EventForm = ({
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <Tiptap
-                  description={field.value}
+                  description={field.value ?? ''}
                   limit={300}
                   onChange={(richtext, plaintext) => {
                     field.onChange(richtext);
@@ -187,7 +187,7 @@ const EventForm = ({
                     size={'sm'}
                     type="single"
                     defaultValue="physical"
-                    value={field.value}
+                    value={field.value ?? ''}
                     onValueChange={(value) => {
                       if (value) field.onChange(value);
                     }}
