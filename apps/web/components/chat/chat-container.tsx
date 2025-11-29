@@ -7,7 +7,7 @@ import { formatDate } from '@/utils/formatDate';
 import { Chat, ChatHeader, ChatMessages, ChatMessage, ChatBubble } from '@/components/ui/chat';
 
 import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getUserDisplayName } from '@/lib/utils';
 import { ChatMessage as ChatMessageType } from '@/components/chat/types';
 import { getProfilePictureUrl } from '@/utils/event';
 
@@ -58,21 +58,22 @@ export function ChatContainer({
 
           {!isLoading &&
             messages.map((msg) => {
+              const displayName = getUserDisplayName(msg.user);
+              const displayInitial = displayName.charAt(0).toUpperCase();
+
               return (
                 <ChatMessage key={msg.id}>
                   <Avatar className="h-10 w-10">
                     <AvatarImage
                       src={getProfilePictureUrl(msg.user?.profileIcon ?? 1)}
-                      alt={msg.user?.fullName || 'User'}
+                      alt={displayName}
                     />
-                    <AvatarFallback>{msg.user?.fullName?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarFallback>{displayInitial}</AvatarFallback>
                   </Avatar>
 
                   <ChatBubble className="bg-dark-800 border-dark-600">
                     <div className="flex flex-col space-y-1">
-                      <span className="font-semibold text-white">
-                        {msg.user?.fullName || 'Unknown User'}
-                      </span>
+                      <span className="font-semibold text-white">{displayName}</span>
                       <div
                         className="prose prose-invert max-w-none text-white"
                         dangerouslySetInnerHTML={{ __html: msg.content }}

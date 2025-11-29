@@ -18,8 +18,9 @@ export interface EventInfo {
 
 export interface ChatUser {
   id: string;
-  fullName: string;
+  fullName: string | null;
   profileIcon: number;
+  userName?: string;
   isHost?: boolean;
   role?: 'creator' | 'manager' | 'attendee';
 }

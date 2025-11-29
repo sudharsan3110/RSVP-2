@@ -211,13 +211,14 @@ describe('Manage Event Communication', () => {
         },
       },
       {
-        id: 'msg-email-only',
-        content: '<p>Email only</p>',
+        id: 'msg-username-only',
+        content: '<p>Username only</p>',
         createdAt: '2025-01-01T12:00:00.000Z',
         user: {
           id: 'u3',
-          primaryEmail: 'test@example.com',
-          // fullName missing
+          userName: 'guest-user-3jrfq4bf',
+          profileIcon: 2,
+          // fullName missing (null)
         },
       },
       {
@@ -247,20 +248,24 @@ describe('Manage Event Communication', () => {
 
     // Check msg-no-user
     expect(messages[0].user).toEqual({
-      id: 'Unknown user',
-      fullName: 'Unknown user',
+      id: 'Unknown User',
+      fullName: 'Unknown User',
       profileIcon: 1,
     });
 
     // Check msg-partial-user
     expect(messages[1].user).toEqual({
       id: 'u2',
-      fullName: 'Unknown user',
+      fullName: 'Unknown User',
       profileIcon: 1,
     });
 
-    // Check msg-email-only
-    expect(messages[2].user.fullName).toBe('test@example.com');
+    // Check msg-username-only
+    expect(messages[2].user).toEqual({
+      id: 'u3',
+      fullName: 'guest-user-3jrfq4bf',
+      profileIcon: 2,
+    });
 
     // Check msg-no-content
     expect(messages[3].content).toBe('');

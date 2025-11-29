@@ -39,3 +39,15 @@ export const getDateGroups = (events: Event[]): DateGroup[] => {
 
   return dateGroups;
 };
+
+export interface UserDisplayName {
+  fullName?: string | null;
+  userName?: string;
+}
+
+export const getUserDisplayName = (
+  user: UserDisplayName | null | undefined,
+  fallback: string = 'Unknown User'
+): string => {
+  return user?.fullName || user?.userName || fallback;
+};

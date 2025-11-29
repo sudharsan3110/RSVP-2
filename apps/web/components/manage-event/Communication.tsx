@@ -14,22 +14,10 @@ import { FormField, FormItem } from '../ui/form';
 import FormProvider from '../ui/form-provider';
 import Tiptap, { EditorRefType } from '../ui/tiptap';
 import { LoaderCircle } from 'lucide-react';
+import { getUserDisplayName } from '@/lib/utils';
 interface CommunicationProps {
   eventId: string;
   updatedAt?: string;
-}
-
-interface CommunicationMessage {
-  user: {
-    name: string;
-  };
-  content: string;
-  time: string;
-  updatedAt: string;
-}
-
-interface CommunicationsData {
-  data: CommunicationMessage[];
 }
 
 const Communication = ({ eventId }: CommunicationProps) => {
@@ -49,7 +37,7 @@ const Communication = ({ eventId }: CommunicationProps) => {
   const rawMessages = (communicationsData?.data ?? []) as any[];
   const chatMessages = rawMessages.map((m) => {
     const user = m.user ?? {};
-    const fullName = user.fullName || user.primaryEmail || 'Unknown user';
+    const displayName = getUserDisplayName(user);
     const profileIcon = user.profileIcon ?? 1;
     const id = m.id;
     return {
@@ -60,14 +48,13 @@ const Communication = ({ eventId }: CommunicationProps) => {
       updatedAt: m.updatedAt,
       timestamp: m.updatedAt || m.createdAt,
       user: {
-        id: user.id ?? 'Unknown user',
-        fullName,
+        id: user.id ?? 'Unknown User',
+        fullName: displayName,
         profileIcon,
       },
     };
   });
 
-  const content = watch('content');
   const plaintextContent = watch('plaintextContent');
 
   const hasContent = plaintextContent?.trim().length > 0;
