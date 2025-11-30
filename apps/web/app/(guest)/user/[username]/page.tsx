@@ -19,6 +19,8 @@ const Page = () => {
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
   const { data: userDetails } = useUserDetailsByUsername(username || '');
 
+  console.log('user details***', userDetails);
+
   const profilePictureUrl = useMemo(() => {
     const profileUrl = userAvatarOptions.find(
       (option) => option.id === userDetails?.data?.data.profileIcon
@@ -60,7 +62,7 @@ const Page = () => {
 
             <div className="mt-5 space-y-3">
               <h3 className="text-2xl font-bold text-white">
-                {userDetails?.data?.data.fullName || userDetails?.data?.data.username}
+                {userDetails?.data?.data.fullName ?? userDetails?.data?.data.userName}
               </h3>
               {userDetails?.data?.data.bio && (
                 <p className="text-base text-secondary">{userDetails?.data?.data.bio}</p>
