@@ -616,6 +616,15 @@ export const createInvitesController = controller(
 
         const ticketUrl = `${config.CLIENT_URL}/ticket/${eventId}`;
 
+        const calendarEvent: CalendarEvent = {
+          uid: event.id,
+          title: event.name,
+          description: event.description || '',
+          start: event.startTime,
+          end: event.endTime,
+          location: event.venueUrl || '',
+        };
+
         const emailData = {
           id: 5,
           subject: "You're Invited!",
@@ -625,6 +634,9 @@ export const createInvitesController = controller(
             name: user.fullName ?? 'Guest',
             eventName: event.name,
             badgeNumber: newAttendee.qrToken,
+            googleCalendarLink: google(calendarEvent),
+            iCalendarLink: ics(calendarEvent),
+            outlookCalendarLink: outlook(calendarEvent),
           },
         };
 
