@@ -305,10 +305,11 @@ export const useUpdateAttendeeStatus = () => {
       attendeeId: string;
       allowedStatus: boolean;
     }) => eventAPI.updateAttendeeStatus(eventId, attendeeId, allowedStatus),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['attendees'] });
-      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId, 'ticket-details'] });
-      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId, 'attendee-details'] });
+    onSuccess: (_, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: [ATTENDEE_QUERY_KEY] });
+      queryClient.invalidateQueries({
+        queryKey: [EVENTS_QUERY_KEY, eventId],
+      });
     },
   });
 };
