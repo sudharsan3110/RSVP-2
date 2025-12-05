@@ -32,6 +32,8 @@ model User {
   state       State?       @relation(fields: [stateId], references: [id])
   country     Country?     @relation(fields: [countryId], references: [id])
   Auth        Auth[]
+  cityId      String?      @map("city_id") @db.VarChar(36)
+  city        City?        @relation(fields: [cityId], references: [id])
 
   @@map("users")
 }
@@ -83,7 +85,9 @@ model Event {
   state     State?     @relation(fields: [venueStateId], references: [id])
   country   Country?   @relation(fields: [venueCountryId], references: [id])
   category  Category?  @relation(fields: [categoryId], references: [id])
-
+  venueCityId String?    @map("venue_city_id") @db.VarChar(36)
+  city      City?      @relation(fields: [venueCityId], references: [id])
+  
   @@map("events")
 }
 
@@ -145,7 +149,8 @@ model State {
   country Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
   Users   User[]
   Event   Event[]
-
+  cities  City[]
+  
   @@unique([name, countryId])
   @@map("states")
 }
@@ -220,4 +225,22 @@ enum Platform {
 enum AuthProvider {
   MAGIC_LINK
   GOOGLE
+}
+
+model City {
+  id        String  @id @default(uuid()) @db.VarChar(36)
+  name      String  @map("name") @db.VarChar(100)
+
+  stateId   String  @map("state_id")   @db.VarChar(36)
+  countryId String  @map("country_id") @db.VarChar(36)
+
+  state   State   @relation(fields: [stateId],   references: [id], onDelete: Cascade)
+
+  Users  User[]
+  Event  Event[]
+  
+  @@unique([name, stateId])   // ensures city names are unique per state
+  @@index([stateId])
+  @@index([countryId])
+  @@map("cities")
 }
