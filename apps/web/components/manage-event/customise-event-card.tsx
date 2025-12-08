@@ -34,6 +34,7 @@ const CustomiseEventCard = ({ className, event, isSuccess }: CustomiseEventCarDP
   const { data: userData } = useCurrentUser();
 
   const isCohost = isCurrentUserCohost(userData, event.cohosts);
+  const isPastEvent = new Date(event.endTime) < new Date();
 
   const [showCopied, setShowCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
@@ -108,7 +109,7 @@ const CustomiseEventCard = ({ className, event, isSuccess }: CustomiseEventCarDP
           <CardTitle className="item-center">{event.name}</CardTitle>
         </div>
         <div className="flex items-center gap-2">
-          {!isCohost && (
+          {!isCohost && !isPastEvent && (
             <Link href={`/events/${id}/edit`} className="w-full sm:flex-1">
               <TooltipProvider delayDuration={100}>
                 <Tooltip>
