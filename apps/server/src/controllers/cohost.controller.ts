@@ -61,7 +61,18 @@ export const addEventHostController = controller(addCohostSchema, async (req, re
 
   if (!user.isCompleted) throw new BadRequestError(API_MESSAGES.USER.PROFILE_INCOMPLETE);
   const hostExists = await CohostRepository.findByUserIdAndEventId(user.id, eventId);
-  if (hostExists) throw new BadRequestError('Host already exists');
+
+  if (hostExists) {
+    if (!hostExists.isDeleted) {
+      throw new BadRequestError('Host already exists');
+    }
+
+    const restoredHost = await CohostRepository.restore(
+      hostExists.id,
+      role.toUpperCase() as HostRole
+    );
+    return new SuccessResponse('success', restoredHost).send(res);
+  }
 
   const host = await CohostRepository.create({
     eventId,

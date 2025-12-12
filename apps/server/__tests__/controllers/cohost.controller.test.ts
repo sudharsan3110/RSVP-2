@@ -269,6 +269,51 @@ describe('addEventHostController', () => {
     expect(error.message).toBe('Host already exists');
     expect(createSpy).not.toHaveBeenCalled();
   });
+
+  it('restores a soft-deleted cohost instead of creating a new one', async () => {
+    const req = createMockRequest({ userId: CREATOR_ID, body: baseBody });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    const softDeletedHost = {
+      id: 'existing-soft-deleted-id',
+      eventId: EVENT_ID,
+      userId: NEW_USER_ID,
+      isDeleted: true,
+      role: HostRole.MANAGER,
+    };
+
+    const restoredHost = {
+      ...softDeletedHost,
+      isDeleted: false,
+    };
+
+    vi.spyOn(EventRepository, 'findById').mockResolvedValue({
+      id: EVENT_ID,
+      creatorId: CREATOR_ID,
+    } as any);
+
+    vi.spyOn(CohostRepository, 'FindhostOrCohost').mockResolvedValue(false);
+    vi.spyOn(UserRepository, 'findbyEmail').mockResolvedValue({
+      id: NEW_USER_ID,
+      isCompleted: true,
+    } as any);
+    vi.spyOn(CohostRepository, 'findByUserIdAndEventId').mockResolvedValue(softDeletedHost as any);
+    const restoreSpy = vi.spyOn(CohostRepository, 'restore').mockResolvedValue(restoredHost as any);
+    const createSpy = vi.spyOn(CohostRepository, 'create');
+    await addEventHostController(req, res, next);
+    expect(CohostRepository.findByUserIdAndEventId).toHaveBeenCalledWith(NEW_USER_ID, EVENT_ID);
+    expect(restoreSpy).toHaveBeenCalledWith('existing-soft-deleted-id', HostRole.MANAGER);
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'success',
+        data: restoredHost,
+      })
+    );
+    expect(next).not.toHaveBeenCalled();
+  });
 });
 
 describe('removeEventCohostController', () => {

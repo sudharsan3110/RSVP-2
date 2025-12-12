@@ -28,7 +28,6 @@ export class CohostRepository {
       where: {
         userId,
         eventId,
-        isDeleted: false,
       },
     });
   }
@@ -145,5 +144,21 @@ export class CohostRepository {
     }
 
     return !!cohost;
+  }
+
+  /**
+   * Restores a soft-deleted cohost record by ID.
+   * @param id - The unique ID of the cohost.
+   * @param role - The role assigned to the restored cohost: "Manager" | "ReadOnly" | "Celebrity".
+   * @returns The updated cohost object with `isDeleted` set to false.
+   */
+  static async restore(id: string, role: HostRole): Promise<Host> {
+    return await prisma.host.update({
+      where: { id },
+      data: {
+        role: role,
+        isDeleted: false,
+      },
+    });
   }
 }
