@@ -8,6 +8,7 @@ export interface IAuthenticatedRequest<
 > extends Request<P, ResBody, ReqBody, ReqQuery> {
   userId?: string;
   Role?: string;
+  userRole?: string;
 }
 
 export interface IEventIdRequest extends IAuthenticatedRequest<

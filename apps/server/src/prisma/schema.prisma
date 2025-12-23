@@ -24,6 +24,7 @@ model User {
   hasUnlimitedAccess Boolean  @default(false) @map("has_unlimited_access")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
+  role           UserRole @default(USER) @map("role")
 
   events      Event[]
   attendees   Attendee[]
@@ -244,4 +245,11 @@ enum Platform {
 enum AuthProvider {
   MAGIC_LINK
   GOOGLE
+}
+
+enum UserRole {
+  USER @map("1")
+  ADMIN @map("2")
+  MODERATOR @map("3")
+  SUPER_USER @map("4")
 }

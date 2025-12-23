@@ -433,4 +433,44 @@ export class EventRepository {
       },
     });
   }
+
+  /**
+   * Retrieves counts for total, upcoming, ongoing, and completed events.
+   * @returns An object containing counts for each status.
+   */
+  static async getEventStatusCounts() {
+    const now = new Date();
+
+    const [total, upcoming, ongoing, completed] = await Promise.all([
+      prisma.event.count({
+        where: {
+          isDeleted: false,
+        },
+      }),
+      prisma.event.count({
+        where: {
+          isDeleted: false,
+          isActive: true,
+          startTime: { gt: now },
+        },
+      }),
+      prisma.event.count({
+        where: {
+          isDeleted: false,
+          isActive: true,
+          startTime: { lte: now },
+          endTime: { gte: now },
+        },
+      }),
+      prisma.event.count({
+        where: {
+          isDeleted: false,
+          isActive: true,
+          endTime: { lt: now },
+        },
+      }),
+    ]);
+
+    return { total, upcoming, ongoing, completed };
+  }
 }

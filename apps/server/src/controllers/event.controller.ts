@@ -26,6 +26,7 @@ import {
   upcomingEventsQuerySchema,
 } from '@/validations/attendee.validation';
 import { eventParamsSchema } from '@/validations/cohost.validation';
+import { emptySchema } from '@/validations/common';
 import {
   attendeesQuerySchema,
   cancelEventSchema,
@@ -989,4 +990,25 @@ export const deleteAttendeeController = controller(eventParamsSchema, async (req
   if (!attendee) throw new NotFoundError('Attendee record not found');
   const cancelledAttendee = await AttendeeRepository.cancel(attendee.id);
   return new SuccessResponse('Attendee removed successfully', cancelledAttendee).send(res);
+});
+
+/**
+ * Controller to retrieve system-wide event statistics.
+ * Fetches the total number of total, upcoming, ongoing, and completed event counts.
+ * @param req - The HTTP request object (requires userId for authentication).
+ * @param res - The HTTP response object.
+ * @returns A SuccessResponse containing the total event count.
+ */
+export const getEventsStatsController = controller(emptySchema, async (req, res) => {
+  const { userId } = req;
+  if (!userId) throw new TokenExpiredError();
+
+  const events = await EventRepository.getEventStatusCounts();
+
+  return new SuccessResponse('success', {
+    totalEvents: events.total,
+    upcomingEvents: events.upcoming,
+    ongoingEvents: events.ongoing,
+    completedEvents: events.completed,
+  }).send(res);
 });
