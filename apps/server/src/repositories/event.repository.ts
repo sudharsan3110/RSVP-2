@@ -435,42 +435,60 @@ export class EventRepository {
   }
 
   /**
-   * Retrieves counts for total, upcoming, ongoing, and completed events.
+   * Retrieves system-wide event statistics.
    * @returns An object containing counts for each status.
    */
   static async getEventStatusCounts() {
     const now = new Date();
 
-    const [total, upcoming, ongoing, completed] = await Promise.all([
-      prisma.event.count({
-        where: {
-          isDeleted: false,
-        },
-      }),
-      prisma.event.count({
-        where: {
-          isDeleted: false,
-          isActive: true,
-          startTime: { gt: now },
-        },
-      }),
-      prisma.event.count({
-        where: {
-          isDeleted: false,
-          isActive: true,
-          startTime: { lte: now },
-          endTime: { gte: now },
-        },
-      }),
-      prisma.event.count({
-        where: {
-          isDeleted: false,
-          isActive: true,
-          endTime: { lt: now },
-        },
-      }),
-    ]);
+    const [totalEvents, upcomingEvents, ongoingEvents, completedEvents, usedTickets, totalTickets] =
+      await Promise.all([
+        prisma.event.count({
+          where: {
+            isDeleted: false,
+          },
+        }),
+        prisma.event.count({
+          where: {
+            isDeleted: false,
+            isActive: true,
+            startTime: { gt: now },
+          },
+        }),
+        prisma.event.count({
+          where: {
+            isDeleted: false,
+            isActive: true,
+            startTime: { lte: now },
+            endTime: { gte: now },
+          },
+        }),
+        prisma.event.count({
+          where: {
+            isDeleted: false,
+            isActive: true,
+            endTime: { lt: now },
+          },
+        }),
+        prisma.attendee.count({ where: { status: 'GOING', isDeleted: false } }),
+        prisma.event.aggregate({
+          _sum: {
+            capacity: true,
+          },
+          where: {
+            isActive: true,
+            isDeleted: false,
+          },
+        }),
+      ]);
 
-    return { total, upcoming, ongoing, completed };
+    return {
+      totalEvents,
+      upcomingEvents,
+      ongoingEvents,
+      completedEvents,
+      totalTickets: totalTickets._sum.capacity || 0,
+      usedTickets,
+    };
   }
 }
