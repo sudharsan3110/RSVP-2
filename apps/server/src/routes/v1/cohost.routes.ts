@@ -1,11 +1,13 @@
 import {
   addEventHostController,
   getEventHostController,
+  getHostsStatsController,
   removeEventCohostController,
 } from '@/controllers/cohost.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
-import { HostRole } from '@prisma/client';
+import { roleMiddleware } from '@/middleware/roleMiddleware';
+import { HostRole, UserRole } from '@prisma/client';
 import { Router } from 'express';
 
 const cohostRouter: Router = Router();
@@ -16,6 +18,8 @@ cohostRouter.get(
   eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   getEventHostController
 );
+
+cohostRouter.get('/stats', authMiddleware, roleMiddleware(UserRole.ADMIN), getHostsStatsController);
 
 cohostRouter.delete(
   '/events/:eventId/:userId',
