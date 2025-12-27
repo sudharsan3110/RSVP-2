@@ -245,13 +245,21 @@ describe('Event Router Endpoints', () => {
     it('should return planned events for the authenticated user', async () => {
       isAuthenticated = true;
       const fakeUser = { id: TEST_USER_ID };
-      vi.spyOn(Users, 'findById').mockResolvedValue(fakeUser as never);
-      const fakePlannedEvents = [{ id: 'event-1', name: 'User Event' }];
-      vi.spyOn(Events, 'findAllPlannedEvents').mockResolvedValue(fakePlannedEvents as never);
+      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
+      const fakePlannedEvents = [
+        { event: { id: 'event-1', name: 'User Event' }, user: { id: TEST_USER_ID } },
+      ];
+      const mockRepoResponse = {
+        data: fakePlannedEvents,
+        metadata: { total: 1, page: 1, limit: 10, hasMore: false },
+      };
+      vi.spyOn(CohostRepository as any, 'findAllByUserId').mockResolvedValue(mockRepoResponse);
       const res = await request(app).get(ENDPOINT_USER_EVENTS).query({ page: 1, limit: 10 });
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'success');
-      expect(res.body).toHaveProperty('data', fakePlannedEvents);
+      expect(res.body.data).toHaveProperty('events');
+      expect(res.body.data.events).toHaveLength(1);
+      expect(res.body.data.events[0]).toHaveProperty('id', 'event-1');
     });
   });
 

@@ -153,23 +153,24 @@ export class CohostRepository {
     }
     whereClause.event = eventWhereClause;
 
-    const adjustedSortBy =
-      sortBy === 'startTime' ? { event: { startTime: sortOrder } } : { [sortBy]: sortOrder };
-
     return await hostPaginator.paginate(
-      { page, limit, sortOrder, sortBy: 'createdAt' },
+      { page, limit, sortOrder, sortBy },
       {
         where: whereClause,
         include: {
           event: {
             include: {
               creator: true,
-              attendees: true,
+              _count: {
+                select: {
+                  attendees: true,
+                },
+              },
             },
           },
           user: true,
         },
-        orderBy: adjustedSortBy,
+        distinct: ['eventId'],
       }
     );
   }

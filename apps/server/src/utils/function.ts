@@ -33,3 +33,7 @@ function shortId() {
 export function generateUniqueUsername(prefix = 'guest-user') {
   return `${prefix}-${shortId()}`;
 }
+// Helper to check for valid objects (excludes null and arrays)
+export function isObject(val: any): boolean {
+  return val && typeof val === 'object' && !Array.isArray(val);
+}

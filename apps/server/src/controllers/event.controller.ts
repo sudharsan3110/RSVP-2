@@ -2,6 +2,7 @@ import config from '@/config/config';
 import { API_MESSAGES } from '@/constants/apiMessages';
 import { IInviteResults } from '@/interface/event';
 import { IAuthenticatedRequest } from '@/interface/middleware';
+import { IPaginatedResult } from '@/interface/pagination';
 import { AttendeeRepository } from '@/repositories/attendee.repository';
 import { CohostRepository } from '@/repositories/cohost.repository';
 import { EventRepository } from '@/repositories/event.repository';
@@ -41,7 +42,7 @@ import {
   updateEventSlugSchema,
   verifyQrSchema,
 } from '@/validations/event.validation';
-import { Attendee, AttendeeStatus, Prisma, VenueType } from '@prisma/client';
+import { Attendee, AttendeeStatus, Event, Host, Prisma, User, VenueType } from '@prisma/client';
 import { CalendarEvent, google, ics, outlook } from 'calendar-link';
 import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
@@ -455,9 +456,20 @@ export const getplannedByUserController = controller(
 
     const sortByField = sort === 'attendees' ? 'attendeeCount' : 'startTime';
 
-    const plannedEvents = await EventRepository.findAllPlannedEvents({
-      filters: {
-        userId,
+    type PaginatedHostsWithEvent = IPaginatedResult<
+      Host & {
+        event: Event & {
+          id: string;
+          creator: User;
+        };
+        user: User;
+      }
+    >;
+
+    const cohostedEventsResult = (await CohostRepository.findAllByUserId({
+      userId,
+      paginatedResult: true,
+      paginationFilters: {
         status,
         search,
       },
@@ -467,11 +479,19 @@ export const getplannedByUserController = controller(
         sortBy: sortByField,
         sortOrder,
       },
-    });
+    })) as PaginatedHostsWithEvent;
 
-    return new SuccessResponse('success', plannedEvents).send(res);
+    const events = cohostedEventsResult.data.map((item) => item.event);
+
+    const response = {
+      events,
+      metadata: cohostedEventsResult.metadata,
+    };
+
+    return new SuccessResponse('success', response).send(res);
   }
 );
+
 /**
  * Registers a user as an attendee for an event.
  * @param req - The HTTP request object containing the event ID in the parameters and attendee details in the body.

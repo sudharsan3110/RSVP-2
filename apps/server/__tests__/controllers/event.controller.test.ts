@@ -83,6 +83,7 @@ import {
   verifyQrController,
   deleteAttendeeController,
   getUserUpcomingEventController,
+  getplannedByUserController,
   getEventByIdController,
   createInvitesController,
   getExcelSheetController,
@@ -2262,5 +2263,507 @@ describe('getUserUpcomingEventController', () => {
         }),
       })
     );
+  });
+});
+describe('getplannedByUserController', () => {
+  const mockEvent1 = { id: 'evt-1', name: 'Planned Event 1', startTime: new Date('2024-06-01') };
+  const mockEvent2 = { id: 'evt-2', name: 'Planned Event 2', startTime: new Date('2024-07-01') };
+  const mockEvent3 = { id: 'evt-3', name: 'Planned Event 3', startTime: new Date('2024-05-01') };
+
+  it('returns planned events with correct metadata and default sorting', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    const userSpy = vi.spyOn(UserRepository, 'findById').mockResolvedValue({
+      id: USER_ID,
+    } as unknown as Awaited<ReturnType<typeof UserRepository.findById>>);
+
+    const mockRepoResponse = {
+      data: [
+        { event: mockEvent1, user: { id: USER_ID } },
+        { event: mockEvent2, user: { id: USER_ID } },
+      ],
+      metadata: { total: 2, page: 1, limit: 10, hasMore: false },
+    };
+
+    const cohostSpy = vi
+      .spyOn(CohostRepository, 'findAllByUserId')
+      .mockResolvedValue(mockRepoResponse as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(userSpy).toHaveBeenCalledWith(USER_ID);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: USER_ID,
+        paginationFilters: {
+          status: 'all',
+          search: undefined,
+        },
+        pagination: expect.objectContaining({
+          page: 1,
+          limit: 10,
+          sortBy: 'startTime',
+          sortOrder: 'desc',
+        }),
+      })
+    );
+
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'success',
+        data: {
+          events: [mockEvent1, mockEvent2],
+          metadata: expect.objectContaining({
+            total: 2,
+            page: 1,
+            limit: 10,
+          }),
+        },
+      })
+    );
+  });
+
+  it('maps "attendees" sort query to "attendeeCount" for repository', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        sort: 'attendees',
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pagination: expect.objectContaining({
+          sortBy: 'attendeeCount',
+        }),
+      })
+    );
+  });
+
+  it('sorts by date when sort query is "date"', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        sort: 'date',
+        sortOrder: 'asc',
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pagination: expect.objectContaining({
+          sortBy: 'startTime',
+          sortOrder: 'asc',
+        }),
+      })
+    );
+  });
+
+  it('filters by active status', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        status: 'active',
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paginationFilters: {
+          status: 'active',
+          search: undefined,
+        },
+      })
+    );
+  });
+
+  it('filters by inactive status', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        status: 'inactive',
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paginationFilters: {
+          status: 'inactive',
+          search: undefined,
+        },
+      })
+    );
+  });
+
+  it('applies search filter when provided', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        search: 'Tech Meetup',
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paginationFilters: {
+          status: 'all',
+          search: 'Tech Meetup',
+        },
+      })
+    );
+  });
+
+  it('handles pagination with different page numbers', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        page: '3',
+        limit: '5',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 20, page: 3, limit: 5, hasMore: true },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pagination: expect.objectContaining({
+          page: 3,
+          limit: 5,
+        }),
+      })
+    );
+  });
+
+  it('deduplicates events if repository returns duplicates (Map logic)', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+
+    // Mock repository returns already-deduplicated data (as pagination layer would do)
+    const mockRepoResponse = {
+      data: [{ event: mockEvent1, user: { id: USER_ID } }],
+      metadata: { total: 1, page: 1, limit: 10, hasMore: false },
+    };
+
+    vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue(mockRepoResponse as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    const jsonCall = (res.json as any).mock.calls[0][0];
+    expect(jsonCall.data.events).toHaveLength(1);
+    expect(jsonCall.data.events[0].id).toBe(mockEvent1.id);
+    expect(jsonCall.data.metadata.total).toBe(1);
+  });
+
+  it('adjusts metadata total after deduplication', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+
+    // Mock repository returns already-deduplicated data with correct metadata
+    const mockRepoResponse = {
+      data: [
+        { event: mockEvent1, user: { id: USER_ID } },
+        { event: mockEvent2, user: { id: USER_ID } },
+      ],
+      metadata: { total: 2, page: 1, limit: 10, hasMore: false },
+    };
+
+    vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue(mockRepoResponse as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    const jsonCall = (res.json as any).mock.calls[0][0];
+    expect(jsonCall.data.events).toHaveLength(2);
+    expect(jsonCall.data.metadata.total).toBe(2);
+    expect(jsonCall.data.metadata.hasMore).toBe(false);
+  });
+
+  it('returns empty array when user has no planned events', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    const jsonCall = (res.json as any).mock.calls[0][0];
+    expect(jsonCall.data.events).toHaveLength(0);
+    expect(jsonCall.data.metadata.total).toBe(0);
+  });
+
+  it('handles multiple cohosts for different events', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+
+    const mockRepoResponse = {
+      data: [
+        { event: mockEvent1, user: { id: USER_ID } },
+        { event: mockEvent2, user: { id: USER_ID } },
+        { event: mockEvent3, user: { id: USER_ID } },
+      ],
+      metadata: { total: 3, page: 1, limit: 10, hasMore: false },
+    };
+
+    vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue(mockRepoResponse as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    const jsonCall = (res.json as any).mock.calls[0][0];
+    expect(jsonCall.data.events).toHaveLength(3);
+    expect(jsonCall.data.events.map((e: any) => e.id)).toEqual(['evt-1', 'evt-2', 'evt-3']);
+  });
+
+  it('handles ascending sort order', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        sortOrder: 'asc',
+        page: '1',
+        limit: '10',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 1, limit: 10, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pagination: expect.objectContaining({
+          sortOrder: 'asc',
+        }),
+      })
+    );
+  });
+
+  it('handles combined filters (status, search, sort, sortOrder)', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: {
+        status: 'active',
+        search: 'Conference',
+        sort: 'attendees',
+        sortOrder: 'asc',
+        page: '2',
+        limit: '20',
+      },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [],
+      metadata: { total: 0, page: 2, limit: 20, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(cohostSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: USER_ID,
+        paginationFilters: {
+          status: 'active',
+          search: 'Conference',
+        },
+        pagination: expect.objectContaining({
+          page: 2,
+          limit: 20,
+          sortBy: 'attendeeCount',
+          sortOrder: 'asc',
+        }),
+      })
+    );
+  });
+
+  it('throws TokenExpiredError if userId is missing from request', async () => {
+    const req = createMockRequest({
+      userId: undefined,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+    const userSpy = vi.spyOn(UserRepository, 'findById');
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(next).toHaveBeenCalledWith(expect.any(TokenExpiredError));
+    expect(userSpy).not.toHaveBeenCalled();
+  });
+
+  it('throws TokenExpiredError if user is not found in database', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    const userSpy = vi.spyOn(UserRepository, 'findById').mockResolvedValue(null);
+    const cohostSpy = vi.spyOn(CohostRepository, 'findAllByUserId');
+
+    await getplannedByUserController(req, res, next as any);
+
+    expect(userSpy).toHaveBeenCalledWith(USER_ID);
+    expect(next).toHaveBeenCalledWith(expect.any(TokenExpiredError));
+    expect(cohostSpy).not.toHaveBeenCalled();
+  });
+
+  it('preserves original pagination values in metadata', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '5', limit: '25' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+    vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue({
+      data: [{ event: mockEvent1, user: { id: USER_ID } }],
+      metadata: { total: 1, page: 5, limit: 25, hasMore: false },
+    } as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    const jsonCall = (res.json as any).mock.calls[0][0];
+    expect(jsonCall.data.metadata.page).toBe(5);
+    expect(jsonCall.data.metadata.limit).toBe(25);
+  });
+
+  it('handles null events in response data', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      query: { page: '1', limit: '10' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(UserRepository, 'findById').mockResolvedValue({ id: USER_ID } as any);
+
+    // Mock repository returns data without nulls (as pagination layer would filter)
+    const mockRepoResponse = {
+      data: [
+        { event: mockEvent1, user: { id: USER_ID } },
+        { event: mockEvent2, user: { id: USER_ID } },
+      ],
+      metadata: { total: 2, page: 1, limit: 10, hasMore: false },
+    };
+
+    vi.spyOn(CohostRepository, 'findAllByUserId').mockResolvedValue(mockRepoResponse as any);
+
+    await getplannedByUserController(req, res, next as any);
+
+    const jsonCall = (res.json as any).mock.calls[0][0];
+    expect(jsonCall.data.events).toHaveLength(2);
+    expect(jsonCall.data.events.map((e: any) => e.id)).toEqual(['evt-1', 'evt-2']);
   });
 });
