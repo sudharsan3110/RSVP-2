@@ -4,12 +4,26 @@ import EditEventForm from '@/components/create-event/EditEventForm';
 import { useCurrentUser } from '@/lib/react-query/auth';
 import { useGetEventById } from '@/lib/react-query/event';
 import NoResults from '@/components/common/NoResults';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import LoadingScreen from '@/components/common/LoadingScreen';
 
 const EditEventPage = ({ params }: { params: { id: string } }) => {
+  const router = useRouter();
   const { data } = useCurrentUser();
   const { data: eventData, isLoading } = useGetEventById(params.id);
 
   const isCreator = eventData?.event.checkCreator(data?.id);
+  const isPastEvent = eventData?.event ? new Date(eventData.event.endTime) < new Date() : false;
+
+  useEffect(() => {
+    if (!isLoading && isPastEvent) {
+      if (window.history.length > 1) router.back();
+      else router.replace(`/events/${params.id}/manage`);
+    }
+  }, [isLoading, isPastEvent, router, params.id]);
+
+  if (isLoading || isPastEvent) return <LoadingScreen />;
 
   if (!isCreator && !isLoading) {
     return (

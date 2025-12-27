@@ -80,6 +80,7 @@ import {
   getEventBySlugController,
   createEventController,
   updateEventController,
+  updateEventSlugController,
   verifyQrController,
   deleteAttendeeController,
   getUserUpcomingEventController,
@@ -2765,5 +2766,31 @@ describe('getplannedByUserController', () => {
     const jsonCall = (res.json as any).mock.calls[0][0];
     expect(jsonCall.data.events).toHaveLength(2);
     expect(jsonCall.data.events.map((e: any) => e.id)).toEqual(['evt-1', 'evt-2']);
+  });
+});
+
+describe('updateEventSlugController', () => {
+  it('returns 400 when event has expired (endTime in the past)', async () => {
+    const req = createMockRequest({
+      userId: USER_ID,
+      params: { eventId: EVENT_ID },
+      body: { slug: 'new-slug' },
+    });
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    vi.spyOn(EventRepository, 'findById').mockResolvedValue({
+      id: EVENT_ID,
+      endTime: new Date(Date.now() - 60_000),
+    } as unknown as Awaited<ReturnType<typeof EventRepository.findById>>);
+
+    const updateSlugSpy = vi.spyOn(EventRepository, 'updateSlug');
+
+    await updateEventSlugController(req, res, next as unknown as NextFunction);
+
+    expect(next).toHaveBeenCalledWith(expect.any(BadRequestError));
+    const error = next.mock.calls[0]![0] as BadRequestError;
+    expect(error.message).toBe('Event has expired');
+    expect(updateSlugSpy).not.toHaveBeenCalled();
   });
 });

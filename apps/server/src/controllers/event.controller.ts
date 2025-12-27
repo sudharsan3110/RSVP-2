@@ -107,6 +107,10 @@ export const updateEventSlugController = controller(updateEventSlugSchema, async
   const { userId } = req;
   if (!userId) throw new TokenExpiredError();
 
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  if (event.endTime < new Date()) throw new BadRequestError('Event has expired');
+
   const slug = req.body.slug;
   logger.info('Updating slug in updateEventSlugController ...');
   const updatedSlug = await EventRepository.updateSlug(eventId, userId, slug);
@@ -320,6 +324,8 @@ export const updateEventController = controller(UpdateEventSchema, async (req, r
   logger.info('Updating event in updateEventController ...');
   const event = await EventRepository.findById(eventId);
   if (!event) throw new NotFoundError('Event not found');
+
+  if (event.endTime < new Date()) throw new BadRequestError('Event has expired');
 
   const currentEventIsPublic = event.discoverable !== false;
   const newEventIsPublic =
