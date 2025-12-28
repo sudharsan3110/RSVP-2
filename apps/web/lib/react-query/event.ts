@@ -397,14 +397,14 @@ export const useAddEventCohost = () => {
 };
 
 export const useDeleteCohost = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ eventId, userId }: { eventId: string; userId: string }) =>
       eventAPI.deleteEventCohost(eventId, userId),
     onSuccess: (resp, { eventId }) => {
+      router.push(`/events`);
       toast.success(resp?.message);
-      queryClient.invalidateQueries({ queryKey: [EVENT_COHOST_KEY, eventId] });
-      queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
     },
     onError: (resp: AxiosError) => {
       const errMsg = resp.response?.data as ErrorResponse | undefined;
