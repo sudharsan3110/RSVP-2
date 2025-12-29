@@ -1,7 +1,6 @@
 import {
   addEventHostController,
   getEventHostController,
-  getHostsStatsController,
   removeEventCohostController,
 } from '@/controllers/cohost.controller';
 import authMiddleware from '@/middleware/authMiddleware';
@@ -18,8 +17,6 @@ cohostRouter.get(
   eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   getEventHostController
 );
-
-cohostRouter.get('/stats', authMiddleware, roleMiddleware(UserRole.ADMIN), getHostsStatsController);
 
 cohostRouter.delete(
   '/events/:eventId/:userId',
