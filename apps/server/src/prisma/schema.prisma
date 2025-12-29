@@ -250,6 +250,4 @@ enum AuthProvider {
 enum UserRole {
   USER @map("1")
   ADMIN @map("2")
-  MODERATOR @map("3")
-  SUPER_USER @map("4")
 }
