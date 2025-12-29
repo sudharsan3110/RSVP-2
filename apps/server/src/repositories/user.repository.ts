@@ -3,6 +3,7 @@ import { generateUniqueUsername } from '@/utils/function';
 import { generateAccessToken } from '@/utils/jwt';
 import { randomUUID } from 'crypto';
 import { BadRequestError } from '@/utils/apiError';
+import { User, UserRole } from '@prisma/client';
 
 /**
  * UserRepository class provides methods to interact with the Users table in the database.
@@ -299,6 +300,22 @@ export class UserRepository {
       });
 
       return deletedUser;
+    });
+  }
+
+  /**
+   * Finds a specific user by ID and Role, ensuring they are active (not deleted).
+   * @param id - The unique identifier of the user.
+   * @param role - The specific role to validate against the user.
+   * @returns The user record if a match is found, otherwise null.
+   */
+  static async findRoleByUserId(id: string, role: UserRole): Promise<User | null> {
+    return await prisma.user.findFirst({
+      where: {
+        id,
+        role,
+        isDeleted: false,
+      },
     });
   }
 }
