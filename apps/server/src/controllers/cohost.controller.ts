@@ -17,7 +17,6 @@ import {
 } from '@/validations/cohost.validation';
 import { HostRole } from '@prisma/client';
 import { API_MESSAGES } from '../constants/apiMessages';
-import { emptySchema } from '@/validations/common';
 /**
  * Retrieves all hosts and cohosts for a specific event.
  * @param req - The HTTP request object containing the event ID in the parameters.
@@ -125,20 +124,4 @@ export const removeEventCohostController = controller(removeCohostSchema, async 
   } else {
     return new SuccessResponse(API_MESSAGES.COHOST.REMOVE.SUCCESS, deletedCohost).send(res);
   }
-});
-
-/**
- * Controller to retrieve system-wide hosts statistics.
- * Fetches the total number of hosts count.
- * @param req - The HTTP request object (requires userId for authentication).
- * @param res - The HTTP response object.
- * @returns A SuccessResponse containing the total host count.
- */
-export const getHostsStatsController = controller(emptySchema, async (req, res) => {
-  const { userId } = req;
-  if (!userId) throw new TokenExpiredError();
-
-  const totalHosts = await CohostRepository.getHostStatusCounts();
-
-  return new SuccessResponse('success', { totalHosts }).send(res);
 });

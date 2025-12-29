@@ -279,13 +279,4 @@ export class CohostRepository {
       },
     });
   }
-
-  /**
-   * Retrieves system-wide host statistics.
-   * Excludes hosts that have been soft-deleted.
-   * @returns A promise resolving to the number of active hosts.
-   */
-  static async getHostStatusCounts(): Promise<number> {
-    return await prisma.host.count({ where: { isDeleted: false, role: HostRole.CREATOR } });
-  }
 }

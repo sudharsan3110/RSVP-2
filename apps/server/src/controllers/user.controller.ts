@@ -101,21 +101,3 @@ export const deleteUserController = controller(emptySchema, async (req, res) => 
 
   return new SuccessResponse('success', deletedUser).send(res);
 });
-
-/**
- * Controller to retrieve system-wide user statistics.
- * Fetches the total number of active users from the database.
- * @param req - The HTTP request object (requires userId for authentication).
- * @param res - The HTTP response object.
- * @returns A SuccessResponse containing the total user count.
- */
-export const getUsersStatsController = controller(emptySchema, async (req, res) => {
-  const { userId } = req;
-  if (!userId) throw new TokenExpiredError();
-
-  const totalUsers = await UserRepository.getTotalUsersCount();
-
-  return new SuccessResponse('success', {
-    totalUsers,
-  }).send(res);
-});

@@ -10,7 +10,6 @@ import {
   getAttendeeTicketController,
   getEventByIdController,
   getEventBySlugController,
-  getEventsStatsController,
   getExcelSheetController,
   getplannedByUserController,
   getPopularEventController,
@@ -31,8 +30,7 @@ import {
 } from '@/controllers/update.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
-import { HostRole, UserRole } from '@prisma/client';
-import { roleMiddleware } from '@/middleware/roleMiddleware';
+import { HostRole } from '@prisma/client';
 
 const eventRouter: Router = Router();
 
@@ -48,8 +46,6 @@ eventRouter.get('/upcoming', authMiddleware, getUserUpcomingEventController);
 eventRouter.get('/popular', getPopularEventController);
 
 eventRouter.get('/user', authMiddleware, getplannedByUserController);
-
-eventRouter.get('/stats', authMiddleware, roleMiddleware(UserRole.ADMIN), getEventsStatsController);
 
 eventRouter.get('/:eventId', authMiddleware, getEventByIdController);
 
