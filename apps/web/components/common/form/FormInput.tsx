@@ -16,6 +16,7 @@ function FormInput<
   label,
   children,
   className,
+  isRequired,
   ...props
 }: {
   label?: string;
@@ -25,6 +26,7 @@ function FormInput<
   children?: React.ReactNode;
   inputClassName?: string;
   name: TName;
+  isRequired?: boolean;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <FormField
@@ -32,7 +34,11 @@ function FormInput<
       name={name}
       render={({ field }) => (
         <FormItem className={className}>
-          {label && <FormLabel className={cn('text-white', lableClassName)}>{label}</FormLabel>}
+          {label && (
+            <FormLabel className={cn('text-white', lableClassName)} isRequired={isRequired}>
+              {label}
+            </FormLabel>
+          )}
           <FormControl className="flex">
             <div>
               {children}
@@ -40,6 +46,11 @@ function FormInput<
                 className={cn('rounded-[6px] bg-dark-900 text-white', inputClassName)}
                 {...props}
                 {...field}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
           </FormControl>

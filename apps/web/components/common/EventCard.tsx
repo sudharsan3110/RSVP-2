@@ -1,11 +1,11 @@
 import { cn } from '@/lib/utils';
 import { ArrowUpRightIcon } from '@heroicons/react/24/solid';
-import dayjs from 'dayjs';
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { venueDisplay } from '@/utils/event';
 import { Event } from '@/types/events';
+import { formatDate } from '@/utils/formatDate';
 
 type CardProps = {
   className?: string;
@@ -40,22 +40,21 @@ const Card = ({ className, event, type }: CardProps) => {
       <section className="flex flex-col">
         <span className="text-xl font-bold line-clamp-1">{event?.name}</span>
         <span className="mb-3 font-semibold capitalize">
-          Hosted By -{' '}
-          {event?.creator?.fullName ? event.creator.fullName.toLowerCase() : 'Unknown Host'}
+          Hosted By - {event.creator?.fullName || event.creator?.userName || 'Unknown Host'}
         </span>
         <span className="font-bold">
-          {event?.startTime ? dayjs(event.startTime).format('hh:mm A, DD MMM YYYY') : ''}
+          {event?.startTime ? formatDate(event.startTime, { withTime: true }) : ''}
         </span>
         <span className="font-medium">{venueDisplay(event)}</span>
       </section>
       {type === 'manage' && (
         <>
-          <Link href={`/events/${event?.id}/manage`} passHref className="block">
+          <Link href={`/events/${event?.id}/manage`} passHref className="block" prefetch={true}>
             <Button variant="tertiary" radius="default" className="w-full border-primary">
               Manage <ArrowUpRightIcon className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <Link href={`/${event?.slug}`} passHref className="block">
+          <Link href={`/${event?.slug}`} passHref className="block" prefetch={true}>
             <Button variant="tertiary" radius="default" className="w-full border-primary">
               Public View <ArrowUpRightIcon className="ml-2 h-4 w-4" />
             </Button>
@@ -72,7 +71,7 @@ const EventCard = ({ className, event, type }: CardProps) => {
   }
 
   return (
-    <Link href={`/${event?.slug}`} className={className}>
+    <Link href={`/${event?.slug}`} className={className} prefetch={true}>
       <Card event={event} type={type} />
     </Link>
   );

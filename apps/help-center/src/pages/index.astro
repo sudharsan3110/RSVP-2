@@ -35,8 +35,8 @@ const posts = await Astro.glob("./blog/*.mdx");
             <a
               href={post.url}
               class="block p-6 bg-white rounded-lg border hover:shadow-lg transition  article-card"
-              data-title={post.frontmatter.title.toLowerCase()}
-              data-description={post.frontmatter.description.toLowerCase()}
+              data-title={post.frontmatter.title?.toLowerCase()}
+              data-description={post.frontmatter.description?.toLowerCase()}
             >
               <h2 class="text-xl font-semibold text-gray-900">
                 {post.frontmatter.title}

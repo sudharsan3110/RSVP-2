@@ -1,17 +1,23 @@
 'use client';
-import { Event } from '@/types/events';
-import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
-import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import dayjs from 'dayjs';
-import { ClockIcon, LinkIcon, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, LinkIcon, Loader2 } from 'lucide-react';
+import { formatDate } from '@/utils/formatDate';
+import { Event } from '@/types/events';
+import { getProfilePictureUrl, venueDisplay } from '@/utils/event';
 import { Badge } from '../ui/badge';
 import AvatarGroup from './AvatarGroup';
-import GetTicketsButton from './GetTicketsButton';
+
+const GetTicketsButton = dynamic(() => import('./GetTicketsButton'), {
+  ssr: false,
+});
 
 const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees: number } }) => {
+  const router = useRouter();
   const { event: eventInfo, totalAttendees } = eventData;
   const event = new Event(eventInfo);
   const [formattedStartDate, setFormattedStartDate] = useState('');
@@ -20,19 +26,37 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
   const [formattedEndDate, setFormattedEndDate] = useState('');
 
   useEffect(() => {
-    setFormattedStartDate(dayjs(event.startTime).format('dddd, MMMM D'));
-    setFormattedStartTime(dayjs(event.startTime).format('h:mm A'));
-    setFormattedEndTime(dayjs(event.endTime).format('h:mm A'));
-    setFormattedEndDate(dayjs(event.endTime).format('dddd, MMMM D'));
+    setFormattedStartDate(formatDate(event.startTime, { dateOnly: true }));
+    setFormattedStartTime(formatDate(event.startTime, { timeOnly: true }));
+    setFormattedEndTime(formatDate(event.endTime, { timeOnly: true }));
+    setFormattedEndDate(formatDate(event.endTime, { dateOnly: true }));
   }, [event.startTime, event.endTime]);
 
   const additionalCount = totalAttendees > 4 ? totalAttendees - 4 : 0;
   const userAvatarLimit = totalAttendees > 4 ? 4 : totalAttendees;
+  const isPastEvent = new Date(event.endTime) < new Date();
 
   const cohosts = event.cohosts?.length ?? 0;
   const capacity = event.capacity ?? 0;
 
   const remainingSeats = capacity - totalAttendees;
+
+  const handleUserClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    userName: string | undefined
+  ) => {
+    e.preventDefault();
+
+    if (!userName) return;
+
+    if (event.creator?.userName === userName && event.creator?.isDeleted) {
+      return;
+    }
+
+    router.push(`/user/${userName}`);
+    return;
+  };
+
   return (
     <main>
       <div className="relative w-full overflow-hidden">
@@ -48,10 +72,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
         <div className="relative mx-auto h-[300px] w-full object-cover sm:h-[350px] sm:w-[600px] md:h-[400px] md:w-[800px] lg:h-[600px] lg:w-[970px]">
           <figure className="relative h-full w-full">
             <div className="relative w-full h-full overflow-hidden rounded-lg">
-              <div
-                className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105"
-                style={{ backgroundImage: `url(${event?.eventImageUrl})` }}
-              />
+              <div className="absolute inset-0 bg-center bg-cover filter blur-xl scale-105" />
               <Image
                 src={event.eventImageUrl}
                 width={1920}
@@ -67,7 +88,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
       <article className="my-6 flex flex-col items-start md:my-12">
         {event.category ? (
           <Badge className="mb-4 text-sm font-medium tracking-wide capitalize text-white">
-            {event?.category}
+            {event?.category?.name}
           </Badge>
         ) : null}
         <p className="text-2xl font-bold md:text-4xl">{event?.name}</p>
@@ -124,34 +145,65 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
           </section>
           <section className="mt-6 p-3 pl-0">
             <p className="font-semibold">Hosted {cohosts > 1 && '& Cohosted'} By</p>
-            {cohosts > 0 &&
-              event?.cohosts?.map((cohost, index) => (
-                <Link
-                  key={index}
-                  href={`/user/${cohost?.user?.userName}`}
-                  className="block mt-3"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <div className="mt-3 flex items-center">
-                    <Image
-                      src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
-                      alt="Host Avatar"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-primary border-2 object-cover"
-                    />
-                    <p className="ml-3 text-sm font-medium capitalize text-secondary">
-                      {cohost.user?.fullName?.toLowerCase()}
+
+            <div className="mt-3">
+              <Link
+                href={`/user/${event.creator?.userName}`}
+                className={`block mt-3 textDecoration-none`}
+                onClick={(e) => {
+                  handleUserClick(e, event?.creator?.userName);
+                }}
+              >
+                <div className="flex items-center">
+                  <Image
+                    src={getProfilePictureUrl(event?.creator?.profileIcon ?? 1)}
+                    alt="Creator Avatar"
+                    width={48}
+                    height={48}
+                    className="rounded-full border-primary border-2 object-cover"
+                  />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium capitalize">
+                      {event?.creator?.fullName?.toLowerCase() ||
+                        event?.creator?.userName ||
+                        'Deleted User'}
                     </p>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </Link>
+            </div>
+
+            {cohosts > 0 &&
+              event?.cohosts
+                ?.filter((cohost) => cohost.role !== 'CREATOR')
+                .map((cohost, index) => (
+                  <Link
+                    key={index}
+                    href={`/user/${event.creator?.userName}`}
+                    className="block mt-3"
+                    style={{ textDecoration: 'none' }}
+                    onClick={(e) => handleUserClick(e, cohost?.user?.userName)}
+                  >
+                    <div className="mt-3 flex items-center">
+                      <Image
+                        src={getProfilePictureUrl(cohost.user?.profileIcon ?? 1)}
+                        alt="Host Avatar"
+                        width={48}
+                        height={48}
+                        className="rounded-full border-primary border-2 object-cover"
+                      />
+                      <p className="ml-3 text-sm font-medium capitalize text-secondary">
+                        {cohost.user?.fullName?.toLowerCase() || cohost.user?.userName}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
           </section>
           {event.description !== '' ? (
             <article className="mt-12">
               <h2 className="text-2xl font-bold">About Event</h2>
               <div
-                className="prose prose-invert text-white"
+                className="prose-ol:m-0 prose-li:m-0 prose-p:m-0 prose-h1:m-0 prose-h2:m-0 prose prose-invert text-white"
                 dangerouslySetInnerHTML={{
                   __html: event.description || '<p>Description not available.</p>',
                 }}
@@ -159,25 +211,35 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
             </article>
           ) : null}
         </section>
-
-        <section className="w-full md:w-[481px]">
-          <section className="w-full rounded-lg bg-dark-900 p-6 shadow-lg md:w-[481px]">
+        <section className="w-full rounded-xl shadow-lg md:w-[481px]">
+          <section className="w-full flex flex-col rounded-xl p-6 bg-dark-900 shadow-lg md:w-[481px]">
             {!event?.isActive ? (
               <p className="text-red-500">Event has been cancelled</p>
             ) : (
               <>
-                <h2 className="text-xl font-bold">Registration</h2>
-                <p className="mt-2 font-semibold">
-                  {remainingSeats > 0
-                    ? `${remainingSeats} Seats are Remaining.`
-                    : 'No Seats Remaining.'}
-                </p>
-                {totalAttendees > 0 && (
-                  <div className="flex items-center pb-2 pt-4">
-                    <AvatarGroup additionalCount={additionalCount} limit={userAvatarLimit} />
-                    <p className="ml-3 text-sm font-semibold">{totalAttendees} going</p>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex flex-col space-y-3">
+                    {isPastEvent ? (
+                      <h2 className="text-xl font-bold">Registration closed</h2>
+                    ) : (
+                      <>
+                        <h2 className="text-xl font-bold">Registration</h2>
+                        <p className="font-semibold">
+                          {remainingSeats > 0
+                            ? `${remainingSeats} Seats are Remaining.`
+                            : 'No Seats Remaining.'}
+                        </p>
+                      </>
+                    )}
                   </div>
-                )}
+
+                  {!isPastEvent && totalAttendees > 0 && (
+                    <div className="flex items-center justify-center gap-2">
+                      <AvatarGroup additionalCount={additionalCount} limit={userAvatarLimit} />
+                      <p className="text-sm font-semibold">{totalAttendees} going</p>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             {/* {event?.hostPermissionRequired && (
@@ -198,6 +260,7 @@ const EventDetail = ({ eventData }: { eventData: { event: Event; totalAttendees:
                 eventId={event.id}
                 eventSlug={event.slug}
                 isPermissionRequired={event?.hostPermissionRequired}
+                isPastEvent={isPastEvent}
               />
             )}
           </section>

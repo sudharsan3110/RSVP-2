@@ -4,15 +4,11 @@ import { eventAPI } from '@/lib/axios/event-API';
 import { AxiosError } from 'axios';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { cache } from 'react';
 
-interface EventData {
-  event: {
-    name: string;
-    description?: string;
-    eventImageUrl?: string;
-    category?: string;
-  };
-}
+const getCachedEventBySlug = cache(async (slug: string) => {
+  return eventAPI.getEventBySlug(slug);
+});
 
 export async function generateMetadata({
   params,
@@ -20,7 +16,7 @@ export async function generateMetadata({
   params: { slug: string };
 }): Promise<Metadata> {
   try {
-    const eventData = await eventAPI.getEventBySlug(params.slug);
+    const eventData = await getCachedEventBySlug(params.slug);
     if (!eventData) {
       return {
         title: 'Event Not Found',
@@ -29,19 +25,24 @@ export async function generateMetadata({
     }
 
     const event = eventData.event;
+    // Convert description to Plain text for metadata
+    const eventDescription =
+      (event.description && event.description.replace(/<[^>]+>/g, '')) ||
+      `Join us for ${event.name}`;
+
     return {
       title: event.name,
-      description: event.description || `Join us for ${event.name}`,
+      description: eventDescription,
       openGraph: {
         title: event.name,
-        description: event.description || `Join us for ${event.name}`,
+        description: eventDescription,
         images: event.eventImageUrl ? [event.eventImageUrl] : [],
         type: 'website',
       },
       twitter: {
         card: 'summary_large_image',
         title: event.name,
-        description: event.description || `Join us for ${event.name}`,
+        description: eventDescription,
         images: event.eventImageUrl ? [event.eventImageUrl] : [],
       },
     };
@@ -56,7 +57,7 @@ export async function generateMetadata({
 const EventDetailPage = async ({ params }: { params: { slug: string } }) => {
   const slug = params.slug;
   try {
-    const eventData = await eventAPI.getEventBySlug(slug);
+    const eventData = await getCachedEventBySlug(slug);
     if (!eventData) notFound();
 
     const serializedEvent = JSON.parse(JSON.stringify(eventData));

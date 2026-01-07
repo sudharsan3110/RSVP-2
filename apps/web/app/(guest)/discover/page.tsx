@@ -11,7 +11,7 @@ import { TooltipContent } from '@/components/ui/tooltip';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import useDebounce from '@/hooks/useDebounce';
-import { useGetDiscoverEvents } from '@/lib/react-query/event';
+import { useGetDiscoverEvents, useGetCategoryList } from '@/lib/react-query/event';
 import { Event } from '@/types/events';
 import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ArrowDownNarrowWideIcon, ArrowUpNarrowWideIcon } from 'lucide-react';
@@ -46,6 +46,8 @@ const DiscoverEvents = () => {
     limit: 10,
     category: filters.category,
   });
+
+  const { data: categories, isLoading: isCategoriesLoading } = useGetCategoryList();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -158,10 +160,15 @@ const DiscoverEvents = () => {
           </section>
 
           <section className="mt-1">
-            <Tags
-              selectedTag={filters.category}
-              setSelectedTag={(value) => setFilters((prev) => ({ ...prev, category: value }))}
-            />
+            {isCategoriesLoading ? (
+              <Skeleton className="w-full h-10" />
+            ) : (
+              <Tags
+                selectedTag={filters.category}
+                setSelectedTag={(value) => setFilters((prev) => ({ ...prev, category: value }))}
+                tagList={categories || []}
+              />
+            )}
           </section>
 
           <section className="mt-6">

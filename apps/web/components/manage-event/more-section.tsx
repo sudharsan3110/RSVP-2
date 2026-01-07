@@ -34,7 +34,7 @@ const MoreSection = ({ event, slug }: { event: Event; slug: string }) => {
   } = form;
 
   const onSubmit = (data: { slug: string }) => {
-    mutate({ eventId, slug: data.slug }, { onSuccess: () => reset({ slug: data.slug }) });
+    mutate({ eventId, slug: data.slug.trim() }, { onSuccess: () => reset({ slug: data.slug }) });
   };
 
   const handleCancelEvent = () => {

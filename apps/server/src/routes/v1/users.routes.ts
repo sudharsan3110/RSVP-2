@@ -10,7 +10,7 @@ const userRouter: Router = Router();
 
 userRouter.post('/profile', authMiddleware, updateUserProfileController);
 
-userRouter.get('/:username', authMiddleware, getUserPublicController);
+userRouter.get('/:username', getUserPublicController);
 
 userRouter.delete('/', authMiddleware, deleteUserController);
 

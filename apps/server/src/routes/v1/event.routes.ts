@@ -2,6 +2,7 @@ import {
   cancelEventController,
   createAttendeeController,
   createEventController,
+  createInvitesController,
   deleteAttendeeController,
   deleteEventController,
   filterEventController,
@@ -29,7 +30,7 @@ import {
 } from '@/controllers/update.controller';
 import authMiddleware from '@/middleware/authMiddleware';
 import { eventManageMiddleware } from '@/middleware/hostMiddleware';
-import { Role } from '@prisma/client';
+import { HostRole } from '@prisma/client';
 
 const eventRouter: Router = Router();
 
@@ -51,51 +52,58 @@ eventRouter.get('/:eventId', authMiddleware, getEventByIdController);
 eventRouter.patch(
   '/:eventId',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR]),
+  eventManageMiddleware([HostRole.CREATOR]),
   updateEventController
 );
 
 eventRouter.patch(
   '/:eventId/cancel',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR]),
+  eventManageMiddleware([HostRole.CREATOR]),
   cancelEventController
 );
 
 eventRouter.delete(
   '/:eventId',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR]),
+  eventManageMiddleware([HostRole.CREATOR]),
   deleteEventController
 );
 
 eventRouter.patch(
   '/:eventId/slug',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   updateEventSlugController
 );
 
 eventRouter.post('/:eventId/attendees', authMiddleware, createAttendeeController);
 
+eventRouter.post(
+  '/:eventId/invites',
+  authMiddleware,
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
+  createInvitesController
+);
+
 eventRouter.get(
   '/:eventId/attendees',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   getAttendeeController
 );
 
 eventRouter.get(
   '/:eventId/attendees/excel',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   getExcelSheetController
 );
 
 eventRouter.post(
   '/:eventId/communications',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   sendMessageController
 );
 
@@ -106,21 +114,21 @@ eventRouter.get('/:eventId/attendees/ticket', authMiddleware, getAttendeeTicketC
 eventRouter.patch(
   '/:eventId/attendee/:attendeeId/verify',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   verifyQrController
 );
 
 eventRouter.get(
   '/:eventId/attendee/qr/:qrToken',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   scanTicketController
 );
 
 eventRouter.patch(
   '/:eventId/attendee/:attendeeId/status',
   authMiddleware,
-  eventManageMiddleware([Role.CREATOR, Role.MANAGER]),
+  eventManageMiddleware([HostRole.CREATOR, HostRole.MANAGER]),
   updateAttendeeStatusController
 );
 

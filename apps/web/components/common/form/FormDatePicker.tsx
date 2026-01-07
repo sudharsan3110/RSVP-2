@@ -1,6 +1,6 @@
 'use client';
 
-import { Control, FieldPath, FieldValues } from 'react-hook-form';
+import { Control, FieldPath, FieldValues, Path, useFormContext } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar, CalendarProps } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import dayjs from 'dayjs';
+import { formatDate } from '@/utils/formatDate';
 
 function FormDatePicker<
   TFieldValues extends FieldValues = FieldValues,
@@ -37,7 +37,8 @@ function FormDatePicker<
   name: TName;
   description?: string;
   initialFocus?: boolean;
-} & Omit<CalendarProps, 'selected' | 'onSelect'>) {
+} & Omit<CalendarProps, 'selected' | 'onSelect' | 'mode'>) {
+  const { clearErrors } = useFormContext<TFieldValues>();
   return (
     <FormField
       control={control}
@@ -56,7 +57,7 @@ function FormDatePicker<
                     className
                   )}
                 >
-                  {field.value ? dayjs(field.value).format('DD MMM YYYY') : <span>Date</span>}
+                  {field.value ? formatDate(field.value, { dateOnly: true }) : <span>Date</span>}
                   <CalendarIcon className={cn('ml-auto h-4 w-4 opacity-50', iconClassName)} />
                 </Button>
               </FormControl>
@@ -64,8 +65,12 @@ function FormDatePicker<
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
+                required
                 selected={field.value}
-                onSelect={field.onChange}
+                onSelect={(date: Date | undefined) => {
+                  field.onChange(date);
+                  clearErrors([name, 'fromDateTime'] as Path<TFieldValues>[]);
+                }}
                 initialFocus={initialFocus}
                 {...calendarProps}
               />

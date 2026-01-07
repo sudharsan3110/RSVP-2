@@ -4,6 +4,7 @@ import { CommunicationForm } from '../zod/communication';
 import { CreateEventSubmissionType } from '../zod/event';
 import api from './instance';
 import { Cohost } from '@/types/cohost';
+import { CategoryType } from '@/types/category';
 
 export interface GetAttendeeByEventIdParams extends PaginationParams {
   eventId: string;
@@ -32,6 +33,11 @@ export type EventParams = {
   endDate?: Date;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+};
+
+export type InviteGuestsParams = {
+  eventId: string;
+  emails: string[];
 };
 
 export const eventAPI = {
@@ -70,6 +76,10 @@ export const eventAPI = {
     return api.get(`/event/${params.eventId}/attendees`, {
       params: apiParams,
     });
+  },
+
+  inviteGuests: async ({ eventId, emails }: InviteGuestsParams) => {
+    return api.post(`/event/${eventId}/invites`, { emails });
   },
 
   getEventAttendeeExcel: async (params: GetAttendeeByEventIdParams) => {
@@ -173,6 +183,11 @@ export const eventAPI = {
     return response.data.data.map((event: Event) => new Event(event));
   },
 
+  getEventImageSignedUrl: async (filename: string): Promise<string> => {
+    const { data } = await api.get('/event/upload-image', { params: { filename } });
+    return data.data.signedUrl as string;
+  },
+
   /* Cohost API */
   getEventCohosts: async (eventId: string): Promise<Cohost[]> => {
     const { data } = await api.get(`/cohosts/events/${eventId}`);
@@ -188,8 +203,16 @@ export const eventAPI = {
     });
     return response.data;
   },
-  deleteEventCohost: async (eventId: string, cohostId: string) => {
-    const response = await api.delete(`cohosts/events/${eventId}/${cohostId}`);
+  deleteEventCohost: async (eventId: string, userId: string) => {
+    const response = await api.delete(`cohosts/events/${eventId}/${userId}`);
     return response.data;
+  },
+
+  /* Category API to fetch all category list */
+  getCategoryList: async () => {
+    const response = await api.get('/categories');
+    return response.data.data.map((category: CategoryType) => {
+      return { value: category.id, label: category.name };
+    });
   },
 };

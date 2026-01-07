@@ -11,7 +11,10 @@ export class Event {
   creatorId: string;
   name: string;
   slug: string;
-  category?: string;
+  category?: {
+    id: string;
+    name: string;
+  };
   startTime: Date;
   endTime: Date;
   eventDate: Date;
@@ -21,6 +24,7 @@ export class Event {
   venueAddress?: string;
   venueUrl?: string;
   hostPermissionRequired: boolean;
+  discoverable: boolean;
   capacity?: number;
   isActive: boolean;
   isCancelled?: boolean;
@@ -30,8 +34,9 @@ export class Event {
   creator?: {
     id: string;
     fullName: string;
-    username: string;
+    userName: string;
     profileIcon: string;
+    isDeleted: boolean;
   };
   cohosts?: Cohost[];
 
@@ -50,6 +55,7 @@ export class Event {
     this.venueAddress = data.venueAddress;
     this.venueUrl = data.venueUrl;
     this.hostPermissionRequired = data.hostPermissionRequired ?? false;
+    this.discoverable = data.discoverable ?? true;
     this.capacity = data.capacity;
     this.isActive = data.isActive ?? true;
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
@@ -73,8 +79,9 @@ export class Event {
     );
   }
 
-  checkCreator(creatorId: string) {
-    return this.creator?.id === creatorId;
+  checkCreator(creatorId?: string) {
+    if (!creatorId) return false;
+    return this.creatorId === creatorId || this.creator?.id === creatorId;
   }
 
   get isPhysical() {

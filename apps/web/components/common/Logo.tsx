@@ -1,6 +1,10 @@
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
-const Logo = ({ className }: PropsWithClassName) => {
+const Logo = ({
+  className,
+  betaBadgeClassName,
+}: PropsWithClassName<{ betaBadgeClassName?: string }>) => {
   return (
     <div className="relative inline-block">
       <Image
@@ -11,7 +15,12 @@ const Logo = ({ className }: PropsWithClassName) => {
         className={className}
         alt="Logo"
       />
-      <span className="absolute -top-1 -right-10 bg-blue-500 text-white text-[10px] border border-white font-bold px-1.5 py-0.5 rounded-full">
+      <span
+        className={cn(
+          'absolute -top-1 -right-10 bg-blue-500 text-white text-[10px] border border-white font-bold px-1.5 py-0.5 rounded-full',
+          betaBadgeClassName
+        )}
+      >
         BETA
       </span>
     </div>

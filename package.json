@@ -1,0 +1,25 @@
+{
+  "name": "rsvp",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "lint": "pnpm -r --parallel lint",
+    "check": "pnpm -r --parallel check",
+    "test": "pnpm -r --parallel test",
+    "coverage": "pnpm -r --parallel coverage",
+    "lint-staged": "lint-staged"
+  },
+  "devDependencies": {
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,mdx,css,scss,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

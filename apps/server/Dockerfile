@@ -1,31 +1,41 @@
 FROM node:20-alpine AS builder
-WORKDIR /app
-
-COPY package.json ./
-RUN npm install -g pnpm
-RUN pnpm install
-
-COPY . . 
-RUN pnpm build
-
-FROM node:20-alpine AS runtime
-
-WORKDIR /app
+WORKDIR /repo
 
 RUN npm install -g pnpm
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/prisma/schema.prisma ./src/prisma/schema.prisma
-COPY package.json ./
-COPY start.sh ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY apps/server/package.json apps/server/package.json
 
-RUN pnpm install --prod
-RUN apk add --no-cache openssl
-RUN pnpm generate
-RUN chmod +x /app/start.sh
+RUN pnpm install --frozen-lockfile
+COPY . .
 
-ENV NODE_ENV=production
+# Build app instll deps
+RUN pnpm --filter "./apps/server" build
 
-EXPOSE 8000
+# install node_modules only in server
+RUN pnpm deploy --legacy --prod --filter "./apps/server" /deploy/server
 
-ENTRYPOINT ["/app/start.sh"]
+
+
+COPY apps/server/src/prisma /deploy/server/src/prisma
+RUN cd /deploy/server && pnpm prisma generate
+
+
+FROM node:20-alpine
+WORKDIR /app
+
+RUN apk add --no-cache openssl \
+    && addgroup -S nodejs \
+    && adduser -S nodeuser -G nodejs
+
+
+COPY --chown=nodeuser:nodejs --from=builder /deploy/server/node_modules ./node_modules
+COPY --chown=nodeuser:nodejs --from=builder /repo/apps/server/dist ./dist
+COPY --chown=nodeuser:nodejs --from=builder /repo/apps/server/package.json ./
+COPY --chown=nodeuser:nodejs --from=builder /deploy/server/src/prisma ./src/prisma
+COPY --chown=nodeuser:nodejs --from=builder /repo/apps/server/start.sh ./start.sh
+
+
+USER nodeuser
+
+CMD ["sh", "start.sh"]

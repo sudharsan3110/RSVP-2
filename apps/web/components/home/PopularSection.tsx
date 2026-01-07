@@ -12,7 +12,7 @@ const PopularSection = () => {
   }
 
   return (
-    <Container className="relative z-10 space-y-8 md:space-y-12 animate-fade-in text-white">
+    <Container className="relative z-10 space-y-8 md:space-y-12 animate-fade-in text-white -mt-32">
       <header className="flex items-center justify-between">
         <h2 className="text-xl font-bold tracking-wide md:text-[28px]">Popular Events</h2>
         <Link href="/discover" className="hidden md:block">

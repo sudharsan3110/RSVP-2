@@ -1,6 +1,6 @@
-type PropsWithClassName = {
+type PropsWithClassName<T = {}> = {
   className?: string;
-};
+} & T;
 
 type FormSelectOption = {
   value: string;

@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import TablePagination from '../common/Pagination';
 import { DataTable } from '../ui/data-table';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import useDebounce from '@/hooks/useDebounce';
 
 interface FilterState {
   searchTerm: string;
@@ -16,11 +17,21 @@ interface FilterState {
   page: number;
 }
 
-export default function EventDetailsTable() {
+type EventDetailsTableProps = Readonly<{
+  eventCapacity: number;
+  totalAttendees: number;
+}>;
+
+export default function EventDetailsTable({
+  eventCapacity,
+  totalAttendees,
+}: EventDetailsTableProps) {
   const [filters, setFilters] = useState<FilterState>({
     searchTerm: '',
     page: 1,
   });
+
+  const searchTerm = useDebounce(filters.searchTerm, 500);
 
   const params = useParams();
   const eventId = params.id?.toString() || '';
@@ -30,13 +41,18 @@ export default function EventDetailsTable() {
     eventId,
     page: filters.page,
     limit: 10,
-    search: filters.searchTerm,
+    search: searchTerm,
     hasAttended: filters.hasAttended,
     sortBy: 'registrationTime',
   });
 
   const attendees = data?.attendees ?? [];
-  const totalPages = data?.total ?? 0;
+  const totalPages = Math.ceil((data?.total ?? 0) / 10);
+
+  const columns = useMemo(
+    () => attendeeColumns(eventCapacity, totalAttendees),
+    [eventCapacity, totalAttendees]
+  );
 
   // Debounced search handler
   const handleSearch = (value: string) => {
@@ -101,7 +117,7 @@ export default function EventDetailsTable() {
         </div>
 
         <div className="overflow-x-auto">
-          <DataTable columns={attendeeColumns} data={attendees} loading={isLoading} />
+          <DataTable columns={columns} data={attendees} loading={isLoading} />
         </div>
 
         <TablePagination

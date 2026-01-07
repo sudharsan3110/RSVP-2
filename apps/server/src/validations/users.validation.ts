@@ -1,12 +1,13 @@
 import z from 'zod';
 import { disposableEmailValidator } from '../utils/disposableEmailBlocklist';
 
-const secondaryEmailSchema = z.object({ secondaryEmail: disposableEmailValidator.or(z.null()) }).strict();
-
+const secondaryEmailSchema = z
+  .object({ secondaryEmail: disposableEmailValidator.or(z.null()) })
+  .strict();
 
 const contactNumberSchema = z.object({ contact: z.string() }).strict();
 
-const fullProfileSchema = z
+export const fullProfileSchema = z
   .object({
     fullName: z.string().min(1),
     location: z.string(),

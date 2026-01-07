@@ -1,5 +1,5 @@
 import { Paginator } from '@/utils/pagination';
-import { Attendee, Prisma, Status } from '@prisma/client';
+import { AttendeeStatus, Prisma } from '@prisma/client';
 import { prisma } from '@/utils/connection';
 import { IRegisteredEvent, IAttendeesByEvent } from '@/interface/attendees';
 
@@ -59,6 +59,22 @@ export class AttendeeRepository {
         userId,
         eventId,
         isDeleted: isDeleted !== null ? isDeleted : undefined,
+      },
+    });
+  }
+
+  /**
+   * Fetches all attendees for the given event and list of user IDs.
+   * @param eventId - The event to filter by.
+   * @param userIds - Array of user IDs to match.
+   * @returns Array of attendee records.
+   */
+
+  static async findAllByEventIdAndUserIds(eventId: string, userIds: string[]) {
+    return prisma.attendee.findMany({
+      where: {
+        eventId,
+        userId: { in: userIds },
       },
     });
   }
@@ -139,7 +155,11 @@ export class AttendeeRepository {
     const attendees = await prisma.attendee.findMany({
       where: whereClause,
       include: {
-        event: true,
+        event: {
+          include: {
+            category: { select: { id: true, name: true } },
+          },
+        },
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -153,7 +173,7 @@ export class AttendeeRepository {
     const totalCount = await prisma.attendee.count({ where: whereClause });
 
     return {
-      events: attendees.map((attendee) => attendee.event),
+      events: attendees.map((attendee) => ({ ...attendee.event })),
       metadata: {
         totalItems: totalCount,
         totalPages: Math.ceil(totalCount / limit),
@@ -205,7 +225,7 @@ export class AttendeeRepository {
       ...(status &&
         status.length > 0 && {
           status: {
-            in: status.map((s) => s as Status),
+            in: status.map((s) => s as AttendeeStatus),
           },
         }),
     };
@@ -304,7 +324,27 @@ export class AttendeeRepository {
       },
       data: {
         allowedStatus,
-        status: allowedStatus ? Status.GOING : Status.WAITING,
+        status: allowedStatus ? AttendeeStatus.GOING : AttendeeStatus.WAITING,
+      },
+    });
+  }
+
+  /**
+   * Updates the allowed status and status of multiple attendees for a specific event.
+   * @param where - The where clause for filtering attendees.
+   * @param status - The new status.
+   * @returns The updated attendees.
+   */
+  static async updateMultipleAttendeesStatus(
+    where: Prisma.AttendeeWhereInput,
+    status: AttendeeStatus
+  ) {
+    where.isDeleted = false;
+    return await prisma.attendee.updateMany({
+      where,
+      data: {
+        allowedStatus: true,
+        status,
       },
     });
   }
@@ -318,7 +358,7 @@ export class AttendeeRepository {
     return await prisma.attendee.update({
       where: { id, isDeleted: false },
       data: {
-        status: Status.CANCELLED,
+        status: AttendeeStatus.CANCELLED,
         isDeleted: true,
         allowedStatus: false,
       },
@@ -330,9 +370,9 @@ export class AttendeeRepository {
    * @param id - The unique ID of the attendee.
    * @returns The updated attendee object with `isDeleted` set to false.
    */
-  static async restore(id: string, status: Status, allowedStatus: boolean) {
+  static async restore(id: string, status: AttendeeStatus, allowedStatus: boolean) {
     return await prisma.attendee.update({
-      where: { id, isDeleted: true, status: Status.CANCELLED },
+      where: { id, isDeleted: true, status: AttendeeStatus.CANCELLED },
       data: {
         status: status,
         isDeleted: false,

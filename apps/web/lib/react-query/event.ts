@@ -1,24 +1,47 @@
 import { Attendee } from '@/types/attendee';
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   eventAPI,
   EventParams,
   GetAttendeeByEventIdParams,
+  InviteGuestsParams,
   PaginationMetadata,
   UpdateEventSubmissionType,
 } from '../axios/event-API';
 import { CreateEventSubmissionType } from '../zod/event';
-
+import { clearLocalStorage } from '@/hooks/useLocalStorage';
+import {
+  FORM_CACHE_KEY,
+  EVENTS_QUERY_KEY,
+  EVENT_COHOST_KEY,
+  ATTENDEE_QUERY_KEY,
+  EVENT_CATEGORY_LIST_KEY,
+} from '@/utils/constants';
 interface ErrorResponse {
   message?: string;
+  errorCode?: string;
 }
 
-const EVENTS_QUERY_KEY = 'events';
-const EVENT_COHOST_KEY = 'cohost';
-const ATTENDEE_QUERY_KEY = 'attendees';
+export const useInviteGuests = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, emails }: InviteGuestsParams) => {
+      const response = await eventAPI.inviteGuests({ eventId, emails });
+      return response.data;
+    },
+    onSuccess: (_, { eventId }) => {
+      queryClient.invalidateQueries({
+        queryKey: [ATTENDEE_QUERY_KEY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [EVENTS_QUERY_KEY, eventId],
+      });
+    },
+  });
+};
 
 export const useEventQuery = (id: string) => {
   return useQuery({
@@ -77,12 +100,18 @@ export const useCreateEvent = () => {
   return useMutation<AxiosResponse, AxiosError<ErrorResponse>, CreateEventSubmissionType>({
     mutationFn: eventAPI.createEvent,
     onSuccess: ({ data }) => {
+      clearLocalStorage(FORM_CACHE_KEY);
       toast.success('Event created successfully');
       const url = `/${data.data.slug}`;
       router.push(url);
     },
     onError: (error) => {
-      toast.error(error.response?.data.message || 'An error occurred');
+      const errorCode = error.response?.data?.errorCode;
+      const message = error.response?.data?.message || 'An error occurred';
+
+      if (errorCode === 'EVENT_LIMIT_PUBLIC' || errorCode === 'EVENT_LIMIT_PRIVATE') return;
+
+      toast.error(message);
     },
   });
 };
@@ -188,7 +217,12 @@ export const useUpdateEvent = () => {
       toast.success('Event updated successfully');
     },
     onError: (error) => {
-      toast.error(error.response?.data.message || 'An error occurred');
+      const errorCode = error.response?.data?.errorCode;
+      const message = error.response?.data?.message || 'An error occurred';
+
+      if (errorCode === 'EVENT_LIMIT_PUBLIC' || errorCode === 'EVENT_LIMIT_PRIVATE') return;
+
+      toast.error(message);
     },
   });
 };
@@ -284,10 +318,11 @@ export const useUpdateAttendeeStatus = () => {
       attendeeId: string;
       allowedStatus: boolean;
     }) => eventAPI.updateAttendeeStatus(eventId, attendeeId, allowedStatus),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['attendees'] });
-      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId, 'ticket-details'] });
-      queryClient.invalidateQueries({ queryKey: ['event', variables.eventId, 'attendee-details'] });
+    onSuccess: (_, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: [ATTENDEE_QUERY_KEY] });
+      queryClient.invalidateQueries({
+        queryKey: [EVENTS_QUERY_KEY, eventId],
+      });
     },
   });
 };
@@ -296,6 +331,31 @@ export const usePopularEvents = (limit?: number) => {
   return useQuery({
     queryKey: ['popular-events', limit],
     queryFn: () => eventAPI.getPopularEvents(limit),
+  });
+};
+
+export const useUploadEventImage = () => {
+  return useMutation<
+    { actualUrl: string },
+    AxiosError<ErrorResponse>,
+    { file: File; onProgress?: (progress: number) => void }
+  >({
+    mutationFn: async ({ file, onProgress }) => {
+      const signedUrl = await eventAPI.getEventImageSignedUrl(file.name);
+
+      await axios.put(signedUrl, file, {
+        headers: { 'Content-Type': file.type },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(progress);
+          }
+        },
+      });
+
+      const actualUrl = signedUrl.split('?')[0];
+      return { actualUrl };
+    },
   });
 };
 
@@ -337,18 +397,25 @@ export const useAddEventCohost = () => {
 };
 
 export const useDeleteCohost = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, cohostId }: { eventId: string; cohostId: string }) =>
-      eventAPI.deleteEventCohost(eventId, cohostId),
+    mutationFn: ({ eventId, userId }: { eventId: string; userId: string }) =>
+      eventAPI.deleteEventCohost(eventId, userId),
     onSuccess: (resp, { eventId }) => {
+      router.push(`/events`);
       toast.success(resp?.message);
-      queryClient.invalidateQueries({ queryKey: [EVENT_COHOST_KEY, eventId] });
-      queryClient.invalidateQueries({ queryKey: [EVENTS_QUERY_KEY, eventId] });
     },
     onError: (resp: AxiosError) => {
       const errMsg = resp.response?.data as ErrorResponse | undefined;
       toast.error(errMsg?.message ?? resp.message ?? 'An unexpected error occured');
     },
+  });
+};
+
+export const useGetCategoryList = () => {
+  return useQuery({
+    queryKey: [EVENT_CATEGORY_LIST_KEY],
+    queryFn: () => eventAPI.getCategoryList(),
   });
 };

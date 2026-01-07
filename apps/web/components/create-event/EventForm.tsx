@@ -3,9 +3,9 @@
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { createEventFormSchema, CreateEventFormType } from '@/lib/zod/event';
+import { createEventFormSchema, CreateEventFormType, EventFromProps } from '@/lib/zod/event';
 import { VenueType } from '@/types/events';
-import { capacityOptions, eventCategoryOptions, evenTimeOptions } from '@/utils/constants';
+import { capacityOptions, evenTimeOptions } from '@/utils/constants';
 import { BuildingOfficeIcon, LinkIcon } from '@heroicons/react/16/solid';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Clock1, Link, LoaderCircle } from 'lucide-react';
@@ -20,26 +20,26 @@ import Tiptap from '../ui/tiptap';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import EventPreview from './EventPreview';
 import FormSelectInput from '../common/form/FormSelectInput';
-
-type Props = {
-  defaultValues: CreateEventFormType;
-  isEditing?: boolean;
-  isLoading: boolean;
-  onSubmit: (data: CreateEventFormType) => void;
-};
-
-const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Props) => {
+import SigninDialog from '../auth/SigninDialog';
+import { useEffect, useState } from 'react';
+const EventForm = ({
+  defaultValues,
+  isEditing = false,
+  isLoading,
+  onSubmit,
+  requireSignIn,
+  setPersistentValue,
+  eventCategoryOptions,
+}: EventFromProps) => {
   const allowedDate = new Date();
   allowedDate.setHours(0, 0, 0, 0);
-  allowedDate.setDate(allowedDate.getDate() + 1);
-
   const form = useForm<CreateEventFormType>({
     resolver: zodResolver(createEventFormSchema),
     defaultValues: defaultValues,
+    mode: 'onChange',
   });
-
+  const [submitted, setSubmitted] = useState(false);
   const buttonText = isEditing ? 'Update Event' : 'Create Event';
-
   const {
     control,
     watch,
@@ -47,13 +47,47 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isDirty },
+    formState: { errors, isValid, isDirty },
   } = form;
+  useEffect(() => {
+    const subscription = watch((value) => {
+      setPersistentValue?.(value as CreateEventFormType);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, setPersistentValue]);
 
+  const image = watch('eventImageUrl');
+
+  useEffect(() => {
+    const subscription = watch((values, { name }) => {
+      if ((name === 'fromTime' || name === 'fromDate') && values.fromDate && values.fromTime) {
+        const [hours, minutes] = values.fromTime.split(':').map(Number);
+        const endHour = hours + 1;
+
+        const normalizedEndHour = endHour % 24;
+        const endTime = `${normalizedEndHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+        setValue('toTime', endTime);
+
+        if (endHour >= 24) {
+          const nextDay = new Date(values.fromDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          setValue('toDate', nextDay);
+        } else {
+          setValue('toDate', values.fromDate);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const isButtonDisabled = isEditing ? !isDirty || isLoading : isLoading || submitted;
   const venueType = watch('venueType');
 
-  const handleFormSubmit = async (data: CreateEventFormType) => {
-    await onSubmit(data);
+  const handleFormSubmit = (data: CreateEventFormType) => {
+    setSubmitted(true);
+    onSubmit(data);
     reset(data);
   };
 
@@ -61,22 +95,28 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
     <Form {...form}>
       <section className="flex items-start justify-between gap-20">
         <form
-          onSubmit={handleSubmit(handleFormSubmit)}
+          onSubmit={
+            requireSignIn
+              ? (e) => {
+                  e.preventDefault();
+                }
+              : handleSubmit(handleFormSubmit)
+          }
           className="flex max-w-[585px] grow flex-col gap-[1.125rem]"
         >
           <FormImageUpload
             control={control}
             name="eventImageUrl"
-            className="lg:hidden"
             label="Event Image"
+            labelClassName={image ? 'lg:hidden' : ''}
           />
-          <FormInput label="Event Name" name="name" control={control} />
+          <FormInput label="Event Name" name="name" control={control} isRequired />
           <FormCombobox
             control={control}
             label="Category"
             name="category"
             placeholder="Select a category"
-            options={eventCategoryOptions}
+            options={eventCategoryOptions || []}
           />
           <div className="flex max-w-96 items-end gap-3.5">
             <FormGroupSelect
@@ -90,7 +130,9 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               control={control}
               name="fromDate"
               iconClassName="opacity-100"
-              disabled={(date) => date < allowedDate}
+              disabled={(date) => {
+                return isEditing ? date < defaultValues.fromDate : date < allowedDate;
+              }}
             />
           </div>
           {errors.fromDateTime && (
@@ -101,7 +143,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               control={control}
               label="To"
               name="toTime"
-              defaultValue="20:00"
+              defaultValue="18:00"
               options={evenTimeOptions}
             />
             <FormDatePicker
@@ -122,7 +164,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <Tiptap
-                  description={field.value}
+                  description={field.value ?? ''}
                   limit={300}
                   onChange={(richtext, plaintext) => {
                     field.onChange(richtext);
@@ -138,12 +180,15 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               name="venueType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Location</FormLabel>
+                  <FormLabel className="text-white" isRequired>
+                    Location
+                    <FormMessage />
+                  </FormLabel>
                   <ToggleGroup
                     size={'sm'}
                     type="single"
                     defaultValue="physical"
-                    value={field.value}
+                    value={field.value ?? ''}
                     onValueChange={(value) => {
                       if (value) field.onChange(value);
                     }}
@@ -186,6 +231,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
                   venueType === VenueType.Physical ? 'One Line Address Of Venue' : 'Meeting Link'
                 }
                 className="mt-2"
+                isRequired
               />
             )}
             {venueType == VenueType.Physical && (
@@ -210,6 +256,15 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
             label="Required Approval"
             description="Needs host permission to join event"
           />
+          <FormSwitch
+            control={control}
+            name="discoverable"
+            className="!mt-1 data-[state=checked]:bg-[linear-gradient(188deg,#AC6AFF_53.34%,#DF7364_116.65%)]"
+            thumbClassName="bg-white"
+            containerClassName="flex flex-row justify-between items-start gap-3"
+            label="Public Event"
+            description="Event will be displayed on Discover page."
+          />
           <FormSelectInput
             control={control}
             label="Capacity"
@@ -223,6 +278,7 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
             emptyMessage="No options found"
             disabled={false}
           />
+
           <Drawer>
             <DrawerTrigger asChild className="lg:hidden">
               <Button className="h-[44px] px-4 text-white" variant="tertiary">
@@ -233,18 +289,25 @@ const EventForm = ({ defaultValues, isEditing = false, isLoading, onSubmit }: Pr
               <EventPreview className="overflow-y-scroll" />
             </DrawerContent>
           </Drawer>
-          {errors.eventImageUrl && (
-            <p className="hidden text-sm font-medium text-destructive lg:block">
-              {errors.eventImageUrl.message}
-            </p>
+          {requireSignIn ? (
+            <SigninDialog variant="signin">
+              <Button
+                type="button"
+                disabled={isButtonDisabled}
+                className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
+              >
+                {isLoading ? <LoaderCircle className="animate-spin" /> : <>{buttonText}</>}
+              </Button>
+            </SigninDialog>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isButtonDisabled}
+              className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
+            >
+              {isLoading ? <LoaderCircle className="animate-spin" /> : <>{buttonText}</>}
+            </Button>
           )}
-          <Button
-            type="submit"
-            disabled={isLoading || !isDirty}
-            className="m mt-2 min-h-11 w-full rounded-[1.25rem] text-base font-semibold text-white"
-          >
-            {isLoading ? <LoaderCircle className="animate-spin" /> : <>{buttonText}</>}
-          </Button>
         </form>
         <EventPreview className="sticky top-28 hidden w-full max-w-[424px] rounded-[1.25rem] bg-[linear-gradient(162.44deg,#5162FF_0%,#413DEB_100%)] px-6 py-7 lg:block" />
       </section>

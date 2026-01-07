@@ -1,10 +1,15 @@
 import { UserRepository } from '@/repositories/user.repository';
 import { BadRequestError, NotFoundError, TokenExpiredError } from '@/utils/apiError';
 import { SuccessResponse } from '@/utils/apiResponse';
+import { prisma } from '@/utils/connection';
 import { controller } from '@/utils/controller';
 import logger from '@/utils/logger';
 import { emptySchema } from '@/validations/common';
-import { updateProfileSchema, usernameSchema } from '@/validations/users.validation';
+import {
+  fullProfileSchema,
+  updateProfileSchema,
+  usernameSchema,
+} from '@/validations/users.validation';
 
 /**
  * Updates the profile of the authenticated user.
@@ -16,7 +21,41 @@ export const updateUserProfileController = controller(updateProfileSchema, async
   const userId = req.userId;
   if (!userId) throw new TokenExpiredError();
 
-  let user = await UserRepository.updateProfile(userId, req.body);
+  let data = req.body;
+
+  const result = fullProfileSchema.safeParse(req.body);
+
+  if (result.success) {
+    const { website, instagram, twitter, ...remainingProfileData } = result.data;
+    data = remainingProfileData;
+
+    if (website) {
+      await prisma.socialLink.upsert({
+        where: { userId_type: { userId: userId, type: 'PERSONAL_WEBSITE' } },
+        update: { handle: website },
+        create: { userId: userId, type: 'PERSONAL_WEBSITE', handle: website },
+      });
+    }
+
+    if (instagram) {
+      await prisma.socialLink.upsert({
+        where: { userId_type: { userId: userId, type: 'INSTAGRAM' } },
+        update: { handle: instagram },
+        create: { userId: userId, type: 'INSTAGRAM', handle: instagram },
+      });
+    }
+
+    if (twitter) {
+      await prisma.socialLink.upsert({
+        where: { userId_type: { userId: userId, type: 'TWITTER' } },
+        update: { handle: twitter },
+        create: { userId: userId, type: 'TWITTER', handle: twitter },
+      });
+    }
+  }
+
+  let user = await UserRepository.updateProfile(userId, data);
+
   if (!user) throw new TokenExpiredError();
   const { fullName, location, contact } = user;
 
@@ -40,7 +79,7 @@ export const getUserPublicController = controller(usernameSchema, async (req, re
   const user = await UserRepository.findByUserName(username);
   if (!user) throw new NotFoundError('User not found');
 
-  const { refreshToken, magicToken, ...publicUserProfile } = user;
+  const { ...publicUserProfile } = user;
   return new SuccessResponse('success', publicUserProfile).send(res);
 });
 

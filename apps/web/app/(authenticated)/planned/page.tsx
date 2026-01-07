@@ -12,7 +12,7 @@ import {
   NO_PLANNED_EVENTS_TITLE,
   NO_PAST_EVENTS_TITLE,
 } from '@/utils/constants';
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 
 const PlannedEvents = () => {
   return (
@@ -55,7 +55,7 @@ const UpcomingEvents = () => {
   });
   const { data, isLoading, isError } = useGetUpcomingEvents(filter);
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading) return <LoadingScreen className="h-96" />;
 
   if (isError) return <div>Error loading events</div>;
   if (data?.events.length === 0)
@@ -84,7 +84,7 @@ const PastEvents = () => {
 
   const { data, isLoading, isError } = useGetUpcomingEvents(filter);
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading) return <LoadingScreen className="h-96" />;
 
   if (isError) return <div>Error loading events</div>;
 
@@ -107,9 +107,5 @@ const PastEvents = () => {
 };
 
 export default function Page() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <PlannedEvents />
-    </Suspense>
-  );
+  return <PlannedEvents />;
 }

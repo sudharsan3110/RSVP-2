@@ -54,7 +54,7 @@ const ScannerPage = () => {
       <section className="hidden items-center justify-between sm:flex">
         <h1 className="text-2xl font-semibold">Check In For {data?.event.name}</h1>
         <Button asChild variant="tertiary" radius="sm">
-          <Link href="/event">
+          <Link href={`/${data?.event.slug}`}>
             Event Page
             <ArrowUpRightIcon className="ml-2 h-4 w-4" />
           </Link>

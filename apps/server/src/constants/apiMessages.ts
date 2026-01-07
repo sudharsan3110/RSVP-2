@@ -23,6 +23,11 @@ export const API_MESSAGES = {
   EVENT_AND_USER_REQUIRED: 'Event Id and cohost user is required',
   EVENT: {
     NOT_FOUND: `Event not found or doesn't exists`,
+    MAX_CAPACITY: `Event capacity reached`,
+    PUBLIC_EVENT_LIMIT_EXCEEDED:
+      'You have reached the monthly limit of creating 10 public events. Need to create more public events?',
+    PRIVATE_EVENT_LIMIT_EXCEEDED:
+      'You have reached the monthly limit of creating 5 private events. Need to create more private events?',
   },
   ALLOW_GUEST: {
     UNAUTHORIZED_ACCESS: 'Unauthorized access',

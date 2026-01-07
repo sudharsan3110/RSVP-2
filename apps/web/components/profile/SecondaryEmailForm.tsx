@@ -55,13 +55,21 @@ const SecondaryEmailForm = ({ user }: Props) => {
         title="Email address"
         description="Invites will be sent to this email address."
       >
-        <FormInput control={form.control} disabled name="email" label="Email" type="email" />
+        <FormInput
+          control={form.control}
+          disabled
+          name="email"
+          label="Email"
+          type="email"
+          aria-label="email"
+        />
 
         {hasSecondaryEmail && (
           <FormInput
             control={form.control}
             name="secondaryEmail"
             label="Secondary Email"
+            aria-label="secondary email"
             type="email"
           />
         )}

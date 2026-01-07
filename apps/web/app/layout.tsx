@@ -22,6 +22,12 @@ export default function RootLayout({
   return (
     <QueryProvider>
       <html lang="en" className="scroll-pt-[90px]">
+        <head>
+          {process.env.NEXT_PUBLIC_API_URL && (
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} crossOrigin="anonymous" />
+          )}
+          <link rel="dns-prefetch" href="https://s3.amazonaws.com" />
+        </head>
         <body className={cn(plusJakartaSans.className, 'dark flex min-h-screen flex-col')}>
           <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster richColors />

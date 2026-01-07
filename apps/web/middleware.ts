@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const protectedRoutes = [
-  '/ticket',
-  '/profile',
-  '/create-event',
-  '/events',
-  '/scanner',
-  '/user',
-  '/planned',
-];
+import { protectedRoutes } from './lib/routes';
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('accessToken');
@@ -37,7 +28,6 @@ export const config = {
     '/create-event/:path*',
     '/events/:path*',
     '/scanner/:path*',
-    '/user/:path*',
     '/planned/:path*',
     '/',
   ],

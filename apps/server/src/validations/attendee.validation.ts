@@ -1,9 +1,36 @@
 import z from 'zod';
 import { uuidSchema } from './common';
+import config from '@/config/config';
 
 export const attendeePayloadSchema = z.object({
   body: z.object({ feedback: z.string().max(512).optional() }),
   params: z.object({ eventId: uuidSchema }),
+});
+
+export const invitesAttendeesPayloadSchema = z.object({
+  body: z.object({
+    emails: z.preprocess(
+      (value) => {
+        if (!Array.isArray(value)) return [];
+
+        // Normalize
+        let cleaned = value
+          .filter((v) => typeof v === 'string')
+          .map((email) => email.trim().toLowerCase())
+          .filter((email) => email.length > 0);
+
+        // Deduplicate
+        cleaned = [...new Set(cleaned)];
+
+        return cleaned;
+      },
+      z.array(z.string().email('Invalid email address')).max(Number(config.MAX_INVITES))
+    ),
+  }),
+
+  params: z.object({
+    eventId: uuidSchema,
+  }),
 });
 
 export const attendeeParamsSchema = z.object({

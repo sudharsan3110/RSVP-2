@@ -98,8 +98,12 @@ function FormSelectInput<
   }, [field, defaultValue, options]);
 
   useEffect(() => {
+    if (isTypingRef.current) return;
+
     const newDisplayValue = customInputMode
-      ? field.value?.toString() || ''
+      ? field.value && field.value !== 0
+        ? field.value.toString()
+        : ''
       : options.find((opt) => opt.value === field.value)?.label || field.value?.toString() || '';
     setDisplayValue(newDisplayValue);
   }, [field.value, customInputMode, options]);
@@ -113,8 +117,9 @@ function FormSelectInput<
 
   const handleInputChange = (newValue: string) => {
     isTypingRef.current = true;
+    setDisplayValue(newValue);
     const parsed = Number(newValue);
-    const valueToSet = !isNaN(parsed) ? parsed : undefined;
+    const valueToSet = newValue === '' ? undefined : !isNaN(parsed) ? parsed : undefined;
 
     field.onChange(valueToSet);
     if (!open) {
@@ -128,9 +133,13 @@ function FormSelectInput<
   const handleSelectOption = (option: SelectOption) => {
     if (option.isOthers) {
       setCustomInputMode(true);
-      field.onChange(0);
+      const currentValue = field.value?.toString() || '';
+      setDisplayValue(currentValue);
       setTimeout(() => {
         inputRef.current?.focus();
+        if (inputRef.current) {
+          inputRef.current.select();
+        }
       }, 10);
     } else {
       setCustomInputMode(false);

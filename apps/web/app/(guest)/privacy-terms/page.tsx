@@ -1,9 +1,10 @@
 import Container from '@/components/common/Container';
+import { formatDate } from '@/utils/formatDate';
 import dayjs from 'dayjs';
 import React from 'react';
 
 const PrivacyPolicy = () => {
-  const today = dayjs().format('MMM DD, YYYY');
+  const today = formatDate(dayjs(), { dateOnly: true });
   return (
     <Container className="container-main dark prose max-w-5xl text-secondary dark:prose-invert prose-h2:text-[1.75rem] prose-p:tracking-wide">
       <header className="mx-auto mb-12 mt-12 text-center">

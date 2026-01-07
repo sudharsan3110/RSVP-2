@@ -7,132 +7,225 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id                        String     @id @default(uuid()) @db.VarChar(36)
-  primaryEmail              String     @map("primary_email") @db.VarChar(100)
-  secondaryEmail            String?    @map("secondary_email") @db.VarChar(100)
-  contact                   String?    @map("contact") @db.VarChar(15)
-  fullName                  String?    @map("full_name") @db.VarChar(50)
-  userName                  String?    @unique @map("user_name") @db.VarChar(50)
-  magicToken                String?    @unique @map("magic_token") @db.VarChar(100)
-  refreshToken              String?    @unique @map("refresh_token") @db.VarChar(512)
-  isCompleted               Boolean    @default(false) @map("is_completed")
-  location                  String?    @map("location") @db.VarChar(100)
-  bio                       String?    @map("bio") @db.VarChar(500)
-  twitter                   String?    @map("twitter") @db.VarChar(50)
-  instagram                 String?    @map("instagram") @db.VarChar(50)
-  website                   String?    @map("website") @db.VarChar(50)
-  profileIcon               Int        @map("profile_icon") @default(1)
-  eventParticipationEnabled Boolean    @default(false) @map("event_participation_enabled")
-  isDeleted                 Boolean    @default(false) @map("is_deleted")
-  createdAt                 DateTime   @default(now()) @map("created_at")
-  updatedAt                 DateTime   @updatedAt @map("updated_at")
+model User {
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  primaryEmail   String   @map("primary_email") @db.VarChar(100)
+  secondaryEmail String?  @map("secondary_email") @db.VarChar(100)
+  contact        String?  @map("contact") @db.VarChar(15)
+  fullName       String?  @map("full_name") @db.VarChar(100)
+  userName       String?  @unique @map("user_name") @db.VarChar(100)
+  isCompleted    Boolean  @default(true) @map("is_completed")
+  location       String?  @map("location") @db.VarChar(256)
+  stateId        String?  @map("state_id") @db.VarChar(36)
+  countryId      String?  @map("country_id") @db.VarChar(36)
+  bio            String?  @map("bio") @db.VarChar(500)
+  profileIcon    Int      @default(1) @map("profile_icon")
+  isDeleted      Boolean  @default(false) @map("is_deleted")
+  hasUnlimitedAccess Boolean  @default(false) @map("has_unlimited_access")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  events                    Event[]
-  attendees                 Attendee[]
-  cohosts                   Cohost[]
-  updates                   Update[]
+  events      Event[]
+  attendees   Attendee[]
+  hosts       Host[]
+  chats       Chat[]
+  socialLinks SocialLink[]
+  state       State?       @relation(fields: [stateId], references: [id])
+  country     Country?     @relation(fields: [countryId], references: [id])
+  Auth        Auth[]
+  cityId      String?      @map("city_id") @db.VarChar(36)
+  city        City?        @relation(fields: [cityId], references: [id])
 
   @@map("users")
 }
 
-model Update {
-  id                        String    @id @default(uuid()) @db.VarChar(36)
-  userId                    String    @map("user_id") @db.VarChar(36)
-  eventId                   String    @map("event_id") @db.VarChar(36)
-  content                   String    @map("content") @db.VarChar(1000)
-  isNotification            Boolean   @default(false) @map("is_notification")
-  scheduledNotificationTime DateTime? @map("scheduled_notification_time")
-  isDeleted                 Boolean   @default(false) @map("is_deleted")
-  createdAt                 DateTime  @default(now()) @map("created_at")
-  updatedAt                 DateTime  @updatedAt @map("updated_at")
+model Chat {
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  userId         String   @map("user_id") @db.VarChar(36)
+  eventId        String   @map("event_id") @db.VarChar(36)
+  content        String   @map("content") @db.VarChar(1000)
+  isNotification Boolean  @default(false) @map("is_notification")
+  isDeleted      Boolean  @default(false) @map("is_deleted")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  event                     Event     @relation("EventUpdates", fields: [eventId], references: [id], onDelete: Cascade)
-  user                      Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation("EventUpdates", fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("updates")
+  @@map("chats")
 }
 
 model Event {
-  id                        String     @id @default(uuid()) @db.VarChar(36)
-  creatorId                 String     @map("creator_id") @db.VarChar(36)
-  name                      String     @map("name") @db.VarChar(100)
-  slug                      String     @unique @map("slug") @db.VarChar(100)
-  category                  String?    @map("category") @db.VarChar(36)
-  startTime                 DateTime   @map("start_time")
-  endTime                   DateTime   @map("end_time")
-  eventDate                 DateTime   @map("event_date")
-  description               String?    @map("description") @db.VarChar(1000)
-  eventImageUrl             String?    @map("event_image_url") @db.VarChar(256)
-  venueType                 VenueType  @map("venue_type")
-  venueAddress              String?    @map("venue_address") @db.VarChar(256)
-  venueUrl                  String?    @map("venue_url") @db.VarChar(256)
-  hostPermissionRequired    Boolean    @map("host_permission_required")
-  capacity                  Int?       @map("capacity")
-  isActive                  Boolean    @default(true) @map("is_active")
-  isDeleted                 Boolean    @default(false) @map("is_deleted")
-  sendReminderEmail         Boolean    @default(false)
-  createdAt                 DateTime   @default(now()) @map("created_at")
-  updatedAt                 DateTime   @updatedAt @map("updated_at")
-  
-  creator                   Users      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  updates                   Update[]   @relation("EventUpdates")
-  attendees                 Attendee[] @relation("EventAttendees")
-  cohosts                   Cohost[]   @relation("EventCohosts")
+  id                     String    @id @default(uuid()) @db.VarChar(36)
+  creatorId              String    @map("creator_id") @db.VarChar(36)
+  name                   String    @map("name") @db.VarChar(256)
+  slug                   String    @unique @map("slug") @db.VarChar(100)
+  categoryId             String?   @map("category_id") @db.VarChar(36)
+  startTime              DateTime  @map("start_time")
+  endTime                DateTime  @map("end_time")
+  description            String?   @map("description") @db.VarChar(1000)
+  eventImageUrl          String?   @map("event_image_url") @db.VarChar(256)
+  venueType              VenueType @map("venue_type")
+  venueAddress           String?   @map("venue_address") @db.VarChar(256)
+  venueStateId           String?   @map("venue_state_id") @db.VarChar(36)
+  venueCountryId         String?   @map("venue_country_id") @db.VarChar(36)
+  venueUrl               String?   @map("venue_url") @db.VarChar(256)
+  hostPermissionRequired Boolean   @default(false) @map("host_permission_required")
+  capacity               Int       @default(-1) @map("capacity")
+  isActive               Boolean   @default(true) @map("is_active")
+  isDeleted              Boolean   @default(false) @map("is_deleted")
+  sendReminderEmail      Boolean   @default(false)
+  discoverable           Boolean   @default(true)
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
+  creator   User       @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  chats     Chat[]     @relation("EventUpdates")
+  attendees Attendee[] @relation("EventAttendees")
+  hosts     Host[]     @relation("EventHosts")
+  state     State?     @relation(fields: [venueStateId], references: [id])
+  country   Country?   @relation(fields: [venueCountryId], references: [id])
+  category  Category?  @relation(fields: [categoryId], references: [id])
+  venueCityId String?    @map("venue_city_id") @db.VarChar(36)
+  city      City?      @relation(fields: [venueCityId], references: [id])
+  
   @@map("events")
 }
 
 model Attendee {
-  id                        String    @id @default(uuid()) @db.VarChar(36)
-  userId                    String    @map("user_id") @db.VarChar(36)
-  eventId                   String    @map("event_id") @db.VarChar(36)
-  registrationTime          DateTime  @default(now()) @map("registration_time")
-  hasAttended               Boolean   @default(false) @map("has_attended")
-  checkInTime               DateTime? @map("check_in_time")
-  feedback                  String?   @map("feedback") @db.VarChar(100)
-  qrToken                   String    @unique @map("qr_token") @db.VarChar(100)
-  status                    Status    @default(WAITING) @map("status")
-  allowedStatus             Boolean   @default(true) @map("allowed_status")
-  isDeleted                 Boolean    @default(false) @map("is_deleted")
-  createdAt                 DateTime   @default(now()) @map("created_at")
-  updatedAt                 DateTime   @updatedAt @map("updated_at")
+  id               String         @id @default(uuid()) @db.VarChar(36)
+  userId           String         @map("user_id") @db.VarChar(36)
+  eventId          String         @map("event_id") @db.VarChar(36)
+  registrationTime DateTime       @default(now()) @map("registration_time")
+  hasAttended      Boolean        @default(false) @map("has_attended")
+  checkInTime      DateTime?      @map("check_in_time")
+  feedback         String?        @map("feedback") @db.VarChar(256)
+  qrToken          String         @unique @map("qr_token") @db.VarChar(100)
+  status           AttendeeStatus @default(WAITING) @map("status")
+  allowedStatus    Boolean        @default(true) @map("allowed_status")
+  isDeleted        Boolean        @default(false) @map("is_deleted")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
 
-  user                      Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event                     Event     @relation("EventAttendees", fields: [eventId], references: [id], onDelete: Cascade)
-  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation("EventAttendees", fields: [eventId], references: [id], onDelete: Cascade)
+
   @@unique([eventId, userId])
   @@map("attendees")
 }
 
-model Cohost {
-  id                        String   @id @default(uuid()) @db.VarChar(36)
-  userId                    String   @map("user_id") @db.VarChar(36)
-  eventId                   String   @map("event_id") @db.VarChar(36)
-  role                      Role     @default(READ_ONLY) @map("role")
-  isDeleted                 Boolean  @default(false) @map("is_deleted")
-  createdAt                 DateTime @default(now()) @map("created_at")
-  updatedAt                 DateTime @updatedAt @map("updated_at")
+model Host {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  userId    String   @map("user_id") @db.VarChar(36)
+  eventId   String   @map("event_id") @db.VarChar(36)
+  role      HostRole @default(READ_ONLY) @map("role")
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  user                      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event                     Event    @relation("EventCohosts", fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation("EventHosts", fields: [eventId], references: [id], onDelete: Cascade)
 
-  @@map("cohosts")
+  @@unique([userId, eventId])
+  @@map("hosts")
 }
 
-enum Status {
-  GOING    @map("1")
+model SocialLink {
+  id     String   @id @default(uuid()) @db.VarChar(36)
+  userId String   @map("user_id") @db.VarChar(36)
+  type   Platform
+  handle String   @db.VarChar(100)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("social_links")
+}
+
+model State {
+  id        String @id @default(uuid()) @db.VarChar(36)
+  name      String @map("name") @db.VarChar(100)
+  countryId String @map("country_id") @db.VarChar(36)
+
+  country Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  Users   User[]
+  Event   Event[]
+  cities  City[]
+  
+  @@unique([name, countryId])
+  @@map("states")
+}
+
+model Country {
+  id   String @id @default(uuid()) @db.VarChar(36)
+  name String @unique @map("name") @db.VarChar(100)
+
+  states State[]
+  Users  User[]
+  Event  Event[]
+
+  @@map("countries")
+}
+
+model Category {
+  id   String @id @default(uuid()) @db.VarChar(36)
+  name String @unique @map("name") @db.VarChar(100)
+
+  Event Event[]
+
+  @@map("categories")
+}
+
+model Auth {
+  id             String       @id @default(uuid()) @db.VarChar(36)
+  userId         String       @map("user_id") @db.VarChar(36)
+  provider       AuthProvider @map("provider")
+  providerUserId String?      @map("provider_user_id") @db.VarChar(255)
+  magicToken     String?      @unique @map("magic_token") @db.VarChar(100)
+  tokenExpiry    DateTime?    @map("token_expiry")
+  refreshToken   String?      @unique @map("refresh_token") @db.VarChar(512)
+  isActive       Boolean      @default(true) @map("is_active")
+  lastUsedAt     DateTime?    @map("last_used_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, userId])
+  @@map("auth")
+}
+
+model City {
+  id        String  @id @default(uuid()) @db.VarChar(36)
+  name      String  @map("name") @db.VarChar(100)
+
+  stateId   String  @map("state_id")   @db.VarChar(36)
+  countryId String  @map("country_id") @db.VarChar(36)
+
+  state   State   @relation(fields: [stateId],   references: [id], onDelete: Cascade)
+
+  Users  User[]
+  Event  Event[]
+  
+  @@unique([name, stateId])   // ensures city names are unique per state
+  @@index([stateId])
+  @@index([countryId])
+  @@map("cities")
+}
+
+enum AttendeeStatus {
+  GOING     @map("1")
   NOT_GOING @map("2")
-  WAITING  @map("3")
-  PENDING  @map("4")
-  INVITED  @map("5")
+  WAITING   @map("3")
+  PENDING   @map("4")
+  INVITED   @map("5")
   CANCELLED @map("6")
 }
 
-enum Role {
+enum HostRole {
   CREATOR   @map("1")
   MANAGER   @map("2")
-  READ_ONLY  @map("3")
+  READ_ONLY @map("3")
   CELEBRITY @map("4")
 }
 
@@ -140,4 +233,15 @@ enum VenueType {
   PHYSICAL
   VIRTUAL
   LATER
+}
+
+enum Platform {
+  PERSONAL_WEBSITE
+  INSTAGRAM
+  TWITTER
+}
+
+enum AuthProvider {
+  MAGIC_LINK
+  GOOGLE
 }

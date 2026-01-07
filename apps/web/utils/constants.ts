@@ -5,6 +5,8 @@ export const userAvatarOptions = [
   { id: 4, src: '/images/user-avatar-short-hair-beard.svg' },
 ];
 
+export const MAX_INVITE_EMAILS = 20;
+
 export const EMAIL_IMAGE_FILES: EmailAttachmentOptions[] = [
   {
     filename: 'logo',
@@ -109,10 +111,10 @@ export const eventCategoryColors = {
   festival: 'bg-[#FFF0D6]',
   charity: 'bg-[#FFE0E0]',
   food: 'bg-[#DAFFD6]',
-  art: 'bg-[#D6FEFF]',
+  'art & culture': 'bg-[#D6FEFF]',
   education: 'bg-[#E6EAFF]',
   gaming: 'bg-[#FFECD6]',
-  others: 'bg-[#F2F2F2]',
+  'others...': 'bg-[#F2F2F2]',
 };
 
 export const NO_PLANNED_EVENTS_TITLE = 'No Upcoming Events';
@@ -142,3 +144,11 @@ export const locationName = [
 ];
 
 export const VERCEL_AVATAR_BASE_URL = `https://avatar.vercel.sh`;
+
+export const FORM_CACHE_KEY = 'EVENTFORM';
+export const EXPIRY_MINUTES = 20;
+export const INVALID_DATE = 'Invalid Date Format';
+export const EVENTS_QUERY_KEY = 'events';
+export const EVENT_COHOST_KEY = 'cohost';
+export const ATTENDEE_QUERY_KEY = 'attendees';
+export const EVENT_CATEGORY_LIST_KEY = 'category-list';

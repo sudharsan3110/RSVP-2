@@ -6,6 +6,31 @@ html {
   scroll-behavior: smooth;
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.8);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.8);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.497) transparent;
+}
+
 @layer base {
   :root {
     --background: 240, 3%, 6%;
@@ -67,7 +92,7 @@ html {
 
 @layer components {
   .container-main {
-    @apply mx-auto max-w-[90rem] px-4 sm:px-8 xl:px-12;
+    @apply mx-auto max-w-[90rem] xs:px-4 px-2 sm:px-8 xl:px-12;
   }
 
   .text-gradient {

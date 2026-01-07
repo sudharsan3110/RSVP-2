@@ -1,0 +1,26 @@
+node_modules
+**/node_modules
+.pnpm
+.pnpm-store
+dist
+
+.env_example
+
+.git
+
+# dependency dirs (CRITICAL)
+node_modules
+**/node_modules
+.pnpm
+.pnpm-store
+
+# build output
+dist
+**/dist
+
+# misc
+.git
+.gitignore
+Dockerfile
+.dockerignore
+*.log

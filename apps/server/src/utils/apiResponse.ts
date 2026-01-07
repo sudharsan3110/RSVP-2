@@ -69,7 +69,10 @@ export class ForbiddenResponse extends ApiResponse {
 }
 
 export class BadRequestResponse extends ApiResponse {
-  constructor(message = 'Bad Parameters') {
+  constructor(
+    message = 'Bad Parameters',
+    public errorCode?: string
+  ) {
     super(StatusCode.FAILURE, ResponseStatus.BAD_REQUEST, message);
   }
 }

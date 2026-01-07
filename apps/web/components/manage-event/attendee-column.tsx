@@ -1,14 +1,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, BadgeVariant } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Attendee } from '@/types/attendee';
 import { ColumnDef } from '@tanstack/react-table';
-import dayjs from 'dayjs';
 import { useUpdateAttendeeStatus } from '@/lib/react-query/event';
 import { useState, useEffect } from 'react';
 import { getBadgeVariant, getProfilePictureUrl } from '@/utils/event';
+import { formatDate } from '@/utils/formatDate';
+import { toast } from 'sonner';
 
-const attendeeColumns: ColumnDef<Attendee>[] = [
+type AllowedGuestColumnProps = Readonly<{
+  attendee: Attendee;
+  eventCapacity: number;
+  currentAllowedCount: number;
+}>;
+
+const attendeeColumns = (
+  eventCapacity: number,
+  currentAllowedCount: number
+): ColumnDef<Attendee>[] => [
   {
     accessorKey: 'name',
     header: () => <div className="block !w-[18rem] text-left">Name</div>,
@@ -21,7 +32,9 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
             <AvatarFallback>{guest.user?.fullName?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{guest.user?.fullName}</div>
+            <div className="font-medium">
+              {guest.user?.fullName || guest.user?.userName || 'Unknown Host'}
+            </div>
           </div>
         </div>
       );
@@ -59,7 +72,13 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
     header: 'Allow Guest',
     cell: ({ row }) => {
       const allowGuest = row.original.allowedStatus;
-      return <AllowedGuestColumn attendee={row.original} />;
+      return (
+        <AllowedGuestColumn
+          attendee={row.original}
+          eventCapacity={eventCapacity}
+          currentAllowedCount={currentAllowedCount}
+        />
+      );
     },
   },
   {
@@ -67,12 +86,16 @@ const attendeeColumns: ColumnDef<Attendee>[] = [
     header: 'Registration Date',
     cell: ({ row }) => {
       const date = row.original.registrationTime;
-      return dayjs(date).format('DD MMM YYYY');
+      return formatDate(date, { dateOnly: true });
     },
   },
 ];
 
-const AllowedGuestColumn = ({ attendee }: { attendee: Attendee }) => {
+const AllowedGuestColumn = ({
+  attendee,
+  eventCapacity,
+  currentAllowedCount,
+}: AllowedGuestColumnProps) => {
   const { mutate } = useUpdateAttendeeStatus();
 
   useEffect(() => {
@@ -81,16 +104,46 @@ const AllowedGuestColumn = ({ attendee }: { attendee: Attendee }) => {
 
   const [isToggled, setIsToggled] = useState(attendee.allowedStatus);
 
+  const isCapacityReached = currentAllowedCount >= eventCapacity;
+  const isDisabled = isCapacityReached && !isToggled;
+
   const handleCheckedChange = (checked: boolean) => {
-    setIsToggled(checked);
-    mutate({
-      eventId: attendee.eventId,
-      attendeeId: attendee.id,
-      allowedStatus: checked,
-    });
+    const previousValue = isToggled;
+    mutate(
+      {
+        eventId: attendee.eventId,
+        attendeeId: attendee.id,
+        allowedStatus: checked,
+      },
+      {
+        onError: () => {
+          setIsToggled(previousValue);
+          toast.error('Failed to update status');
+        },
+      }
+    );
   };
 
-  return <Switch checked={isToggled} onCheckedChange={handleCheckedChange} />;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="inline-block">
+            <Switch
+              checked={isToggled}
+              onCheckedChange={handleCheckedChange}
+              disabled={isDisabled}
+            />
+          </div>
+        </TooltipTrigger>
+        {isDisabled && (
+          <TooltipContent>
+            <p>Slots Full</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
+  );
 };
 
 export { attendeeColumns };

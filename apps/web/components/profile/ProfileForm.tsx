@@ -23,7 +23,7 @@ const ProfileForm = ({ user }: Props) => {
   const form = useForm<ProfileFormType>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      fullName: user.fullName ?? '',
+      fullName: user.fullName ?? user.userName ?? '',
       location: user.location ?? '',
       bio: user?.bio ?? '',
       profileIcon: user?.profileIcon ?? 1,
@@ -31,6 +31,7 @@ const ProfileForm = ({ user }: Props) => {
       website: user?.website ?? '',
       instagram: user?.instagram ?? '',
     },
+    mode: 'onChange',
   });
 
   const bio = form.watch('bio');
@@ -67,10 +68,23 @@ const ProfileForm = ({ user }: Props) => {
           />
           <ProfilePictureEditPopover control={form.control} />
         </div>
-        <FormInput control={form.control} name="fullName" label="Full name" type="text" />
-        <FormInput control={form.control} name="location" label="Location" type="text" />
+        <FormInput
+          control={form.control}
+          name="fullName"
+          label="Full name"
+          type="text"
+          aria-label="full name"
+          isRequired
+        />
+        <FormInput
+          control={form.control}
+          name="location"
+          label="Location"
+          type="text"
+          aria-label="location"
+        />
         <div className="space-y-1.5">
-          <FormTextArea control={form.control} name="bio" label="Bio" />
+          <FormTextArea control={form.control} name="bio" label="Bio" aria-label="bio" />
           <p className="text-sm text-secondary">{500 - bio?.length} characters left</p>
         </div>
         <FormInput
@@ -79,6 +93,7 @@ const ProfileForm = ({ user }: Props) => {
           label="Twitter/X"
           type="text"
           inputClassName="rounded-l-none"
+          aria-label="twitter/x"
         >
           <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2 whitespace-nowrap">
             https://x.com/
@@ -90,6 +105,7 @@ const ProfileForm = ({ user }: Props) => {
           label="Instagram"
           type="text"
           inputClassName="rounded-l-none"
+          aria-label="instagram"
         >
           <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2 whitespace-nowrap">
             https://instagram.com/
@@ -101,6 +117,7 @@ const ProfileForm = ({ user }: Props) => {
           label="Website"
           type="text"
           inputClassName="rounded-l-none"
+          aria-label="website"
         >
           <span className="block rounded-l-[6px] bg-dark-500 px-2.5 py-2 whitespace-nowrap">
             https://

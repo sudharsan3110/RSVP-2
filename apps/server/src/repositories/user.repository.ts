@@ -1,7 +1,8 @@
-import { generateAccessToken } from '@/utils/jwt';
 import { prisma } from '@/utils/connection';
+import { generateUniqueUsername } from '@/utils/function';
+import { generateAccessToken } from '@/utils/jwt';
 import { randomUUID } from 'crypto';
-import { generateUsernameByEmail } from '@/utils/function';
+import { BadRequestError } from '@/utils/apiError';
 
 /**
  * UserRepository class provides methods to interact with the Users table in the database.
@@ -14,8 +15,11 @@ export class UserRepository {
    * @returns The user object if found, otherwise null.
    */
   static async findById(id: string) {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id, isDeleted: false },
+      include: {
+        socialLinks: true,
+      },
     });
     return user;
   }
@@ -26,8 +30,23 @@ export class UserRepository {
    * @returns The user object if found, otherwise null.
    */
   static async findByUserName(userName: string) {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { userName, isDeleted: false },
+      select: {
+        socialLinks: {
+          select: {
+            handle: true,
+            type: true,
+          },
+        },
+        bio: true,
+        createdAt: true,
+        fullName: true,
+        location: true,
+        userName: true,
+        profileIcon: true,
+        isDeleted: true,
+      },
     });
     return user;
   }
@@ -39,7 +58,7 @@ export class UserRepository {
    * @returns The user object if found, otherwise null.
    */
   static async findbyEmail(primaryEmail: string, isDeleted: boolean | null = false) {
-    const user = await prisma.users.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         primaryEmail,
         isDeleted: isDeleted !== null ? isDeleted : undefined,
@@ -49,12 +68,28 @@ export class UserRepository {
   }
 
   /**
+   * Finds Many users by their primary email address.
+   * @param primaryEmail - The array of primary emails of the users.
+   * @param isDeleted - Filter by isDeleted. Pass null to ignore this filter.
+   * @returns Array of User records. Returns an empty array when no matches are found.
+   */
+
+  static async findManyByEmails(emails: string[], isDeleted: boolean | null = false) {
+    return prisma.user.findMany({
+      where: {
+        primaryEmail: { in: emails },
+        isDeleted: isDeleted !== null ? isDeleted : undefined,
+      },
+    });
+  }
+
+  /**
    * Finds multiple users by their IDs.
    * @param ids - An array of user IDs.
    * @returns An array of user objects.
    */
   static async findAllByIds(ids: string[]) {
-    const users = await prisma.users.findMany({
+    const users = await prisma.user.findMany({
       where: { id: { in: ids }, isDeleted: false },
     });
     return users;
@@ -66,10 +101,50 @@ export class UserRepository {
    * @returns The newly created user object.
    */
   static async create(primaryEmail: string) {
-    const userName = generateUsernameByEmail(primaryEmail);
-    const newUser = await prisma.users.create({
+    const userName = generateUniqueUsername();
+    const newUser = await prisma.user.create({
       data: {
         primaryEmail,
+        userName,
+      },
+    });
+    return newUser;
+  }
+
+  /**
+   * Creates multiple users in a single database transaction.
+   * @param emails - Array of primary emails to create users for.
+   * @returns A list of the newly created user records.
+   */
+
+  static async createMany(emails: string[]) {
+    return prisma.$transaction(async (tx) => {
+      return Promise.all(
+        emails.map((email) => {
+          const userName = generateUniqueUsername();
+          return tx.user.create({
+            data: {
+              primaryEmail: email,
+              userName,
+            },
+          });
+        })
+      );
+    });
+  }
+
+  /**
+   * Creates a new user through Google Oauth.
+   * @param primaryEmail - The primary email of the new user.
+   * @param fullName - The full name of the new user.
+   * @returns The newly created user object.
+   */
+  static async createUserByGoogleOAuth(primaryEmail: string, fullName?: string) {
+    const userName = generateUniqueUsername();
+    const newUser = await prisma.user.create({
+      data: {
+        primaryEmail,
+        fullName,
         userName,
       },
     });
@@ -85,8 +160,22 @@ export class UserRepository {
     const tokenId = randomUUID();
     const token = generateAccessToken({ userId, tokenId });
 
-    await prisma.users.update({
-      where: { id: userId, isDeleted: false },
+    let auth = await prisma.auth.findFirst({
+      where: { userId, provider: 'MAGIC_LINK' },
+    });
+
+    if (!auth) {
+      auth = await prisma.auth.create({
+        data: {
+          userId,
+          magicToken: tokenId,
+          provider: 'MAGIC_LINK',
+        },
+      });
+    }
+
+    await prisma.auth.update({
+      where: { id: auth.id },
       data: { magicToken: tokenId },
     });
 
@@ -99,17 +188,26 @@ export class UserRepository {
    * @returns The user object if the token is valid, otherwise null.
    */
   static async verifyToken(userId: string, tokenId: string) {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: userId },
     });
 
     if (!user) return null;
     if (user.isDeleted) return null;
 
-    if (user.magicToken !== tokenId) return null;
+    const auth = await prisma.auth.findFirst({
+      where: {
+        userId: userId,
+        provider: 'MAGIC_LINK',
+      },
+    });
 
-    await prisma.users.update({
-      where: { id: userId, isDeleted: false },
+    if (!auth) return null;
+
+    if (auth.magicToken !== tokenId) return null;
+
+    await prisma.auth.update({
+      where: { id: auth.id },
       data: { magicToken: null },
     });
     return user;
@@ -122,7 +220,7 @@ export class UserRepository {
    * @returns The updated user object.
    */
   static async updateProfile(id: string, data: any) {
-    return await prisma.users.update({
+    return await prisma.user.update({
       where: { id, isDeleted: false },
       data: data,
     });
@@ -134,8 +232,14 @@ export class UserRepository {
    * @param refreshToken - The new refresh token, or null to clear it.
    */
   static async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
-    await prisma.users.update({
-      where: { id: userId, isDeleted: false },
+    const auth = await prisma.auth.findFirst({
+      where: { userId, provider: 'MAGIC_LINK' }, // `provider` is needed to by taken as param but it will be updated later.
+    });
+
+    if (!auth) return;
+
+    await prisma.auth.update({
+      where: { id: auth.id },
       data: { refreshToken },
     });
   }
@@ -147,33 +251,50 @@ export class UserRepository {
    * @returns The updated user object.
    */
   static async delete(userId: string) {
-    return await prisma.$transaction(async (tx) => {
-      await tx.event.updateMany({
-        where: { creatorId: userId, isDeleted: false },
-        data: { isDeleted: true, isActive: false },
-      });
+    const currentDate = new Date();
 
+    const upcomingEvents = await prisma.event.findMany({
+      where: {
+        creatorId: userId,
+        startTime: {
+          gte: currentDate,
+        },
+        isDeleted: false,
+        isActive: true,
+      },
+    });
+
+    if (upcomingEvents.length > 0) {
+      throw new BadRequestError(
+        'You have upcoming events. Please cancel them before deleting your account.'
+      );
+    }
+
+    return await prisma.$transaction(async (tx) => {
       await tx.attendee.updateMany({
         where: { userId, isDeleted: false },
         data: { isDeleted: true, status: 'CANCELLED', allowedStatus: false },
       });
 
-      await tx.cohost.updateMany({
+      await tx.host.updateMany({
         where: { userId, isDeleted: false },
         data: { isDeleted: true },
       });
 
-      await tx.update.updateMany({
+      await tx.chat.updateMany({
         where: { userId, isDeleted: false },
         data: { isDeleted: true },
       });
 
-      const deletedUser = await tx.users.update({
+      await tx.auth.updateMany({
+        where: { userId },
+        data: { magicToken: null, refreshToken: null },
+      });
+
+      const deletedUser = await tx.user.update({
         where: { id: userId },
         data: {
           isDeleted: true,
-          magicToken: null,
-          refreshToken: null,
         },
       });
 

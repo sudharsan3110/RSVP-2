@@ -7,6 +7,12 @@ export const SigninSchema = z.object({
   }),
 });
 
+export const googleSigninSchema = z.object({
+  body: z.object({
+    code: z.string().min(1, { message: 'code is required' }),
+  }),
+});
+
 export const verifySigninSchema = z.object({
   body: z.object({
     token: z.string().min(1, { message: 'token is required' }),

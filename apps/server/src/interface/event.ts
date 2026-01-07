@@ -1,6 +1,39 @@
 import { VenueType } from '@prisma/client';
 
 /**
+ * Structure for a successful invite or restore entry.
+ */
+export interface IInviteSuccessEntry {
+  email: string;
+}
+
+/**
+ * Structure for a failed invite entry.
+ */
+export interface IInviteFailedEntry {
+  email: string;
+  error: string;
+}
+
+/**
+ * Structure for a skipped invite entry with a reason.
+ */
+export interface IInviteSkippedEntry {
+  email: string;
+  reason: string;
+}
+
+/**
+ * Response structure for the invite attendees controller.
+ */
+export interface IInviteResults {
+  invited: IInviteSuccessEntry[];
+  restored: IInviteSuccessEntry[];
+  failed: IInviteFailedEntry[];
+  skipped: IInviteSkippedEntry[];
+}
+
+/**
  * Interface for filtering and paginating events.
  */
 
@@ -16,10 +49,9 @@ export interface ICreateEvent {
   creatorId: string;
   name: string;
   slug: string;
-  category?: string;
+  categoryId?: string;
   startTime: Date;
   endTime: Date;
-  eventDate: Date;
   description?: string;
   eventImageUrl?: string;
   venueType: VenueType;
@@ -28,6 +60,7 @@ export interface ICreateEvent {
   hostPermissionRequired: boolean;
   capacity?: number;
   isActive?: boolean;
+  discoverable?: boolean;
 }
 
 /**

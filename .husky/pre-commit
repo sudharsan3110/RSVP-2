@@ -1,1 +1,21 @@
-pnpm lint-staged
+ # Run lint-staged to format and fix staged files
+echo "Running lint-staged..."
+pnpm lint-staged || exit 1
+
+# Get list of staged files
+changed_files=$(git diff --cached --name-only)
+
+# Check for changes in apps/web
+if echo "$changed_files" | grep -q "^apps/web/"; then
+  echo "Changes detected in apps/web. Running web checks..."
+  pnpm --filter web lint || exit 1
+  pnpm --filter web test || exit 1
+fi
+
+# Check for changes in apps/server
+if echo "$changed_files" | grep -q "^apps/server/"; then
+  echo "Changes detected in apps/server. Running server checks..."
+  pnpm --filter server lint || exit 1
+  pnpm --filter server test || exit 1
+  # pnpm --filter server coverage || exit 1
+fi

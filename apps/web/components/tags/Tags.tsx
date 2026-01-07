@@ -1,12 +1,11 @@
-import { eventCategoryColors, eventCategoryOptions } from '@/utils/constants';
+import { eventCategoryColors } from '@/utils/constants';
 import { X } from 'lucide-react'; // Importing Lucide Icons
 import React, { useEffect, useRef } from 'react';
-
-const tags = eventCategoryOptions;
 
 export type TagType = {
   selectedTag: string | null;
   setSelectedTag: (value: string) => void;
+  tagList: { value: string; label: string }[];
 };
 
 const EventCategoryFilter = (props: TagType) => {
@@ -50,12 +49,14 @@ const EventCategoryFilter = (props: TagType) => {
         aria-label="Tags"
       >
         <div className="flex flex-nowrap gap-3 md:flex-wrap md:justify-start">
-          {tags.map((tag, index) => (
+          {props.tagList.map((tag, index) => (
             <span
               key={index}
               onClick={() => tagClickHandler(tag.value)}
               className={`relative flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-[8px] px-3 py-1 text-sm font-medium text-black transition-all duration-200 ${
-                eventCategoryColors[tag.value as keyof typeof eventCategoryColors]
+                eventCategoryColors[
+                  tag.label.toLocaleLowerCase() as keyof typeof eventCategoryColors
+                ]
               } ${
                 props.selectedTag === tag.value
                   ? 'scale-105 border-2 border-white bg-opacity-80 shadow-md'

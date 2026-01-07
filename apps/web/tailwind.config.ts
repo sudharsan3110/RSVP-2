@@ -1,4 +1,3 @@
-import { Scale } from 'lucide-react';
 import type { Config } from 'tailwindcss';
 
 const config = {
@@ -22,6 +21,9 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        xs: '425px',
+      },
       colors: {
         dark: {
           400: 'hsl(val(--dark-400))',

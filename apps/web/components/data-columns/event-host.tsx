@@ -16,7 +16,7 @@ export type EventHost = {
   status: 'Active' | 'Inactive';
 };
 
-export const eventHostColumns: ColumnDef<Cohost>[] = [
+export const eventHostColumns = (isCreator: boolean): ColumnDef<Cohost>[] => [
   {
     accessorKey: 'name',
     header: 'Host',
@@ -42,11 +42,11 @@ export const eventHostColumns: ColumnDef<Cohost>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => <ActionColumn row={row} />,
+    cell: ({ row }) => <ActionColumn row={row} isCreator={isCreator} />,
   },
 ];
 
-const ActionColumn = ({ row }: { row: Row<Cohost> }) => {
+const ActionColumn = ({ row, isCreator }: { row: Row<Cohost>; isCreator: boolean }) => {
   const { mutate: deleteCohostMutate } = useDeleteCohost();
   const { data: userData } = useCurrentUser();
 
@@ -55,8 +55,12 @@ const ActionColumn = ({ row }: { row: Row<Cohost> }) => {
 
   const isCohost = host.user && userData && host.user.userName === userData.userName;
 
+  if (!isCreator && !isCohost) {
+    return <></>;
+  }
+
   const handleRemoveCohost = () => {
-    deleteCohostMutate({ eventId: host.eventId, cohostId: host.id });
+    deleteCohostMutate({ eventId: host.eventId, userId: host.userId });
   };
 
   return (

@@ -1,15 +1,27 @@
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import eventImageSrc from '@/public/images/demo-event-image.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Icons } from '../common/Icon';
 import { Event } from '@/types/events';
-import dayjs from 'dayjs';
 import { getDateGroups } from '@/lib/utils';
 import { Badge } from '../ui/badge';
+import { formatDate } from '@/utils/formatDate';
 
 const Timeline = ({ events }: { events?: Event[] }) => {
-  if (!events || events.length === 0) {
+  const isEmpty = !events || events.length === 0;
+
+  const timelineData = useMemo(() => {
+    if (!events) return [];
+    return getDateGroups(events);
+  }, [events]);
+
+  const priorityEventIds = useMemo(() => {
+    const allEvents = timelineData.flatMap((group) => group.events ?? []);
+    return new Set(allEvents.slice(0, 3).map((event) => event.id));
+  }, [timelineData]);
+
+  if (isEmpty) {
     return (
       <div className="py-8 text-center">
         <h2 className="text-2xl font-semibold text-gray-600">No Events Found</h2>
@@ -21,10 +33,8 @@ const Timeline = ({ events }: { events?: Event[] }) => {
     );
   }
 
-  const timelineData = getDateGroups(events);
-
   return (
-    <div className="bg- mx-auto max-w-[70rem] text-white md:w-[90%]">
+    <div className="mx-auto max-w-[70rem] text-white md:w-[90%]">
       <div className="relative md:pl-24">
         {/* Timeline Rod */}
         <div className="absolute bottom-0 left-0 top-0 w-0.5 bg-gray-700 md:left-24"></div>
@@ -36,28 +46,25 @@ const Timeline = ({ events }: { events?: Event[] }) => {
 
             {/* Event Date - Laptop View*/}
             <div className="absolute left-[2rem] top-0 hidden pr-4 text-right text-sm font-medium md:left-[-6rem] md:block">
-              {dayjs(dateGroup.date).format('DD MMM YYYY')}
+              {formatDate(dateGroup.date)}
             </div>
 
             {/* Container for each day */}
             <div className="pl-4 md:pl-6">
               {/* Event Date - Mobile View */}
               <div className="block pb-4 text-left text-sm font-medium md:hidden">
-                {dayjs(dateGroup.date).format('DD MMM YYYY')}
+                {formatDate(dateGroup.date)}
               </div>
 
-              {dateGroup?.events?.map((event, eventIndex) => (
-                <Link key={eventIndex} href={`/${event.slug}`}>
+              {dateGroup?.events?.map((event) => (
+                <Link key={event.id} href={`/${event.slug}`} prefetch={true}>
                   {/* Container for each day */}
-                  <Card
-                    key={eventIndex}
-                    className="mb-4 flex cursor-pointer flex-col-reverse justify-between gap-3 rounded-lg border border-dark-500 bg-dark-900 p-3 text-card-foreground shadow-sm transition-all duration-200 hover:border-b-4 hover:border-r-4 hover:border-purple-500 md:h-auto md:min-h-[190px] md:flex-row"
-                  >
+                  <Card className="mb-4 flex cursor-pointer flex-col-reverse justify-between gap-3 rounded-lg border border-dark-500 bg-dark-900 p-3 text-card-foreground shadow-sm transition-all duration-200 hover:border-b-4 hover:border-r-4 hover:border-purple-500 md:h-auto md:min-h-[190px] md:flex-row">
                     <div className="flex h-auto w-full flex-col justify-between gap-4 md:w-3/4">
                       <div className="flex flex-col gap-2">
                         <CardHeader className="flex flex-col items-start justify-between space-y-1.5 border-b-0 py-0 pl-0">
                           <Badge variant="outline" className="text-sm -ml-0.5 mb-1 font-medium">
-                            {event.category}
+                            {event.category?.name}
                           </Badge>
                           <CardTitle className="text-xl font-bold leading-[25.2px] mb-1 tracking-tight">
                             {event.name}
@@ -66,7 +73,7 @@ const Timeline = ({ events }: { events?: Event[] }) => {
 
                         <CardContent className="flex flex-col gap-1 p-0 pt-2">
                           <p className="text-base font-bold leading-[19.6px]">
-                            {dayjs(event.startTime).format('HH:mm A, DD MMM YYYY')}
+                            {formatDate(event.startTime, { withTime: true })}
                           </p>
                           <p className="text-sm font-medium leading-[19.6px]">
                             {event.venueAddress}
@@ -98,6 +105,7 @@ const Timeline = ({ events }: { events?: Event[] }) => {
                           fill
                           style={{ objectFit: 'cover' }}
                           className="rounded-md"
+                          priority={priorityEventIds.has(event.id)}
                         />
                       </div>
                     </div>

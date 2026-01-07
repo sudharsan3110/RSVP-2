@@ -14,30 +14,42 @@ import {
   ENDPOINT_USER_EVENTS,
   FAKE_ATTENDEE_COUNT,
   FAKE_EVENT,
-  FAKE_USER,
   HTTP_BAD_REQUEST,
-  HTTP_CREATED,
   HTTP_NOT_FOUND,
   HTTP_OK,
   TEST_USER_ID,
 } from '@/utils/testConstants';
 
-import { Role } from '@prisma/client';
-import { eventManageMiddleware } from '@/middleware/hostMiddleware';
+import { HostRole as Role } from '@prisma/client';
+import { ApiError, InternalError } from '@/utils/apiError';
+import logger from '@/utils/logger';
 
-const API_ROLES = {
-  CHECK_ALLOW_STATUS: [Role.CREATOR, Role.MANAGER],
-  DELETE_EVENT: [Role.CREATOR],
-  UPDATE_EVENT: [Role.CREATOR, Role.MANAGER],
-};
+const mocks = vi.hoisted(() => ({
+  categoryFindFirstMock: vi.fn(),
+  categoryCreateMock: vi.fn(),
+}));
+
+vi.mock('@/utils/connection', () => ({
+  __esModule: true,
+  prisma: {
+    category: {
+      findFirst: mocks.categoryFindFirstMock,
+      create: mocks.categoryCreateMock,
+    },
+  },
+}));
 
 let isAuthenticated: boolean = true;
+
+interface AuthenticatedRequest extends Request {
+  userId?: string;
+}
 
 vi.mock('@/middleware/authMiddleware', () => {
   return {
     default: (req: Request, res: Response, next: NextFunction) => {
       if (isAuthenticated) {
-        (req as any).userId = TEST_USER_ID;
+        (req as AuthenticatedRequest).userId = TEST_USER_ID;
         next();
       } else {
         return res.status(401).json({ message: 'Invalid or expired tokens' });
@@ -72,7 +84,15 @@ vi.mock('@/middleware/hostMiddleware', () => {
 
 const app = express();
 app.use(express.json());
-app.use(eventRouter);
+app.use(eventRouter).use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof ApiError) {
+    ApiError.handle(err, res);
+  } else {
+    logger.error(err);
+    const errorMessage = 'Something went wrong';
+    ApiError.handle(new InternalError(errorMessage), res);
+  }
+});
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -80,18 +100,20 @@ beforeEach(() => {
 });
 
 describe('Event Router Endpoints', () => {
+  const fakeEventId = '123e4567-e89b-12d3-a456-426614174000';
+
   describe('GET /slug/:slug', () => {
     it('should return event details and attendee count when a valid slug is provided', async () => {
-      vi.spyOn(Events as any, 'findUnique').mockResolvedValue(FAKE_EVENT);
-      vi.spyOn(Attendees as any, 'countAttendees').mockResolvedValue(FAKE_ATTENDEE_COUNT);
+      vi.spyOn(Events, 'findbySlug').mockResolvedValue(FAKE_EVENT as never);
+      vi.spyOn(Attendees, 'countAttendees').mockResolvedValue(FAKE_ATTENDEE_COUNT);
       const res = await request(app).get(`${ENDPOINT_SLUG}/${FAKE_EVENT.slug}`);
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('event', FAKE_EVENT);
-      expect(res.body).toHaveProperty('totalAttendees', FAKE_ATTENDEE_COUNT);
+      expect(res.body.data).toHaveProperty('event', FAKE_EVENT);
+      expect(res.body.data).toHaveProperty('totalAttendees', FAKE_ATTENDEE_COUNT);
     });
 
     it('should return 404 if no event is found', async () => {
-      vi.spyOn(Events as any, 'findUnique').mockResolvedValue(null);
+      vi.spyOn(Events, 'findbySlug').mockResolvedValue(null);
       const res = await request(app).get(`${ENDPOINT_SLUG}/nonexistent-slug`);
       expect(res.status).toBe(HTTP_NOT_FOUND);
       expect(res.body).toHaveProperty('message', 'Event not found');
@@ -104,10 +126,10 @@ describe('Event Router Endpoints', () => {
         { id: 'event-1', name: 'Event One' },
         { id: 'event-2', name: 'Event Two' },
       ];
-      vi.spyOn(Events as any, 'findAllEvents').mockResolvedValue(fakeEvents);
+      vi.spyOn(Events, 'findEvents').mockResolvedValue(fakeEvents as never);
       const res = await request(app).get('/');
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('message', 'All Events Data');
+      expect(res.body).toHaveProperty('message', 'success');
       expect(res.body).toHaveProperty('data', fakeEvents);
     });
   });
@@ -116,37 +138,50 @@ describe('Event Router Endpoints', () => {
     const validPhysicalEventPayload = {
       name: 'Annual Conference',
       category: 'Conference',
-      description: 'An event to discuss annual trends',
+      richtextDescription: 'An event to discuss annual trends',
       eventImageUrl: 'img-123',
-      venueType: 'physical',
+      venueType: 'PHYSICAL',
       venueAddress: 'World Trade Center, Bengaluru',
       hostPermissionRequired: true,
       capacity: 50,
       startTime: new Date(Date.now() + 3600 * 1000).toISOString(),
       endTime: new Date(Date.now() + 7200 * 1000).toISOString(),
-      eventDate: new Date(Date.now() + 86400 * 1000).toISOString(),
+      discoverable: true,
     };
     const invalidPhysicalEventPayload = {
       ...validPhysicalEventPayload,
       venueUrl: 'https://example.com/venue',
       venueAddress: 'World Trade Center, Bengaluru',
+      invalidVanueField: 'invalid vanue field',
     };
 
     it('should create a new event with valid data', async () => {
       isAuthenticated = true;
-      const fakeUser = { id: TEST_USER_ID, is_completed: true, primary_email: 'user@example.com' };
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
+      const fakeUser = { id: TEST_USER_ID, isCompleted: true, primary_email: 'user@example.com' };
+      vi.spyOn(Users, 'findById').mockResolvedValue(fakeUser as never);
+      vi.spyOn(Events, 'countEventsCreatedThisMonth').mockResolvedValue(0);
+
+      const fakeCategory = { id: 'cat-1', name: 'Conference' };
+      const fakeCohost = {
+        id: 'cohost-1',
+        userId: TEST_USER_ID,
+        eventId: 'event-456',
+        role: Role.CREATOR,
+      };
+
+      mocks.categoryFindFirstMock.mockResolvedValue(fakeCategory);
       const fakeNewEvent = {
         id: 'event-456',
         name: validPhysicalEventPayload.name,
         slug: 'annual-conference',
       };
-      vi.spyOn(Events as any, 'create').mockResolvedValue(fakeNewEvent);
-      vi.spyOn(CohostRepository as any, 'create').mockResolvedValue(undefined);
+      vi.spyOn(Events, 'create').mockResolvedValue(fakeNewEvent as never);
+      vi.spyOn(CohostRepository, 'create').mockResolvedValue(fakeCohost as never);
+
       const res = await request(app).post('/').send(validPhysicalEventPayload);
-      expect(res.status).toBe(HTTP_CREATED);
+      expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'success');
-      expect(res.body.event).toMatchObject({
+      expect(res.body.data).toMatchObject({
         id: fakeNewEvent.id,
         name: validPhysicalEventPayload.name,
         slug: expect.any(String),
@@ -156,7 +191,7 @@ describe('Event Router Endpoints', () => {
     it('should return 400 when payload validation fails (invalid venue fields)', async () => {
       isAuthenticated = true;
       const fakeUser = { id: TEST_USER_ID, is_completed: true };
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
+      vi.spyOn(Users, 'findById').mockResolvedValue(fakeUser as never);
       const res = await request(app).post('/').send(invalidPhysicalEventPayload);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
       expect(res.body).toHaveProperty('errors');
@@ -165,7 +200,7 @@ describe('Event Router Endpoints', () => {
     it('should return 400 if user profile is incomplete', async () => {
       isAuthenticated = true;
       const incompleteUser = { id: TEST_USER_ID, is_completed: false };
-      vi.spyOn(Users as any, 'findById').mockResolvedValue(incompleteUser);
+      vi.spyOn(Users, 'findById').mockResolvedValue(incompleteUser as never);
       const res = await request(app).post('/').send(validPhysicalEventPayload);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
       expect(res.body).toHaveProperty(
@@ -178,23 +213,31 @@ describe('Event Router Endpoints', () => {
   describe(`GET ${ENDPOINT_POPULAR_EVENTS}`, () => {
     it('should return popular events with a specified limit', async () => {
       const fakePopularEvents = [{ id: 'event-1', name: 'Popular Event' }];
-      vi.spyOn(Events as any, 'getPopularEvents').mockResolvedValue(fakePopularEvents);
+      vi.spyOn(Events, 'findAllPopularEvents').mockResolvedValue(fakePopularEvents as never);
       const res = await request(app).get(ENDPOINT_POPULAR_EVENTS).query({ limit: 5 });
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('data', fakePopularEvents);
     });
   });
 
-  describe(`GET ${ENDPOINT_FILTER_EVENTS}`, () => {
+  describe(`GET / (filteredEvents)`, () => {
     it('should return filtered events with metadata', async () => {
       const fakeEvents = [{ id: 'event-1', name: 'Filtered Event' }];
-      vi.spyOn(Events as any, 'findEvents').mockResolvedValue(fakeEvents);
-      vi.spyOn(Events as any, 'findAllEvents').mockResolvedValue(fakeEvents);
+      const fakeMetadata = {
+        total: 1,
+        page: 1,
+        limit: 10,
+        hasMore: false,
+      };
+      vi.spyOn(Events, 'findEvents').mockResolvedValue({
+        events: fakeEvents,
+        metadata: fakeMetadata,
+      } as never);
       const res = await request(app).get(ENDPOINT_FILTER_EVENTS).query({ page: 1, limit: 10 });
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('message', 'Filtered Events Data');
-      expect(res.body).toHaveProperty('data', fakeEvents);
-      expect(res.body).toHaveProperty('metadata');
+      expect(res.body).toHaveProperty('message', 'success');
+      expect(res.body.data).toHaveProperty('events', fakeEvents);
+      expect(res.body.data).toHaveProperty('metadata', fakeMetadata);
     });
   });
 
@@ -203,12 +246,20 @@ describe('Event Router Endpoints', () => {
       isAuthenticated = true;
       const fakeUser = { id: TEST_USER_ID };
       vi.spyOn(Users as any, 'findById').mockResolvedValue(fakeUser);
-      const fakePlannedEvents = [{ id: 'event-1', name: 'User Event' }];
-      vi.spyOn(Events as any, 'plannedEvents').mockResolvedValue(fakePlannedEvents);
+      const fakePlannedEvents = [
+        { event: { id: 'event-1', name: 'User Event' }, user: { id: TEST_USER_ID } },
+      ];
+      const mockRepoResponse = {
+        data: fakePlannedEvents,
+        metadata: { total: 1, page: 1, limit: 10, hasMore: false },
+      };
+      vi.spyOn(CohostRepository as any, 'findAllByUserId').mockResolvedValue(mockRepoResponse);
       const res = await request(app).get(ENDPOINT_USER_EVENTS).query({ page: 1, limit: 10 });
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'success');
-      expect(res.body).toHaveProperty('data', fakePlannedEvents);
+      expect(res.body.data).toHaveProperty('events');
+      expect(res.body.data.events).toHaveLength(1);
+      expect(res.body.data.events[0]).toHaveProperty('id', 'event-1');
     });
   });
 
@@ -216,9 +267,13 @@ describe('Event Router Endpoints', () => {
     it('should soft-delete the attendee record', async () => {
       isAuthenticated = true;
       const fakeAttendee = { id: 'attendee-1', userId: TEST_USER_ID, deleted: false };
-      vi.spyOn(Attendees as any, 'findByUserIdAndEventId').mockResolvedValue(fakeAttendee);
-      vi.spyOn(Attendees as any, 'softDelete').mockResolvedValue(undefined);
-      const res = await request(app).delete(`/event-123/attendee`);
+      vi.spyOn(Events, 'findById').mockResolvedValue({ id: fakeEventId } as never);
+      vi.spyOn(Attendees, 'findByUserIdAndEventId').mockResolvedValue(fakeAttendee as never);
+      vi.spyOn(Attendees, 'cancel').mockResolvedValue({
+        ...fakeAttendee,
+        isDeleted: true,
+      } as never);
+      const res = await request(app).delete(`/${fakeEventId}/attendee`);
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'Attendee removed successfully');
     });
@@ -227,83 +282,30 @@ describe('Event Router Endpoints', () => {
   describe(`GET /:eventId (getEventById)`, () => {
     it('should return event details when a valid eventId is provided', async () => {
       isAuthenticated = true;
-      const fakeEventDetail = { id: 'event-123', name: 'Event Detail' };
-      vi.spyOn(Events as any, 'findById').mockResolvedValue(fakeEventDetail);
-      vi.spyOn(Attendees as any, 'countAttendees').mockResolvedValue(5);
-      const res = await request(app).get(`/event-123`);
+      const fakeEventDetail = { id: fakeEventId, name: 'Event Detail' };
+      vi.spyOn(Events, 'findById').mockResolvedValue(fakeEventDetail as never);
+      vi.spyOn(Attendees, 'countAttendees').mockResolvedValue(5);
+      const res = await request(app).get(`/${fakeEventId}`);
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('event', fakeEventDetail);
-      expect(res.body).toHaveProperty('totalAttendees', 5);
-    });
-  });
-
-  describe('GET /:eventId/attendee/:userId/allowStatus (checkAllowStatus)', () => {
-    const eventId = 'event-123';
-    const userId = TEST_USER_ID;
-    const endpoint = `/${eventId}/attendee/${userId}/allowStatus`;
-
-    it('should allow authenticated CREATOR role to check allow status', async () => {
-      isAuthenticated = true;
-      currentTestRole = Role.MANAGER;
-      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
-      vi.spyOn(CohostRepository as any, 'checkHostForEvent').mockResolvedValue(true);
-      const res = await request(app).get(endpoint);
-      expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('message', 'Success');
-      expect(res.body.data).toHaveProperty('success', true);
-    });
-
-    it('should deny unauthenticated requests from checking allow status', async () => {
-      isAuthenticated = false;
-      currentTestRole = Role.CREATOR;
-      const res = await request(app).get(endpoint);
-      expect(res.status).toBe(401);
-      expect(res.body).toHaveProperty('message', 'Invalid or expired tokens');
-    });
-
-    it('should allow authenticated MANAGER role to check allow status', async () => {
-      isAuthenticated = true;
-      currentTestRole = Role.MANAGER;
-      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
-      vi.spyOn(CohostRepository as any, 'checkHostForEvent').mockResolvedValue(true);
-      const res = await request(app).get(endpoint);
-      expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('message', 'Success');
-      expect(res.body.data).toHaveProperty('success', true);
-    });
-
-    it('should deny authenticated ReadOnly role from checking allow status', async () => {
-      isAuthenticated = true;
-      currentTestRole = Role.READ_ONLY;
-      const res = await request(app).get(endpoint);
-      expect(res.status).toBe(403);
-      expect(res.body).toHaveProperty('message', 'Access denied: Insufficient permissions');
-    });
-
-    it('should deny authenticated requests with no role from checking allow status', async () => {
-      isAuthenticated = true;
-      currentTestRole = null;
-      const res = await request(app).get(endpoint);
-      expect(res.status).toBe(403);
-      expect(res.body).toHaveProperty('message', 'Access denied: No role specified');
+      expect(res.body.data).toHaveProperty('event', fakeEventDetail);
+      expect(res.body.data).toHaveProperty('totalAttendees', 5);
     });
   });
 
   describe('DELETE /:eventId (deleteEvent)', () => {
-    const eventId = 'event-123';
+    const eventId = fakeEventId;
     const endpoint = `/${eventId}`;
 
     it('should allow authenticated CREATOR role to delete an event', async () => {
       isAuthenticated = true;
       currentTestRole = Role.CREATOR;
       const fakeEvent = { id: eventId, name: 'Event to Delete', isDeleted: false };
-      vi.spyOn(Events as any, 'findById').mockResolvedValue(fakeEvent);
+      vi.spyOn(Events, 'findById').mockResolvedValue(fakeEvent as never);
       const deletedEvent = { ...fakeEvent, isDeleted: true };
-      vi.spyOn(Events as any, 'delete').mockResolvedValue(deletedEvent);
+      vi.spyOn(Events, 'delete').mockResolvedValue(deletedEvent as never);
       const res = await request(app).delete(endpoint);
       expect(res.status).toBe(HTTP_OK);
       expect(res.body).toHaveProperty('message', 'Event deleted successfully');
-      expect(res.body).toHaveProperty('success', true);
       expect(res.body).toHaveProperty('data', deletedEvent);
     });
 
@@ -334,7 +336,7 @@ describe('Event Router Endpoints', () => {
     it('should return 404 if the event does not exist', async () => {
       isAuthenticated = true;
       currentTestRole = Role.CREATOR;
-      vi.spyOn(Events as any, 'findById').mockResolvedValue(null);
+      vi.spyOn(Events, 'findById').mockResolvedValue(null);
       const res = await request(app).delete(endpoint);
       expect(res.status).toBe(HTTP_NOT_FOUND);
       expect(res.body).toHaveProperty('message', 'Event not found');
@@ -344,7 +346,7 @@ describe('Event Router Endpoints', () => {
       isAuthenticated = true;
       currentTestRole = Role.CREATOR;
       const alreadyDeletedEvent = { id: eventId, name: 'Already Deleted Event', isDeleted: true };
-      vi.spyOn(Events as any, 'findById').mockResolvedValue(alreadyDeletedEvent);
+      vi.spyOn(Events, 'findById').mockResolvedValue(alreadyDeletedEvent as never);
       const res = await request(app).delete(endpoint);
       expect(res.status).toBe(HTTP_BAD_REQUEST);
       expect(res.body).toHaveProperty('message', 'Event already deleted');
@@ -372,15 +374,15 @@ describe('Event Router Endpoints', () => {
         id: eventId,
         creatorId: TEST_USER_ID,
       };
-      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
-      vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
+      vi.spyOn(Events, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' } as never);
+      vi.spyOn(Events, 'updateSlug').mockResolvedValue(fakeSlugReq as never);
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
         eventId: eventId,
       });
 
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('success', true);
+      expect(res.body).toHaveProperty('message', 'success');
       expect(res.body.data).toMatchObject({
         id: fakeSlugReq.id,
         name: fakeSlugReq.name,
@@ -399,15 +401,15 @@ describe('Event Router Endpoints', () => {
         id: eventId,
         creatorId: TEST_USER_ID,
       };
-      vi.spyOn(Events as any, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' });
-      vi.spyOn(Events as any, 'updateSlug').mockResolvedValue(fakeSlugReq);
+      vi.spyOn(Events, 'findById').mockResolvedValue({ id: eventId, name: 'Test Event' } as never);
+      vi.spyOn(Events, 'updateSlug').mockResolvedValue(fakeSlugReq as never);
       const res = await request(app).patch(endpoint).send({
         slug: 'test-slug',
         eventId: eventId,
       });
 
       expect(res.status).toBe(HTTP_OK);
-      expect(res.body).toHaveProperty('success', true);
+      expect(res.body).toHaveProperty('message', 'success');
       expect(res.body.data).toMatchObject({
         id: fakeSlugReq.id,
         name: fakeSlugReq.name,
@@ -465,7 +467,7 @@ describe('Event Router Endpoints', () => {
     });
 
     describe('PATCH /:eventId/cancel (CancelEvent)', () => {
-      const eventId = 'event-123';
+      const eventId = fakeEventId;
       const endpoint = `/${eventId}/cancel`;
 
       it('should allow authenticated CREATOR role to cancel an event', async () => {
@@ -475,28 +477,28 @@ describe('Event Router Endpoints', () => {
         const fakeEvent = {
           id: eventId,
           name: 'Event to cancel',
-          isCancelled: false,
+          isActive: true,
           creatorId: TEST_USER_ID,
         };
 
         const cancelledEvent = {
           ...fakeEvent,
-          isCancelled: true,
-          cancelledAt: new Date(),
+          isActive: false,
+          updatedAt: new Date(),
         };
 
-        vi.spyOn(Events as any, 'findById').mockResolvedValue(fakeEvent);
-        vi.spyOn(Events as any, 'cancel').mockResolvedValue(cancelledEvent);
+        vi.spyOn(Events, 'findById').mockResolvedValue(fakeEvent as never);
+        vi.spyOn(Events, 'cancel').mockResolvedValue(cancelledEvent as never);
 
         const res = await request(app).patch(endpoint);
 
         expect(res.status).toBe(HTTP_OK);
-        expect(res.body).toHaveProperty('success', true);
+        expect(res.body).toHaveProperty('message', 'success');
         expect(res.body.data).toHaveProperty('id', eventId);
         expect(res.body.data).toHaveProperty('name', 'Event to cancel');
-        expect(res.body.data).toHaveProperty('isCancelled', true);
+        expect(res.body.data).toHaveProperty('isActive', false);
         expect(res.body.data).toHaveProperty('creatorId', TEST_USER_ID);
-        expect(res.body.data).toHaveProperty('cancelledAt');
+        expect(res.body.data).toHaveProperty('updatedAt');
       });
 
       it('should deny unauthenticated requests from cancelling an event', async () => {
@@ -533,7 +535,7 @@ describe('Event Router Endpoints', () => {
         isAuthenticated = true;
         currentTestRole = Role.CREATOR;
 
-        vi.spyOn(Events as any, 'findById').mockResolvedValue(null);
+        vi.spyOn(Events, 'findById').mockResolvedValue(null);
 
         const res = await request(app).patch(endpoint);
 
@@ -546,13 +548,13 @@ describe('Event Router Endpoints', () => {
         currentTestRole = Role.CREATOR;
 
         const alreadyCancelledEvent = {
-          id: eventId,
+          id: fakeEventId,
           name: 'Already Cancelled Event',
           isCancelled: true,
           creatorId: TEST_USER_ID,
         };
 
-        vi.spyOn(Events as any, 'findById').mockResolvedValue(alreadyCancelledEvent);
+        vi.spyOn(Events, 'findById').mockResolvedValue(alreadyCancelledEvent as never);
 
         const res = await request(app).patch(endpoint);
 

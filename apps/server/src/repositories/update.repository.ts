@@ -12,7 +12,7 @@ export class UpdateRepository {
    * @returns An array of updates associated with the event, including user details.
    */
   static async findAllById(eventId: string) {
-    const events = await prisma.update.findMany({
+    const events = await prisma.chat.findMany({
       where: { eventId, isDeleted: false },
       orderBy: { createdAt: 'asc' },
       include: {
@@ -20,8 +20,8 @@ export class UpdateRepository {
           select: {
             id: true,
             fullName: true,
-            primaryEmail: true,
             profileIcon: true,
+            userName: true,
           },
         },
       },
@@ -35,11 +35,10 @@ export class UpdateRepository {
    * @returns The newly created update object.
    */
   static async create(notificationDetails: IUpdate) {
-    const newNotification = await prisma.update.create({
+    const newNotification = await prisma.chat.create({
       data: {
         content: notificationDetails.content,
         isNotification: notificationDetails.isNotification,
-        scheduledNotificationTime: notificationDetails.scheduledNotificationTime,
         event: {
           connect: {
             id: notificationDetails.eventId,

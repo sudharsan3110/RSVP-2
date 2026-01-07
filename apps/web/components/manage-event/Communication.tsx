@@ -4,36 +4,20 @@ import {
   useCreateEventCommunication,
   useEventCommunications,
 } from '@/lib/react-query/communication';
-import { cn } from '@/lib/utils';
 import { communication, CommunicationForm } from '@/lib/zod/communication';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ChatContainer } from '@/components/chat/chat-container';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
 import { FormField, FormItem } from '../ui/form';
 import FormProvider from '../ui/form-provider';
-import { ScrollArea } from '../ui/scroll-area';
 import Tiptap, { EditorRefType } from '../ui/tiptap';
-import ChatMessage from './ChatMessage';
 import { LoaderCircle } from 'lucide-react';
-
+import { getUserDisplayName } from '@/lib/utils';
 interface CommunicationProps {
   eventId: string;
   updatedAt?: string;
-}
-
-interface CommunicationMessage {
-  user: {
-    name: string;
-  };
-  content: string;
-  time: string;
-  updatedAt: string;
-}
-
-interface CommunicationsData {
-  data: CommunicationMessage[];
 }
 
 const Communication = ({ eventId }: CommunicationProps) => {
@@ -46,10 +30,31 @@ const Communication = ({ eventId }: CommunicationProps) => {
   });
 
   const { mutate: createCommunication, isPending } = useCreateEventCommunication(eventId);
-  const { data: communicationsData } = useEventCommunications(eventId);
+  const { data: communicationsData, isLoading: isMessagesLoading } =
+    useEventCommunications(eventId);
   const { setValue, watch } = form;
 
-  const content = watch('content');
+  const rawMessages = (communicationsData?.data ?? []) as any[];
+  const chatMessages = rawMessages.map((m) => {
+    const user = m.user ?? {};
+    const displayName = getUserDisplayName(user);
+    const profileIcon = user.profileIcon ?? 1;
+    const id = m.id;
+    return {
+      id,
+      content: m.content ?? '',
+      userId: user.id,
+      createdAt: m.createdAt,
+      updatedAt: m.updatedAt,
+      timestamp: m.updatedAt || m.createdAt,
+      user: {
+        id: user.id ?? 'Unknown User',
+        fullName: displayName,
+        profileIcon,
+      },
+    };
+  });
+
   const plaintextContent = watch('plaintextContent');
 
   const hasContent = plaintextContent?.trim().length > 0;
@@ -67,40 +72,17 @@ const Communication = ({ eventId }: CommunicationProps) => {
     tiptapEditorRef.current?.editor?.commands.clearContent();
   };
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true,
-    });
-  };
-
   return (
     <section className="flex w-full flex-col space-y-8">
-      <h3>Communicate with your Attendees</h3>
       <section>
         {communicationsData?.data?.length > 0 && (
-          <section>
-            <Card className="w-full border-none bg-transparent lg:w-1/2">
-              <CardContent className="px-0">
-                <ScrollArea className={cn(communicationsData?.data?.length > 3 && 'h-96 ')}>
-                  {(communicationsData as CommunicationsData)?.data?.map(
-                    (msg: CommunicationMessage, index: number) => (
-                      <ChatMessage
-                        key={index}
-                        user={msg.user}
-                        message={msg.content}
-                        time={formatTime(msg.updatedAt)}
-                      />
-                    )
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
+          <section className="w-full">
+            <ChatContainer
+              subtitle="Communicate with your Attendees"
+              messages={chatMessages}
+              isLoading={isMessagesLoading}
+              variant="fullscreen"
+            />
           </section>
         )}
         <FormProvider methods={form} onSubmit={form.handleSubmit(onSubmit)}>
@@ -111,7 +93,7 @@ const Communication = ({ eventId }: CommunicationProps) => {
               <FormItem>
                 <Tiptap
                   ref={tiptapEditorRef}
-                  description={field.value}
+                  description={field.value ?? ''}
                   limit={300}
                   onChange={(richtext, plaintext) => {
                     field.onChange(richtext);

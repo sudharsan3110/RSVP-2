@@ -1,7 +1,7 @@
 import { ICreateEvent } from '@/interface/event';
 import { Paginator } from '@/utils/pagination';
 import { EventFilter } from '@/validations/event.validation';
-import { Event, Prisma, Status } from '@prisma/client';
+import { Event, Prisma, AttendeeStatus } from '@prisma/client';
 import { prisma } from '@/utils/connection';
 
 /**
@@ -37,9 +37,10 @@ export class EventRepository {
 
     const where: Prisma.EventWhereInput = {
       ...(location && { location: location }),
-      ...(category && { category: category }),
+      ...(category && { categoryId: category }),
       isDeleted: false,
       isActive: true,
+      discoverable: true,
       endTime: { gte: currentDateTime },
     };
 
@@ -53,7 +54,8 @@ export class EventRepository {
       where.OR = [
         { name: { contains: search } },
         { description: { contains: search } },
-        { category: { contains: search } },
+        // search by category name via relation
+        { category: { name: { contains: search } } },
       ];
     }
 
@@ -67,11 +69,19 @@ export class EventRepository {
               profileIcon: true,
               fullName: true,
               userName: true,
+              isDeleted: true,
             },
           },
           attendees: {
             where: {
               isDeleted: false,
+            },
+          },
+          category: {
+            // include category relation to get name
+            select: {
+              id: true,
+              name: true,
             },
           },
         },
@@ -94,9 +104,10 @@ export class EventRepository {
             profileIcon: true,
             fullName: true,
             userName: true,
+            isDeleted: true,
           },
         },
-        cohosts: {
+        hosts: {
           where: {
             isDeleted: false,
           },
@@ -107,6 +118,7 @@ export class EventRepository {
                 profileIcon: true,
                 fullName: true,
                 userName: true,
+                isDeleted: true,
               },
             },
           },
@@ -156,7 +168,8 @@ export class EventRepository {
       where.OR = [
         { name: { contains: search } },
         { description: { contains: search } },
-        { category: { contains: search } },
+        // search by category name via relation
+        { category: { name: { contains: search } } },
       ];
     }
 
@@ -169,6 +182,12 @@ export class EventRepository {
           attendees: {
             where: {
               isDeleted: false,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
             },
           },
         },
@@ -191,17 +210,20 @@ export class EventRepository {
             profileIcon: true,
             fullName: true,
             userName: true,
+            isDeleted: true,
           },
         },
-        cohosts: {
+        hosts: {
           where: { isDeleted: false },
           select: {
             role: true,
+            userId: true,
             user: {
               select: {
                 profileIcon: true,
                 fullName: true,
                 userName: true,
+                isDeleted: true,
               },
             },
           },
@@ -218,17 +240,21 @@ export class EventRepository {
    */
   static async findAllPopularEvents(take: number) {
     const currentDateTime = new Date();
-  
+
     const popularEventGroups = await prisma.attendee.groupBy({
       by: ['eventId'],
       where: {
         isDeleted: false,
-        status: Status.GOING,
+        status: AttendeeStatus.GOING,
         event: {
           isActive: true,
           isDeleted: false,
           hostPermissionRequired: false,
-          OR: [{ startTime: { gte: currentDateTime } }, { startTime: { lt: currentDateTime }, endTime: { gt: currentDateTime } }],
+          discoverable: true,
+          OR: [
+            { startTime: { gte: currentDateTime } },
+            { startTime: { lt: currentDateTime }, endTime: { gt: currentDateTime } },
+          ],
         },
       },
       _count: { id: true },
@@ -239,14 +265,14 @@ export class EventRepository {
         _count: { id: 'desc' },
       },
     });
-  
-    const popularEventIds = popularEventGroups.map(g => g.eventId);
-  
+
+    const popularEventIds = popularEventGroups.map((g) => g.eventId);
+
     if (popularEventIds.length === 0) return [];
-  
+
     const events = await prisma.event.findMany({
       where: {
-        id: { in: popularEventIds }
+        id: { in: popularEventIds },
       },
       include: {
         creator: {
@@ -259,14 +285,44 @@ export class EventRepository {
       },
       take: take,
     });
-  
+
     // Step 3: Preserve the popularity order
-    const eventMap = new Map(events.map(e => [e.id, e]));
+    const eventMap = new Map(events.map((e) => [e.id, e]));
     return popularEventIds
-      .map(id => eventMap.get(id))
-      .filter((e): e is typeof events[0] => e !== undefined);
+      .map((id) => eventMap.get(id))
+      .filter((e): e is (typeof events)[0] => e !== undefined);
   }
-  
+
+  /**
+   * Counts events created by a user in the current month, filtered by discoverable status.
+   * Deleted events are excluded, but cancelled events are included.
+   * @param creatorId - The unique ID of the creator.
+   * @param discoverable - Whether to count public (true) or private (false) events.
+   * @returns The count of events created this month.
+   */
+  static async countEventsCreatedThisMonth(creatorId: string, discoverable: boolean) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    return await prisma.event.count({
+      where: {
+        creatorId,
+        discoverable,
+        createdAt: {
+          gte: startOfMonth,
+          lt: startOfNextMonth,
+        },
+        OR: [
+          // If the event is not deleted, it is always counted towards the limit
+          { isDeleted: false },
+          // If the event is deleted, it is only counted towards the limit if the event is in the past
+          { isDeleted: true, endTime: { lt: now } },
+        ],
+      },
+    });
+  }
+
   /**
    * Creates a new event.
    * @param eventDetails - The details of the event to create.
@@ -329,6 +385,52 @@ export class EventRepository {
     return await prisma.event.update({
       where: { id: eventId, creatorId },
       data: { isDeleted: true, isActive: false },
+    });
+  }
+
+  /**
+   * Fetches the events by creator id.
+   * The unique ID of the event.
+   * @param creatorId - The unique ID of the creator.
+   * @param startDate - Events hosted after this date.
+   * @param endDate - Event hosted before this date.
+   * @returns Array of events hosted by user based on filters..
+   */
+  static async getEventByCreatorId({
+    creatorId,
+    startDate,
+    endDate,
+  }: {
+    creatorId: string;
+    startDate?: Date;
+    endDate?: Date;
+  }) {
+    const whereClause: Prisma.EventWhereInput = {
+      creatorId,
+    };
+
+    if (startDate) {
+      whereClause.startTime = {
+        gte: startDate,
+      };
+    }
+
+    if (endDate) {
+      whereClause.endTime = {
+        lt: endDate,
+      };
+    }
+
+    return await prisma.event.findMany({
+      where: whereClause,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
   }
 }

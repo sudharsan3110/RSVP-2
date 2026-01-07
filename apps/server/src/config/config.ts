@@ -9,6 +9,7 @@ dotenv.config();
  */
 const envSchema = z.object({
   NODE_ENV: z.enum(['production', 'development', 'test']),
+  MAX_INVITES: z.string(),
   DATABASE_URL: z.string().url(),
   REFRESH_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
@@ -20,6 +21,9 @@ const envSchema = z.object({
   AWS_SECRET_KEY: z.string(),
   AWS_REGION: z.string(),
   AWS_BUCKET_NAME: z.string(),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_REDIRECT_URI: z.string().url(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -39,6 +43,7 @@ if (!envVars.success) {
  */
 const config = {
   NODE_ENV: envVars.data.NODE_ENV.toLowerCase(),
+  MAX_INVITES: envVars.data.MAX_INVITES,
   DATABASE_URL: envVars.data.DATABASE_URL,
   ACCESS_TOKEN_SECRET: envVars.data.ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET: envVars.data.REFRESH_TOKEN_SECRET,
@@ -50,6 +55,9 @@ const config = {
   AWS_SECRET_KEY: envVars.data.AWS_SECRET_KEY,
   AWS_REGION: envVars.data.AWS_REGION,
   AWS_BUCKET_NAME: envVars.data.AWS_BUCKET_NAME,
+  GOOGLE_CLIENT_ID: envVars.data.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: envVars.data.GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI: envVars.data.GOOGLE_REDIRECT_URI,
 };
 
 export default config;

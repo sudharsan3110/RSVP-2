@@ -2987,6 +2987,267 @@
 					]
 				}
 			]
-		}
+		},
+		    {
+      "name": "social_links",
+      "item": [
+        {
+          "name": "signedInUser",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": "{{baseUrl}}/v1/social_links/"
+          },
+          "response": [
+            {
+              "name": "signedInUser",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": "{{baseUrl}}/v1/social_links/"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "X-RateLimit-Limit",
+                  "value": "5000"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "4996"
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 25 Sep 2025 04:26:32 GMT"
+                },
+                {
+                  "key": "X-RateLimit-Reset",
+                  "value": "1758774910"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "316"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"13c-/hfJh47I/mvWXL85VQSGTG90fl8\""
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"statusCode\": \"10000\",\n    \"status\": 200,\n    \"message\": \"success\",\n    \"data\": [\n        {\n            \"id\": \"0ad2edb4-706b-4ad2-9cca-1a97ba113465\",\n            \"userId\": \"e2eb1d1b-d41d-42b8-a370-df3ec67add9e\",\n            \"type\": \"INSTAGRAM\",\n            \"handle\": \"aziz\"\n        },\n        {\n            \"id\": \"8eac7ed1-89d6-40f4-9643-d8f230c30abc\",\n            \"userId\": \"e2eb1d1b-d41d-42b8-a370-df3ec67add9e\",\n            \"type\": \"TWITTER\",\n            \"handle\": \"\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"handle\": \"azeemuddinaziz\",\n        \"type\": \"TWITTER\"\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/social_links/update"
+          },
+          "response": [
+            {
+              "name": "update",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n    {\n        \"handle\": \"azeemuddinaziz\",\n        \"type\": \"TWITTER\"\n    }\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "{{baseUrl}}/v1/social_links/update"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "X-RateLimit-Limit",
+                  "value": "5000"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "4995"
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 25 Sep 2025 04:27:38 GMT"
+                },
+                {
+                  "key": "X-RateLimit-Reset",
+                  "value": "1758774910"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "227"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"e3-BQIAkGRoXGCc+uDCpYSo5mNnwaI\""
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"statusCode\": \"10000\",\n    \"status\": 200,\n    \"message\": \"Social links updated successfully\",\n    \"data\": [\n        {\n            \"id\": \"8eac7ed1-89d6-40f4-9643-d8f230c30abc\",\n            \"userId\": \"e2eb1d1b-d41d-42b8-a370-df3ec67add9e\",\n            \"type\": \"TWITTER\",\n            \"handle\": \"azeemuddinaziz\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "getByUserId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/social_links/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "social_links", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "e2eb1d1b-d41d-42b8-a370-df3ec67add9e"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "getByUserId",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/social_links/:userId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "social_links", ":userId"],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "e2eb1d1b-d41d-42b8-a370-df3ec67add9e"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "X-RateLimit-Limit",
+                  "value": "5000"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "4997"
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 25 Sep 2025 04:29:44 GMT"
+                },
+                {
+                  "key": "X-RateLimit-Reset",
+                  "value": "1758775429"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "330"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"14a-4tWdz58gSTvT9DJy44VdgwmBou8\""
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"statusCode\": \"10000\",\n    \"status\": 200,\n    \"message\": \"success\",\n    \"data\": [\n        {\n            \"id\": \"0ad2edb4-706b-4ad2-9cca-1a97ba113465\",\n            \"userId\": \"e2eb1d1b-d41d-42b8-a370-df3ec67add9e\",\n            \"type\": \"INSTAGRAM\",\n            \"handle\": \"aziz\"\n        },\n        {\n            \"id\": \"8eac7ed1-89d6-40f4-9643-d8f230c30abc\",\n            \"userId\": \"e2eb1d1b-d41d-42b8-a370-df3ec67add9e\",\n            \"type\": \"TWITTER\",\n            \"handle\": \"azeemuddinaziz\"\n        }\n    ]\n}"
+            }
+          ]
+        }
+      ]
+    }
 	]
 }

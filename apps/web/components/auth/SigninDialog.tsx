@@ -20,6 +20,8 @@ import { Button } from '../ui/button';
 import FormProvider from '../ui/form-provider';
 import { LoaderCircle } from 'lucide-react';
 import { disposableEmailValidator } from '@/lib/zod/disposible-mail';
+import { Separator } from '../ui/separator';
+import { useGoogleOAuth } from '../../lib/react-query/auth';
 
 const signInFormSchema = z.object({
   email: disposableEmailValidator,
@@ -78,6 +80,7 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
   }, [isEmailSent]);
 
   async function onSubmit(values: SignInFormType) {
+    window.localStorage.setItem('redirect', window.location.pathname);
     mutate(values, {
       onSuccess: () => {
         setIsEmailSent(true);
@@ -112,6 +115,8 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
     }
   };
 
+  const { loginWithGoogle } = useGoogleOAuth();
+
   const title = variant === 'signin' ? 'Sign In to Your Account' : 'Sign Up for an Account';
   const description =
     variant === 'signin'
@@ -126,10 +131,28 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
           <>
             <DialogHeader>
               <DialogTitle className="text-start text-2xl font-semibold">{title}</DialogTitle>
-              <DialogDescription className="text-start text-sm font-medium">
-                {description}
-              </DialogDescription>
             </DialogHeader>
+
+            <Button
+              variant="secondary"
+              onClick={loginWithGoogle}
+              className="gap-3"
+              aria-label="Sign in with Google OAuth"
+            >
+              <Icons.google className="w-5 h-5" />
+              <span className="text-sm font-medium">Continue with Google</span>
+            </Button>
+
+            <div className="flex items-center gap-4 my-2">
+              <Separator className="flex-1" />
+              <span className="text-sm whitespace-nowrap">or</span>
+              <Separator className="flex-1" />
+            </div>
+
+            <DialogDescription className="text-start text-sm font-medium">
+              {description}
+            </DialogDescription>
+
             <FormProvider
               methods={form}
               onSubmit={form.handleSubmit(onSubmit)}
@@ -162,13 +185,13 @@ const SigninDialog: React.FC<SigninDialogProps> = ({ children, variant }) => {
           <div className="flex flex-col items-center justify-center">
             <Image
               priority
-              height={186}
-              width={216}
+              height={188}
+              width={219}
               src={'/images/verify-email.svg'}
               alt="verify-email icon"
             />
             <p className="mt-6 text-3xl font-semibold">Check your email!</p>
-            <p className="mt-3 text-center">{`We've just sent an email to you at ${email}. Click to verify.`}</p>
+            <p className="mt-3 text-center">{`We've just sent an email to you at ${email}. Click to verify. The verification link will expire in 10 minutes.`}</p>
             <Button
               className="mt-10 w-full bg-primary px-4 py-[10px] font-semibold text-white"
               disabled={isResendDisabled}

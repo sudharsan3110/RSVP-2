@@ -1,4 +1,5 @@
 import config from '@/config/config';
+import { prisma } from '@/utils/connection';
 import { generateAccessToken, verifyAccessToken, verifyRefreshToken } from '@/utils/jwt';
 import { NextFunction, Response } from 'express';
 import { UserRepository } from '@/repositories/user.repository';
@@ -19,7 +20,13 @@ const checkFromRefreshToken = async (req: IAuthenticatedRequest) => {
 
   try {
     const user = await UserRepository.findById(decoded.userId);
-    if (!user || user.refreshToken !== refreshToken) return false;
+    if (!user) return false;
+
+    const auth = await prisma.auth.findFirst({
+      where: { userId: user.id, provider: 'MAGIC_LINK' },
+    });
+
+    if (!auth || auth.refreshToken != refreshToken) return false;
 
     return decoded;
   } catch (error) {

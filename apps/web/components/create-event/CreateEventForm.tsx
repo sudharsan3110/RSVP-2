@@ -1,41 +1,65 @@
 'use client';
 
 import { useCreateEvent } from '@/lib/react-query/event';
-import { fileFromUrl } from '@/lib/utils';
+import { useCurrentUser } from '@/lib/react-query/auth';
 import { CreateEventFormType, CreateEventSubmissionType } from '@/lib/zod/event';
 import { VenueType } from '@/types/events';
 import { combineDateAndTime } from '@/utils/time';
-import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Separator } from '../ui/separator';
 import EventForm from './EventForm';
-const allowedDate = new Date();
-allowedDate.setHours(0, 0, 0, 0);
-allowedDate.setDate(allowedDate.getDate() + 1);
+import { usePersistentState } from '@/hooks/useLocalStorage';
+import { FORM_CACHE_KEY, EXPIRY_MINUTES } from '@/utils/constants';
+import EventLimitDialog from './EventLimitDialog';
+import type { AxiosError } from 'axios';
+import { handleEventLimitError } from '@/lib/utils';
+import type { LimitErrorResponse } from '@/lib/utils';
+import { useGetCategoryList } from '@/lib/react-query/event';
 
-const defaultValues: CreateEventFormType = {
-  name: '',
-  category: '',
-  description: '',
-  venueType: VenueType.Physical,
-  location: '',
-  hostPermissionRequired: false,
-  fromTime: '17:00',
-  fromDate: allowedDate,
-  toTime: '20:00',
-  toDate: allowedDate,
-  capacity: 20,
-  eventImageUrl: {
-    signedUrl: '',
-    file: '',
-    url: '',
-    type: '',
-  },
-};
+function getAllowedDate() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 const CreateEventForm = () => {
-  const { mutate } = useCreateEvent();
-  const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
+
+  const { data: user } = useCurrentUser();
+  const { mutate, isPending } = useCreateEvent();
+  const { data: categories } = useGetCategoryList();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const defaultValues = useMemo<CreateEventFormType>(() => {
+    const allowedDate = getAllowedDate();
+    return {
+      name: '',
+      category: '',
+      description: '',
+      plaintextDescription: '',
+      venueType: VenueType.Physical,
+      location: '',
+      hostPermissionRequired: false,
+      discoverable: true,
+      fromTime: '17:00',
+      fromDate: allowedDate,
+      toTime: '18:00',
+      toDate: allowedDate,
+      capacity: 20,
+      eventImageUrl: '',
+    };
+  }, []);
+
+  const [value, setPersistentValue] = usePersistentState<CreateEventFormType>(
+    FORM_CACHE_KEY,
+    defaultValues,
+    EXPIRY_MINUTES
+  );
+
   async function onSubmit(data: CreateEventFormType) {
     const {
       name,
@@ -46,6 +70,7 @@ const CreateEventForm = () => {
       venueType,
       locationMapUrl,
       hostPermissionRequired,
+      discoverable,
       capacity,
       location,
       fromTime,
@@ -59,7 +84,7 @@ const CreateEventForm = () => {
       category,
       richtextDescription: description,
       plaintextDescription,
-      eventImageUrl: eventImageUrl.url ?? '',
+      eventImageUrl: eventImageUrl ?? '',
       venueType,
       venueAddress: venueType === VenueType.Physical ? location : undefined,
       venueUrl:
@@ -69,26 +94,20 @@ const CreateEventForm = () => {
             ? locationMapUrl
             : undefined,
       hostPermissionRequired,
+      discoverable,
       capacity,
       startTime: combineDateAndTime(fromDate, fromTime),
       endTime: combineDateAndTime(toDate, toTime),
-      eventDate: new Date(
-        Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate())
-      ),
     };
 
-    if (data.eventImageUrl.file && data.eventImageUrl.signedUrl) {
-      setIsLoading(true);
-      const imageFile = await fileFromUrl(data.eventImageUrl.file, 'event-image');
-      await axios.put(data.eventImageUrl.signedUrl, imageFile, {
-        headers: {
-          'Content-Type': imageFile.type,
-        },
-      });
-      mutate(submissionData);
-      setIsLoading(false);
-    }
+    mutate(submissionData, {
+      onError: (error: AxiosError<LimitErrorResponse>) => {
+        handleEventLimitError(error, setLimitMessage);
+      },
+    });
   }
+
+  if (!mounted) return null;
 
   return (
     <>
@@ -96,7 +115,21 @@ const CreateEventForm = () => {
         <p className="font-medium text-secondary">Fill in the form below to create a new event</p>
       </div>
       <Separator className="my-9 bg-separator" />
-      <EventForm defaultValues={defaultValues} isLoading={isLoading} onSubmit={onSubmit} />
+      <EventForm
+        defaultValues={value}
+        isLoading={isPending}
+        onSubmit={onSubmit}
+        requireSignIn={!user}
+        setPersistentValue={setPersistentValue}
+        eventCategoryOptions={categories}
+      />
+      {limitMessage && (
+        <EventLimitDialog
+          open={true}
+          onOpenChange={(open) => !open && setLimitMessage(null)}
+          message={limitMessage}
+        />
+      )}
     </>
   );
 };

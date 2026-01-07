@@ -232,60 +232,56 @@ An Entity-Relationship diagram (ERD) is a conceptual, logical or physcial repres
 erDiagram
   USERS {
     id(PK) VARCHAR(36) "NOT NULL"
-    primaryEmail VARCHAR(100) "NOT NULL"
+    primaryEmail VARCHAR(100) "UNIQUE NOT NULL"
     secondaryEmail VARCHAR(100)
     contact VARCHAR(15)
-    fullName VARCHAR(50)
+    fullName VARCHAR(100)
     userName VARCHAR(50) "UNIQUE"
-    magicToken VARCHAR(100) "UNIQUE"
-    refreshToken VARCHAR(512) "UNIQUE"
     isCompleted BOOLEAN "DEFAULT FALSE"
     location VARCHAR(100)
+    stateId(FK) VARCHAR(36)
+    countryId(FK) VARCHAR(36)
     bio VARCHAR(500)
-    twitter VARCHAR(50)
-    instagram VARCHAR(50)
-    website VARCHAR(50)
     profileIcon INT "DEFAULT 1"
-    eventParticipationEnabled BOOLEAN "DEFAULT FALSE"
     isDeleted BOOLEAN "DEFAULT FALSE"
+    has_unlimited_access BOOLEAN "DEFAULT FALSE"
     createdAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
     updatedAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
   }
-
   EVENTS {
     id(PK) VARCHAR(36) "NOT NULL"
     creatorId(FK) VARCHAR(36) "NOT NULL"
     name VARCHAR(100) "NOT NULL"
     slug VARCHAR(100) "UNIQUE"
-    category VARCHAR(36)
+    categoryId(FK) VARCHAR(36)
     startTime TIMESTAMP "NOT NULL"
     endTime TIMESTAMP "NOT NULL"
-    eventDate TIMESTAMP "NOT NULL"
     description VARCHAR(1000)
     eventImageUrl VARCHAR(256)
     venueType ENUM "NOT NULL"
     venueAddress VARCHAR(256)
+    venueStateId(FK) VARCHAR(36)
+    venueCountryId(FK) VARCHAR(36)
     venueUrl VARCHAR(256)
-    hostPermissionRequired BOOLEAN "NOT NULL"
-    capacity INT
+    hostPermissionRequired BOOLEAN "DEFAULT FALSE"
+    capacity INT "DEFAULT -1"
     isActive BOOLEAN "DEFAULT TRUE"
     isDeleted BOOLEAN "DEFAULT FALSE"
+    sendReminderEmail BOOLEAN "DEFAULT FALSE"
+    discoverable BOOLEAN "DEFAULT TRUE"
     createdAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
     updatedAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
   }
-
-  UPDATES {
+  CHATS {
     id(PK) VARCHAR(36) "NOT NULL"
     userId(FK) VARCHAR(36) "NOT NULL"
     eventId(FK) VARCHAR(36) "NOT NULL"
-    content VARCHAR(100) "NOT NULL"
+    content VARCHAR(1000) "NOT NULL"
     isNotification BOOLEAN "DEFAULT FALSE"
-    scheduledNotificationTime TIMESTAMP
     isDeleted BOOLEAN "DEFAULT FALSE"
     createdAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
     updatedAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
   }
-
   ATTENDEES {
     id(PK) VARCHAR(36) "NOT NULL"
     userId(FK) VARCHAR(36) "NOT NULL"
@@ -301,8 +297,7 @@ erDiagram
     createdAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
     updatedAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
   }
-
-  COHOSTS {
+  HOSTS {
     id(PK) VARCHAR(36) "NOT NULL"
     userId(FK) VARCHAR(36) "NOT NULL"
     eventId(FK) VARCHAR(36) "NOT NULL"
@@ -311,14 +306,53 @@ erDiagram
     createdAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
     updatedAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
   }
-
+  SOCIAL_LINKS {
+    id(PK) VARCHAR(36) "NOT NULL"
+    userId(FK) VARCHAR(36) "NOT NULL"
+    type ENUM "NOT NULL"
+    handle VARCHAR(100) "NOT NULL"
+  }
+  STATES {
+    id(PK) VARCHAR(36) "NOT NULL"
+    name VARCHAR(36) "NOT NULL"
+    countryId(FK) VARCHAR(36) "NOT NULL"
+  }
+  COUNTRIES {
+    id(PK) VARCHAR(36) "NOT NULL"
+    name VARCHAR(36) "UNIQUE NOT NULL"
+  }
+  CATEGORIES {
+    id(PK) VARCHAR(36) "NOT NULL"
+    name VARCHAR(36) "UNIQUE NOT NULL"
+  }
+  AUTH {
+    id(PK) VARCHAR(36) "NOT NULL"
+    userId(FK) VARCHAR(36) "NOT NULL"
+    provider ENUM "NOT NULL"
+    providerUserId VARCHAR(255)
+    magicToken VARCHAR(100) "UNIQUE"
+    tokenExpiry TIMESTAMP
+    refreshToken VARCHAR(512) "UNIQUE"
+    isActive BOOLEAN "DEFAULT TRUE"
+    lastUsedAt TIMESTAMP
+    createdAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
+    updatedAt TIMESTAMP "DEFAULT CURRENT_TIMESTAMP()"
+  }
   USERS ||--o{ EVENTS : creatorId
-  USERS ||--o{ UPDATES : userId
   USERS ||--o{ ATTENDEES : userId
-  USERS ||--o{ COHOSTS : userId
-  EVENTS ||--o{ UPDATES : eventId
+  USERS ||--o{ HOSTS : userId
+  USERS ||--o{ CHATS : userId
+  USERS ||--o{ SOCIAL_LINKS : userId
+  USERS ||--o{ AUTH : userId
+  EVENTS ||--o{ CHATS : eventId
   EVENTS ||--o{ ATTENDEES : eventId
-  EVENTS ||--o{ COHOSTS : eventId
+  EVENTS ||--o{ HOSTS : eventId
+  STATES ||--o{ USERS : stateId
+  STATES ||--o{ EVENTS : venueStateId
+  COUNTRIES ||--o{ STATES : countryId
+  COUNTRIES ||--o{ USERS : countryId
+  COUNTRIES ||--o{ EVENTS : venueCountryId
+  CATEGORIES ||--o{ EVENTS : categoryId
 ```
 
 ## Deployment and CI/CD Strategy
@@ -528,16 +562,6 @@ graph TD
         <td>Unique username</td>
       </tr>
       <tr>
-        <td>magic_token</td>
-        <td>string</td>
-        <td>Optional login token</td>
-      </tr>
-      <tr>
-        <td>refresh_token</td>
-        <td>string</td>
-        <td>Unique refresh token</td>
-      </tr>
-      <tr>
         <td>is_completed</td>
         <td>boolean</td>
         <td>Onboarding completed or not</td>
@@ -548,24 +572,19 @@ graph TD
         <td>User's location</td>
       </tr>
       <tr>
+        <td>stateId</td>
+        <td>string</td>
+        <td>User's state</td>
+      </tr>
+      <tr>
+        <td>countryId</td>
+        <td>string</td>
+        <td>User's country</td>
+      </tr>
+      <tr>
         <td>bio</td>
         <td>string</td>
         <td>Profile bio</td>
-      </tr>
-      <tr>
-        <td>twitter</td>
-        <td>string</td>
-        <td>Twitter handle</td>
-      </tr>
-      <tr>
-        <td>instagram</td>
-        <td>string</td>
-        <td>Instagram handle</td>
-      </tr>
-      <tr>
-        <td>website</td>
-        <td>string</td>
-        <td>Personal website</td>
       </tr>
       <tr>
         <td>profile_icon</td>
@@ -573,14 +592,68 @@ graph TD
         <td>Profile icon identifier</td>
       </tr>
       <tr>
-        <td>event_participation_enabled</td>
-        <td>boolean</td>
-        <td>Can participate in events</td>
-      </tr>
-      <tr>
         <td>is_deleted</td>
         <td>boolean</td>
         <td>Soft delete flag</td>
+      </tr>
+      <tr>
+        <td>has_unlimited_access</td>
+        <td>boolean</td>
+        <td>Toggle to bypass all feature restrictions</td>
+      </tr>
+      <tr>
+        <td>created_at</td>
+        <td>datetime</td>
+        <td>Timestamp of creation</td>
+      </tr>
+      <tr>
+        <td>updated_at</td>
+        <td>datetime</td>
+        <td>Timestamp of last update</td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<details>
+<summary><strong>Chat </strong> – Event Update</summary>
+  <table>
+    <thread>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thread>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>uuid</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>userId</td>
+        <td>string</td>
+        <td>Link user's table</td>
+      </tr>
+      <tr>
+        <td>eventId</td>
+        <td>string</td>
+        <td>Link event table</td>
+      </tr>
+      <tr>
+        <td>content</td>
+        <td>string</td>
+        <td>Text message</td>
+      </tr>
+      <tr>
+        <td>isNotification</td>
+        <td>boolean</td>
+        <td>Message notification</td>
+      </tr>
+      <tr>
+        <td>isDeleted</td>
+        <td>boolean</td>
+        <td>Message deleted check</td>
       </tr>
       <tr>
         <td>created_at</td>
@@ -642,11 +715,6 @@ graph TD
         <td>End datetime</td>
       </tr>
       <tr>
-        <td>event_date</td>
-        <td>datetime</td>
-        <td>Date of the event</td>
-      </tr>
-      <tr>
         <td>description</td>
         <td>string</td>
         <td>Detailed description</td>
@@ -665,6 +733,16 @@ graph TD
         <td>venue_address</td>
         <td>string</td>
         <td>Address of venue</td>
+      </tr>
+      <tr>
+        <td>venue_state_id</td>
+        <td>string</td>
+        <td>State of venue</td>
+      </tr>
+      <tr>
+        <td>venue_country_id</td>
+        <td>string</td>
+        <td>Country of venue</td>
       </tr>
       <tr>
         <td>venue_url</td>
@@ -692,63 +770,14 @@ graph TD
         <td>Soft delete flag</td>
       </tr>
       <tr>
-        <td>created_at</td>
-        <td>datetime</td>
-        <td>Timestamp of creation</td>
-      </tr>
-      <tr>
-        <td>updated_at</td>
-        <td>datetime</td>
-        <td>Timestamp of last update</td>
-      </tr>
-    </tbody>
-  </table>
-</details>
-<details>
-  <summary><strong>UPDATE</strong> – Event updates</summary>
-  <table>
-    <thead>
-      <tr>
-        <th>Field</th>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>id</td>
-        <td>uuid</td>
-        <td>Primary key</td>
-      </tr>
-      <tr>
-        <td>user_id</td>
-        <td>uuid</td>
-        <td>Foreign key to USERS</td>
-      </tr>
-      <tr>
-        <td>event_id</td>
-        <td>uuid</td>
-        <td>Foreign key to EVENT</td>
-      </tr>
-      <tr>
-        <td>content</td>
-        <td>string</td>
-        <td>Update message</td>
-      </tr>
-      <tr>
-        <td>is_notification</td>
+        <td>send_reminder_email</td>
         <td>boolean</td>
-        <td>Should notify?</td>
+        <td>Email Reminder</td>
       </tr>
       <tr>
-        <td>scheduled_notification_time</td>
-        <td>datetime</td>
-        <td>Optional scheduled send time</td>
-      </tr>
-      <tr>
-        <td>is_deleted</td>
+        <td>discoverable</td>
         <td>boolean</td>
-        <td>Soft delete flag</td>
+        <td>Public events</td>
       </tr>
       <tr>
         <td>created_at</td>
@@ -843,7 +872,7 @@ graph TD
   </table>
 </details>
 <details>
-  <summary><strong>COHOST</strong> – Event cohosts</summary>
+  <summary><strong>HOST</strong> – Event hosts</summary>
   <table>
     <thead>
       <tr>
@@ -892,26 +921,204 @@ graph TD
   </table>
 </details>
 <details>
+<summary><strong>Social Links</strong> – Social link metadata</summary>
+  <table>
+    <thread>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thread>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>uuid</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>userId</td>
+        <td>string</td>
+        <td>Store user id</td>
+      </tr>
+      <tr>
+        <td>type</td>
+        <td>Platform</td>
+        <td>Social Media handle</td>
+      </tr>
+      <tr>
+        <td>handel</td>
+        <td>string</td>
+        <td>Social Media handel</td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<details>
+  <summary><strong>State </strong>- State data</summary>
+  <table>
+    <thread>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thread>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>uuid</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>string</td>
+        <td>State name</td>
+      </tr>
+      <tr>
+        <td>country_id</td>
+        <td>string</td>
+        <td>Country Id</td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<details>
+  <summary><strong>Country </strong>- Country data</summary>
+  <table>
+    <thread>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thread>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>uuid</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>string</td>
+        <td>Country name</td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<details>
+  <summary><strong>Category </strong>- Country data</summary>
+  <table>
+    <thread>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thread>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>uuid</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>string</td>
+        <td>Category name</td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<details>
+  <summary><strong>Auth </strong>- User Credentials</summary>
+  <table>
+    <thread>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thread>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>uuid</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>user_id</td>
+        <td>string</td>
+        <td>Primary key</td>
+      </tr>
+      <tr>
+        <td>provider</td>
+        <td>Auth_Provider</td>
+        <td>Enum authentication provider</td>
+      </tr>
+      <tr>
+        <td>providerUserId</td>
+        <td>string</td>
+        <td>user's identifier</td>
+      </tr>
+      <tr>
+        <td>magic_token</td>
+        <td>string</td>
+        <td>Unique token</td>
+      </tr>
+      <tr>
+        <td>token_expiry</td>
+        <td>datetime</td>
+        <td>Expiry timestamp, optional</td>
+      </tr>
+      <tr>
+        <td>refreshToken</td>
+        <td>datetime</td>
+        <td>Unique and optional.</td>
+      </tr>
+      <tr>
+        <td>created_at</td>
+        <td>datetime</td>
+        <td>Timestamp of creation</td>
+      </tr>
+      <tr>
+        <td>updated_at</td>
+        <td>datetime</td>
+        <td>Timestamp of last update</td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<details>
   <summary><strong>ENUMS</strong></summary>
   <table>
-    <thead>
+    <thread>
       <tr>
         <th>Enum Name</th>
         <th>Values</th>
       </tr>
-    </thead>
+    </thread>
     <tbody>
       <tr>
         <td>STATUS</td>
         <td>GOING, NOT_GOING, WAITING, PENDING, INVITED, CANCELLED</td>
       </tr>
       <tr>
-        <td>ROLE</td>
+        <td>HOST_ROLE</td>
         <td>CREATOR, MANAGER, READ_ONLY, CELEBRITY</td>
       </tr>
       <tr>
         <td>VENUE_TYPE</td>
         <td>PHYSICAL, VIRTUAL, LATER</td>
+      </tr>
+      <tr>
+        <td>PLATFORM</td>
+        <td>PERSONAL_WEBSITE, INSTAGRAM, TWITTER</td>
+      </tr>
+      <tr>
+        <td>AUTH_PROVIDER</td>
+        <td>MAGIC_LINK, GOOGLE</td>
       </tr>
     </tbody>
   </table>
@@ -965,6 +1172,7 @@ graph TD
 >     "website": "https://arjunsharma.dev",
 >     "profileIcon": 5,
 >     "eventParticipationEnabled": true,
+>     "hasUnlimitedAccess": false,
 >     "isDeleted": false,
 >     "createdAt": "2025-04-20T09:45:12.303Z",
 >     "updatedAt": "2025-04-24T06:30:00.000Z"
@@ -999,6 +1207,7 @@ graph TD
 >     "website": "https://arjunsharma.dev",
 >     "profileIcon": 5,
 >     "eventParticipationEnabled": true,
+>     "hasUnlimitedAccess": false,
 >     "isDeleted": false,
 >     "createdAt": "2025-04-20T09:45:12.303Z",
 >     "updatedAt": "2025-04-24T06:30:00.000Z"
@@ -1032,6 +1241,7 @@ graph TD
 >     "website": "https://arjunsharma.dev",
 >     "profileIcon": 5,
 >     "eventParticipationEnabled": true,
+>     "hasUnlimitedAccess": false,
 >     "isDeleted": true,
 >     "createdAt": "2023-01-01T12:00:00Z",
 >     "updatedAt": "2025-04-24T07:00:00.000Z"
@@ -1072,6 +1282,47 @@ graph TD
 >
 > **Response:** `200 OK`
 > </details>
+
+---
+| URL | Method | Auth Required | Description |
+|-----|--------|---------------|-------------|
+| `/auth/google-signin` | POST | False | Authenticates a user via Google OAuth by exchanging the authorization code for tokens, verifying the user, and issuing JWT-based session cookies. |
+
+> <details>
+> <summary>Request body</summary>
+> 
+> ```json
+> {
+>   "code": "4/0AVMBsJjtmEI..."
+> }
+> ```
+> </details>
+>
+> <details>
+> <summary>Response body</summary>
+> 
+> ```json
+> {
+>   "data": {
+>     "user": {
+>       "isCompleted": true
+>     }
+>   }
+> }
+> ```
+>
+> **Response:** `200 OK`
+>
+> **Note:**  
+> This endpoint also sets two cookies:
+> - `accessToken` – HTTP-only cookie that expires in 15 minutes
+> - `refreshToken` – HTTP-only cookie that expires in 7 days
+> </details>
+
+---
+| URL | Method | Auth Required | Description |
+|-----|--------|---------------|-------------|
+| `/auth/oauth/google` | GET | False | Generates the Google OAuth URL for frontend login redirection. |
 
 ---
 | URL | Method | Auth Required | Description |
@@ -1161,6 +1412,7 @@ graph TD
 >     "website": "https://arjunsharma.dev",
 >     "profileIcon": 5,
 >     "eventParticipationEnabled": true,
+>     "hasUnlimitedAccess": false,
 >     "isDeleted": false,
 >     "createdAt": "2023-01-01T12:00:00Z",
 >     "updatedAt": "2025-04-24T07:00:00.000Z"
@@ -1200,6 +1452,7 @@ graph TD
 >       "website": "https://arjunsharma.dev",
 >       "profileIcon": 5,
 >       "eventParticipationEnabled": true,
+>       "hasUnlimitedAccess": false,
 >       "isDeleted": false,
 >       "createdAt": "2023-01-01T12:00:00Z",
 >       "updatedAt": "2025-04-24T07:00:00.000Z"
@@ -1983,6 +2236,7 @@ graph TD
 >                 "website": "https://rohitsharma.dev",
 >                 "profileIcon": 4,
 >                 "eventParticipationEnabled": true,
+>                 "hasUnlimitedAccess": false,
 >                 "isDeleted": false,
 >                 "createdAt": "2025-04-21T12:08:25.043Z",
 >                 "updatedAt": "2025-04-25T07:14:45.804Z"

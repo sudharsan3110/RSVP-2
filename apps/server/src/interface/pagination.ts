@@ -2,6 +2,7 @@
  * Interface for pagination parameters.
  * Used to define the structure of pagination-related inputs.
  */
+import { Host, Event, Attendee, User } from '@prisma/client';
 export interface IPaginationParams {
   page?: number;
   limit?: number;
@@ -24,3 +25,11 @@ export interface IPaginatedResult<T> {
     nextCursor?: string;
   };
 }
+export type HostWithEventAndAttendees = Host & {
+  event: Event & {
+    attendees: Attendee[];
+    creator: User;
+    _count: { attendees: number };
+  };
+  user: User;
+};

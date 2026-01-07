@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 export const createEventFormSchema = z
   .object({
+    isEditing: z.boolean().optional(),
     name: z.string().min(2, {
       message: 'Event Name must be at least 2 characters.',
     }),
@@ -26,7 +27,13 @@ export const createEventFormSchema = z
     plaintextDescription: z.string().optional(),
     venueType: z.nativeEnum(VenueType),
     location: z.string().optional(),
-    locationMapUrl: z.string().url({ message: 'Please enter a valid URL' }).optional(),
+    locationMapUrl: z
+      .string()
+      .trim()
+      .url('Please enter a valid URL')
+      .or(z.literal(''))
+      .transform((val) => (val === '' ? undefined : val))
+      .optional(),
     // .refine(
     //   (val) => {
     //     if (val == '' || !val) return true;
@@ -40,6 +47,7 @@ export const createEventFormSchema = z
     //   }
     // ),
     hostPermissionRequired: z.boolean(),
+    discoverable: z.boolean(),
     capacity: z.coerce
       .number({
         required_error: 'Capacity is required',
@@ -47,13 +55,9 @@ export const createEventFormSchema = z
       })
       .int()
       .positive()
-      .min(1, { message: 'Capacity should be at least 1' }),
-    eventImageUrl: z.object({
-      file: z.string().nullable(),
-      url: z.string().nullable(),
-      signedUrl: z.string().nullable(),
-      type: z.string().nullable().optional(),
-    }),
+      .min(1, { message: 'Capacity should be at least 1' })
+      .max(1000, { message: 'The capacity must be between 1 and 1000' }),
+    eventImageUrl: z.string().url('Event Image is required').nullable(),
     fromDateTime: z.string().optional(),
     toDateTime: z.string().optional(),
   })
@@ -83,7 +87,7 @@ export const createEventFormSchema = z
     const toDateTime = combineDateAndTime(data.toDate, data.toTime);
     const now = new Date();
 
-    const image = data.eventImageUrl.file || data.eventImageUrl.url;
+    const image = data.eventImageUrl;
     if (!image) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -92,7 +96,7 @@ export const createEventFormSchema = z
       });
     }
 
-    if (fromDateTime <= now) {
+    if (!data.isEditing && fromDateTime <= now) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'From date and time must be greater than current time',
@@ -121,8 +125,18 @@ export type CreateEventSubmissionType = {
   venueAddress?: string;
   venueUrl?: string;
   hostPermissionRequired: boolean;
+  discoverable: boolean;
   capacity: number;
   startTime: Date;
   endTime: Date;
-  eventDate: Date;
+};
+
+export type EventFromProps = {
+  defaultValues: CreateEventFormType;
+  isEditing?: boolean;
+  isLoading: boolean;
+  onSubmit: (data: CreateEventFormType) => void;
+  requireSignIn?: boolean;
+  setPersistentValue?: (data: CreateEventFormType) => void;
+  eventCategoryOptions?: FormSelectOption[];
 };

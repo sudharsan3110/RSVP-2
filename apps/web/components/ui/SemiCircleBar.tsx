@@ -4,7 +4,13 @@ type Props = {
 };
 
 export default function SemiCircleBar({ score, total }: Props) {
-  const percentage = (score / total) * 100;
+  const validTotal = total > 0 ? total : 1;
+  const percentage = Math.min(Math.max((score / validTotal) * 100, 0), 100);
+
+  const radius = 40;
+  const circumference = Math.PI * radius;
+
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
     <div className="relative flex h-32 w-full justify-between p-1 sm:w-full">
@@ -22,8 +28,9 @@ export default function SemiCircleBar({ score, total }: Props) {
           stroke="#8b5cf6"
           strokeWidth="10"
           strokeLinecap="round"
-          strokeDasharray="125.6"
-          strokeDashoffset={125.6 - (percentage / 100) * 125.6}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className={`transition-all duration-500 ease-out ${percentage === 0 ? 'opacity-0' : 'opacity-100'}`}
         />
       </svg>
       <div className="absolute inset-x-0 bottom-2 flex flex-col items-center justify-center">

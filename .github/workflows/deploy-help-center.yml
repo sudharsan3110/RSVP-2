@@ -1,32 +1,40 @@
 name: Deploy Help Center
-env:
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_HELP_PROJECT_ID }}
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      # - stage
+      - prod
     paths:
       - 'apps/help-center/src/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
+    environment: ${{ github.ref_name == 'stage' && 'STAGE' || 'PROD' }}
+    env:
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_HELPCENTER_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 10
+            version: 10
+
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
+
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
       - name: Build Project
         run: vercel build --prod --token=$VERCEL_TOKEN
+
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN

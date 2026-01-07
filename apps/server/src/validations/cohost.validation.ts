@@ -17,6 +17,6 @@ export const eventParamsSchema = z.object({
 export const removeCohostSchema = z.object({
   params: z.object({
     eventId: z.string().uuid(),
-    cohostId: z.string().uuid(),
+    userId: z.string().uuid(),
   }),
 });

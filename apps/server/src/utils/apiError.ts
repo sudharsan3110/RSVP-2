@@ -27,7 +27,8 @@ enum ErrorType {
 export abstract class ApiError extends Error {
   constructor(
     public type: ErrorType,
-    public message: string = 'error'
+    public message: string = 'error',
+    public errorCode?: string
   ) {
     super(type);
   }
@@ -47,7 +48,7 @@ export abstract class ApiError extends Error {
       case ErrorType.NO_DATA:
         return new NotFoundResponse(err.message).send(res);
       case ErrorType.BAD_REQUEST:
-        return new BadRequestResponse(err.message).send(res);
+        return new BadRequestResponse(err.message, err.errorCode).send(res);
       case ErrorType.FORBIDDEN:
         return new ForbiddenResponse(err.message).send(res);
 
@@ -74,8 +75,8 @@ export class InternalError extends ApiError {
 }
 
 export class BadRequestError extends ApiError {
-  constructor(message = 'Bad Request') {
-    super(ErrorType.BAD_REQUEST, message);
+  constructor(message = 'Bad Request', errorCode?: string) {
+    super(ErrorType.BAD_REQUEST, message, errorCode);
   }
 }
 

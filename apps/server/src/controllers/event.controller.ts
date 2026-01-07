@@ -1,6 +1,8 @@
 import config from '@/config/config';
 import { API_MESSAGES } from '@/constants/apiMessages';
+import { IInviteResults } from '@/interface/event';
 import { IAuthenticatedRequest } from '@/interface/middleware';
+import { IPaginatedResult } from '@/interface/pagination';
 import { AttendeeRepository } from '@/repositories/attendee.repository';
 import { CohostRepository } from '@/repositories/cohost.repository';
 import { EventRepository } from '@/repositories/event.repository';
@@ -13,12 +15,14 @@ import {
 } from '@/utils/apiError';
 import { SuccessResponse } from '@/utils/apiResponse';
 import catchAsync from '@/utils/catchAsync';
+import { prisma } from '@/utils/connection';
 import { controller } from '@/utils/controller';
 import { sluggify } from '@/utils/function';
 import logger from '@/utils/logger';
 import EmailService from '@/utils/sendEmail';
 import {
   attendeePayloadSchema,
+  invitesAttendeesPayloadSchema,
   upcomingEventsQuerySchema,
 } from '@/validations/attendee.validation';
 import { eventParamsSchema } from '@/validations/cohost.validation';
@@ -38,9 +42,13 @@ import {
   updateEventSlugSchema,
   verifyQrSchema,
 } from '@/validations/event.validation';
-import { Attendee, Prisma, Status, VenueType } from '@prisma/client';
+import { Attendee, AttendeeStatus, Event, Host, Prisma, User, VenueType } from '@prisma/client';
+import { CalendarEvent, google, ics, outlook } from 'calendar-link';
 import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
+
+const PUBLIC_EVENTS_PER_MONTH = 10;
+const PRIVATE_EVENTS_PER_MONTH = 5;
 
 /**
  * Retrieves an event by its slug.
@@ -56,7 +64,10 @@ export const getEventBySlugController = controller(eventSlugSchema, async (req, 
   if (!event) throw new NotFoundError('Event not found');
   const totalAttendees = await AttendeeRepository.countAttendees(event.id);
 
-  return new SuccessResponse('success', { event, totalAttendees }).send(res);
+  return new SuccessResponse('success', {
+    event: { ...event, cohosts: event.hosts },
+    totalAttendees,
+  }).send(res);
 });
 
 /**
@@ -73,7 +84,16 @@ export const getEventByIdController = controller(getEventByIdSchema, async (req,
   if (!event) throw new NotFoundError('Event not found');
   const totalAttendees = await AttendeeRepository.countAttendees(event.id);
 
-  return new SuccessResponse('success', { event, totalAttendees }).send(res);
+  let category;
+  if (event.categoryId) {
+    const categoryObj = await prisma.category.findFirst({ where: { id: event.categoryId } });
+    category = categoryObj ? categoryObj.name : undefined;
+  }
+
+  return new SuccessResponse('success', {
+    event: { ...event, cohosts: event.hosts, category },
+    totalAttendees,
+  }).send(res);
 });
 
 /**
@@ -86,6 +106,10 @@ export const updateEventSlugController = controller(updateEventSlugSchema, async
   const { eventId } = req.params;
   const { userId } = req;
   if (!userId) throw new TokenExpiredError();
+
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+  if (event.endTime < new Date()) throw new BadRequestError('Event has expired');
 
   const slug = req.body.slug;
   logger.info('Updating slug in updateEventSlugController ...');
@@ -117,6 +141,15 @@ export const getPopularEventController = controller(eventLimitSchema, async (req
 export const filterEventController = controller(eventFilterSchema, async (req, res) => {
   logger.info('Filtering events in filterEventController ...');
   const filters = req.query;
+  if (filters.category) {
+    const category = await prisma.category.findFirst({ where: { id: filters.category } });
+
+    if (!category?.id) {
+      filters.category = 'not found';
+    } else {
+      filters.category = category?.id;
+    }
+  }
   const events = await EventRepository.findEvents(filters);
 
   return new SuccessResponse('success', events).send(res);
@@ -137,19 +170,51 @@ export const getUserUpcomingEventController = controller(
     const filters = req.query;
 
     logger.info('Getting upcoming event in getUserUpcomingEventController ..');
-    const registeredEvents = await AttendeeRepository.findRegisteredEventsByUser({
-      userId,
-      ...filters,
-    });
+    const [registeredEvents, cohosts] = await Promise.all([
+      AttendeeRepository.findRegisteredEventsByUser({
+        userId,
+        ...filters,
+      }),
+      CohostRepository.findAllByUserId({
+        userId,
+        ...filters,
+      }),
+    ]);
+    const cohostEvents = Array.isArray(cohosts) ? cohosts.map((cohost) => cohost.event) : [];
+
+    const mergedEvents = [...registeredEvents.events, ...cohostEvents].filter(Boolean);
+
+    const getTimeOrInfinity = (value: any) => {
+      try {
+        const t = new Date(value).getTime();
+        return Number.isFinite(t) ? t : Number.POSITIVE_INFINITY;
+      } catch (err) {
+        return Number.POSITIVE_INFINITY;
+      }
+    };
+
+    const uniqueMergeEvents = Array.from(new Map(mergedEvents.map((e) => [e.id, e])).values()).sort(
+      (a, b) => {
+        try {
+          const timeA = getTimeOrInfinity(a?.startTime);
+          const timeB = getTimeOrInfinity(b?.startTime);
+          return filters.startDate ? timeA - timeB : timeB - timeA;
+        } catch (err) {
+          logger.warn('Error comparing event times in getUserUpcomingEventController', {
+            error: err,
+          });
+          return 0;
+        }
+      }
+    );
 
     const data = {
-      events: registeredEvents.events,
+      events: uniqueMergeEvents,
       metadata: registeredEvents.metadata,
     };
     return new SuccessResponse('Registered events retrieved successfully', data).send(res);
   }
 );
-
 /**
  * Creates a new event.
  * @param req - The HTTP request object containing event details in the body.
@@ -157,7 +222,7 @@ export const getUserUpcomingEventController = controller(
  * @returns The newly created event object.
  */
 export const createEventController = controller(CreateEventSchema, async (req, res) => {
-  const { richtextDescription, plaintextDescription, ...data } = req.body;
+  const { richtextDescription, plaintextDescription, category, ...data } = req.body;
   const userId = req.userId;
   if (!userId) throw new TokenExpiredError();
 
@@ -169,9 +234,45 @@ export const createEventController = controller(CreateEventSchema, async (req, r
   if (plaintextDescription && plaintextDescription.length > 300)
     throw new BadRequestError('Description cannot be greater than 300 characters.');
 
+  const isPublic = data.discoverable !== false;
+
+  if (!getUserData.hasUnlimitedAccess) {
+    const eventsCreatedThisMonth = await EventRepository.countEventsCreatedThisMonth(
+      userId,
+      isPublic
+    );
+
+    if (isPublic && eventsCreatedThisMonth >= PUBLIC_EVENTS_PER_MONTH) {
+      throw new BadRequestError(
+        API_MESSAGES.EVENT.PUBLIC_EVENT_LIMIT_EXCEEDED,
+        'EVENT_LIMIT_PUBLIC'
+      );
+    }
+
+    if (!isPublic && eventsCreatedThisMonth >= PRIVATE_EVENTS_PER_MONTH) {
+      throw new BadRequestError(
+        API_MESSAGES.EVENT.PRIVATE_EVENT_LIMIT_EXCEEDED,
+        'EVENT_LIMIT_PRIVATE'
+      );
+    }
+  }
+
   logger.info('Formatting data for create event in createEventController ...');
+
+  // Find `category` in the `categories` table only if provided.
+  let categoryData: any = undefined;
+  if (category) {
+    categoryData = await prisma.category.findFirst({ where: { id: category } });
+
+    // If not exists - create a new record.
+    if (!categoryData) {
+      throw new BadRequestError('Invalid category provided.');
+    }
+  }
+
   const formattedData = {
     ...data,
+    categoryId: categoryData?.id,
     description: richtextDescription,
     creatorId: userId,
     slug: sluggify(data.name),
@@ -196,16 +297,74 @@ export const createEventController = controller(CreateEventSchema, async (req, r
  */
 export const updateEventController = controller(UpdateEventSchema, async (req, res) => {
   const { eventId } = req.params;
-  const { richtextDescription, plaintextDescription, ...data } = req.body;
+  const { richtextDescription, plaintextDescription, category, ...data } = req.body;
+
+  const userId = req.userId;
+  if (!userId) throw new TokenExpiredError();
+
+  const getUserData = await UserRepository.findById(userId);
+  if (!getUserData) throw new NotFoundError('User not found');
 
   if (!data.venueType) throw new BadRequestError('Venue type cannot be updated');
 
   if (plaintextDescription && plaintextDescription.length > 300)
     throw new BadRequestError('Description cannot be greater than 300 characters.');
 
+  // Find `category` in the `categories` table.
+  let categoryData = null;
+  if (category) {
+    categoryData = await prisma.category.findFirst({ where: { id: category } });
+
+    // If not exists - throw error.
+    if (!categoryData) {
+      throw new BadRequestError('Invalid category provided.');
+    }
+  }
+
   logger.info('Updating event in updateEventController ...');
+  const event = await EventRepository.findById(eventId);
+  if (!event) throw new NotFoundError('Event not found');
+
+  if (event.endTime < new Date()) throw new BadRequestError('Event has expired');
+
+  const currentEventIsPublic = event.discoverable !== false;
+  const newEventIsPublic =
+    data.discoverable !== undefined ? data.discoverable !== false : currentEventIsPublic;
+
+  if (!getUserData.hasUnlimitedAccess && currentEventIsPublic !== newEventIsPublic) {
+    const eventsInTargetCategory = await EventRepository.countEventsCreatedThisMonth(
+      userId,
+      newEventIsPublic
+    );
+
+    if (newEventIsPublic && eventsInTargetCategory >= PUBLIC_EVENTS_PER_MONTH) {
+      throw new BadRequestError(
+        API_MESSAGES.EVENT.PUBLIC_EVENT_LIMIT_EXCEEDED,
+        'EVENT_LIMIT_PUBLIC'
+      );
+    }
+
+    if (!newEventIsPublic && eventsInTargetCategory >= PRIVATE_EVENTS_PER_MONTH) {
+      throw new BadRequestError(
+        API_MESSAGES.EVENT.PRIVATE_EVENT_LIMIT_EXCEEDED,
+        'EVENT_LIMIT_PRIVATE'
+      );
+    }
+  }
+
+  // current is private and converting to public
+  if (event?.hostPermissionRequired == true && data.hostPermissionRequired == false) {
+    const where: Prisma.AttendeeWhereInput = {
+      eventId,
+      status: AttendeeStatus.WAITING,
+      isDeleted: false,
+    };
+    await AttendeeRepository.updateMultipleAttendeesStatus(where, AttendeeStatus.GOING);
+  }
+
   const updatedEvent = await EventRepository.update(eventId, {
     ...data,
+    categoryId: categoryData?.id,
     description: richtextDescription,
     venueType: data.venueType.toUpperCase() as VenueType,
   });
@@ -303,9 +462,20 @@ export const getplannedByUserController = controller(
 
     const sortByField = sort === 'attendees' ? 'attendeeCount' : 'startTime';
 
-    const plannedEvents = await EventRepository.findAllPlannedEvents({
-      filters: {
-        userId,
+    type PaginatedHostsWithEvent = IPaginatedResult<
+      Host & {
+        event: Event & {
+          id: string;
+          creator: User;
+        };
+        user: User;
+      }
+    >;
+
+    const cohostedEventsResult = (await CohostRepository.findAllByUserId({
+      userId,
+      paginatedResult: true,
+      paginationFilters: {
         status,
         search,
       },
@@ -315,11 +485,19 @@ export const getplannedByUserController = controller(
         sortBy: sortByField,
         sortOrder,
       },
-    });
+    })) as PaginatedHostsWithEvent;
 
-    return new SuccessResponse('success', plannedEvents).send(res);
+    const events = cohostedEventsResult.data.map((item) => item.event);
+
+    const response = {
+      events,
+      metadata: cohostedEventsResult.metadata,
+    };
+
+    return new SuccessResponse('success', response).send(res);
   }
 );
+
 /**
  * Registers a user as an attendee for an event.
  * @param req - The HTTP request object containing the event ID in the parameters and attendee details in the body.
@@ -337,6 +515,7 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
   const { eventId } = req.params;
 
   logger.info('Finding event by id in createAttendeeController ...');
+
   const event = await EventRepository.findById(eventId);
   if (!event) throw new NotFoundError('Event not found');
   if (!event.isActive) throw new BadRequestError('Event is not active');
@@ -346,28 +525,30 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
 
   if (event.capacity) {
     const currentAttendeeCount = await AttendeeRepository.countAttendees(eventId);
-    if (currentAttendeeCount >= event.capacity) {
+
+    // -1 is depicted to be a capacity of infinite
+    if (currentAttendeeCount != -1 && currentAttendeeCount >= event.capacity) {
       throw new BadRequestError('Event is at full capacity. No seats available.');
     }
   }
 
   if (!event.hostPermissionRequired) {
-    attendeeStatus = { allowedStatus: true, status: Status.GOING };
+    attendeeStatus = { allowedStatus: true, status: AttendeeStatus.GOING };
   } else {
-    attendeeStatus = { allowedStatus: false, status: Status.WAITING };
+    attendeeStatus = { allowedStatus: false, status: AttendeeStatus.WAITING };
   }
 
   const existingAttendee = await AttendeeRepository.findByUserIdAndEventId(userId, eventId, null);
   if (existingAttendee) {
     const isUserTicketCancelled =
-      existingAttendee.isDeleted && existingAttendee.status === Status.CANCELLED;
+      existingAttendee.isDeleted && existingAttendee.status === AttendeeStatus.CANCELLED;
     if (isUserTicketCancelled) {
       const restoredAttendee = await AttendeeRepository.restore(
         existingAttendee.id,
-        event.hostPermissionRequired ? Status.WAITING : Status.GOING,
+        event.hostPermissionRequired ? AttendeeStatus.WAITING : AttendeeStatus.GOING,
         event.hostPermissionRequired ? false : true
       );
-      attendeeStatus = { isDeleted: false, status: Status.GOING };
+      attendeeStatus = { isDeleted: false, status: AttendeeStatus.GOING };
       return new SuccessResponse('Attendee restored successfully', restoredAttendee).send(res);
     }
     throw new BadRequestError('User already registered for this event');
@@ -395,6 +576,15 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
   const newAttendee = await AttendeeRepository.create(attendeeData);
   const url = `${config.CLIENT_URL}/ticket/${newAttendee.eventId}`;
 
+  const calendarEvent: CalendarEvent = {
+    uid: event.id,
+    title: event.name,
+    description: event.description || '',
+    start: event.startTime,
+    end: event.endTime,
+    location: event.venueUrl || '',
+  };
+
   const emailData = {
     id: 5,
     subject: 'Ticket Confirmed',
@@ -404,6 +594,9 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
       name: user.fullName ?? 'Guest',
       eventName: event.name,
       badgeNumber: newAttendee.qrToken,
+      googleCalendarLink: google(calendarEvent),
+      iCalendarLink: ics(calendarEvent),
+      outlookCalendarLink: outlook(calendarEvent),
     },
   };
   if (config.NODE_ENV !== 'development') {
@@ -414,6 +607,162 @@ export const createAttendeeController = controller(attendeePayloadSchema, async 
 
   return new SuccessResponse('success', newAttendee).send(res);
 });
+
+/**
+ * Handles inviting multiple guests to an event
+ * @param req - The HTTP request object containing the eventId in params and array of guest email in the request body
+ * @param res - The HTTP response object.
+ * @returns - A response containing details of invited, restored, failed, and skipped entries
+ */
+
+export const createInvitesController = controller(
+  invitesAttendeesPayloadSchema,
+  async (req, res) => {
+    const { eventId } = req.params;
+    const { emails } = req.body;
+
+    logger.info('Finding event by id in createInvitesController ...');
+
+    const event = await EventRepository.findById(eventId);
+    if (!event) throw new NotFoundError('Event not found');
+    if (!event.isActive) throw new BadRequestError('Event is not active');
+
+    const currentTime = new Date();
+    if (event.endTime < currentTime) throw new BadRequestError('Event has expired');
+
+    const currentAttendeeCount = await AttendeeRepository.countAttendees(eventId);
+
+    const infinite = event.capacity === -1;
+
+    if (!infinite && currentAttendeeCount >= event.capacity) {
+      throw new BadRequestError('Event is at full capacity. No seats available.');
+    }
+
+    const existingUsers = await UserRepository.findManyByEmails(emails, null);
+
+    const usersByEmail = new Map(existingUsers.map((user) => [user.primaryEmail, user]));
+
+    const missingUsers = emails.filter((email) => !usersByEmail.has(email));
+
+    const newUsers = await UserRepository.createMany(missingUsers);
+
+    newUsers.forEach((user) => usersByEmail.set(user.primaryEmail, user));
+
+    const userIds = Array.from(usersByEmail.values()).map((user) => user.id);
+
+    const existingAttendees = await AttendeeRepository.findAllByEventIdAndUserIds(
+      event.id,
+      userIds
+    );
+
+    const attendeesByUserId = new Map(existingAttendees.map((att) => [att.userId, att]));
+
+    const remainingSeats = infinite ? Infinity : event.capacity - currentAttendeeCount;
+
+    const results: IInviteResults = {
+      invited: [],
+      restored: [],
+      failed: [],
+      skipped: [],
+    };
+
+    let seatsUsed = 0;
+
+    for (const email of emails) {
+      try {
+        if (!infinite && seatsUsed >= remainingSeats) {
+          results.failed.push({
+            email,
+            error: 'Event capacity reached',
+          });
+          break;
+        }
+        const user = usersByEmail.get(email);
+
+        if (!user) {
+          results.failed.push({ email, error: 'User creation failed unexpectedly' });
+          continue;
+        }
+        const attendee = attendeesByUserId.get(user.id);
+
+        if (attendee && attendee.isDeleted && attendee.status === AttendeeStatus.CANCELLED) {
+          const restored = await AttendeeRepository.restore(
+            attendee.id,
+            AttendeeStatus.GOING,
+            true
+          );
+          attendeesByUserId.set(user.id, restored);
+          seatsUsed++;
+          results.restored.push({ email });
+          continue;
+        }
+
+        if (attendee) {
+          results.skipped.push({ email, reason: 'Already registered' });
+          continue;
+        }
+
+        const uuid = randomUUID();
+        const hash = createHash('sha256').update(uuid).digest('base64');
+        const qrToken = hash.slice(0, 6);
+
+        const attendeeData: Prisma.AttendeeCreateInput = {
+          allowedStatus: true,
+          status: AttendeeStatus.GOING,
+          qrToken,
+          user: { connect: { id: user.id } },
+          event: { connect: { id: eventId } },
+        };
+
+        const newAttendee = await AttendeeRepository.create(attendeeData);
+        attendeesByUserId.set(user.id, newAttendee);
+
+        const ticketUrl = `${config.CLIENT_URL}/ticket/${eventId}`;
+
+        const calendarEvent: CalendarEvent = {
+          uid: event.id,
+          title: event.name,
+          description: event.description || '',
+          start: event.startTime,
+          end: event.endTime,
+          location: event.venueUrl || '',
+        };
+
+        const emailData = {
+          id: 5,
+          subject: "You're Invited!",
+          recipient: email,
+          body: {
+            ticketLink: ticketUrl,
+            name: user.fullName ?? 'Guest',
+            eventName: event.name,
+            badgeNumber: newAttendee.qrToken,
+            googleCalendarLink: google(calendarEvent),
+            iCalendarLink: ics(calendarEvent),
+            outlookCalendarLink: outlook(calendarEvent),
+          },
+        };
+
+        if (config.NODE_ENV !== 'development') {
+          await EmailService.send(emailData);
+        } else {
+          logger.info('Email notification:', emailData);
+        }
+        seatsUsed++;
+        results.invited.push({ email });
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+
+        results.failed.push({
+          email,
+          error: errorMessage,
+        });
+      }
+    }
+
+    return new SuccessResponse('success', results).send(res);
+  }
+);
 
 /**
  * Retrieves a paginated list of attendees for a specific event.
@@ -529,8 +878,18 @@ export const getAttendeeTicketController = controller(eventParamsSchema, async (
 export const updateAttendeeStatusController = controller(
   updateAttendeeStatusSchema,
   async (req, res) => {
-    const { attendeeId } = req.params;
+    const { attendeeId, eventId } = req.params;
     const { allowedStatus } = req.body;
+
+    const event = await EventRepository.findById(eventId);
+
+    if (!event) throw new NotFoundError(API_MESSAGES.EVENT.NOT_FOUND);
+
+    const totalAttendees = await AttendeeRepository.countAttendees(eventId);
+
+    if (totalAttendees >= event?.capacity && allowedStatus) {
+      throw new BadRequestError(API_MESSAGES.EVENT.MAX_CAPACITY);
+    }
 
     logger.info('Updating attendee status in updateAttendeeStatusController ...');
     const updatedAttendee = await AttendeeRepository.updateAttendeeStatus(

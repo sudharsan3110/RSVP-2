@@ -1,234 +1,355 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import SigninDialog from '@/components/auth/SigninDialog';
-import { Button } from '../components/ui/button';
-import { useSignInMutation } from '@/lib/react-query/auth';
+import React from 'react';
 
-// Mock `next/navigation`
-const { useRouter } = vi.hoisted(() => {
-  const mockedRouterPush = vi.fn();
-  return {
-    useRouter: () => ({ push: mockedRouterPush }),
-    mockedRouterPush,
-  };
-});
+const mutateMock = vi.fn();
+const loginWithGoogleMock = vi.fn();
+const pendingState = { current: false };
+const pendingSubscribers = new Set<() => void>();
+const notifyPendingSubscribers = () => {
+  if (pendingSubscribers.size === 0) return;
 
-vi.mock('@/lib/react-query/auth', () => ({
-  useSignInMutation: vi.fn(),
-}));
+  act(() => {
+    pendingSubscribers.forEach((listener) => listener());
+  });
+};
+const storageData = new Map<string, string>();
+let mutateCalled = false;
+const localStorageMock = {
+  getItem: vi.fn((key: string) => (storageData.has(key) ? storageData.get(key)! : null)),
+  setItem: vi.fn((key: string, value: string) => {
+    storageData.set(key, String(value));
+  }),
+  removeItem: vi.fn((key: string) => {
+    storageData.delete(key);
+  }),
+  clear: vi.fn(() => {
+    storageData.clear();
+  }),
+};
 
-vi.mock('next/navigation', async () => {
-  const actual = await vi.importActual('next/navigation');
+vi.mock('@/lib/react-query/auth', async (orig) => {
+  const actual = (await orig()) as Record<string, unknown>;
   return {
     ...actual,
-    useRouter,
+    useSignInMutation: () => {
+      const [, forceRender] = React.useReducer((count) => count + 1, 0);
+
+      React.useEffect(() => {
+        pendingSubscribers.add(forceRender);
+        return () => {
+          pendingSubscribers.delete(forceRender);
+        };
+      }, [forceRender]);
+
+      const mutate = (...args: Parameters<typeof mutateMock>) => {
+        if (pendingState.current) return;
+
+        pendingState.current = true;
+        notifyPendingSubscribers();
+        const release = () => {
+          pendingState.current = false;
+          notifyPendingSubscribers();
+        };
+
+        try {
+          const result = mutateMock(...args);
+          if (result && typeof (result as Promise<unknown>).finally === 'function') {
+            (result as Promise<unknown>).finally(release);
+          } else {
+            Promise.resolve().then(release);
+          }
+          return result;
+        } catch (error) {
+          release();
+          throw error;
+        }
+      };
+
+      return {
+        mutate,
+        get isPending() {
+          return pendingState.current;
+        },
+      };
+    },
+    useGoogleOAuth: () => ({
+      loginWithGoogle: loginWithGoogleMock,
+    }),
   };
 });
 
-describe('Sign In Dialog', () => {
-  const mockMutate = vi.fn((_, { onSuccess }) => {
-    onSuccess(); // Simulate successful mutation
+import SigninDialog from '@/components/auth/SigninDialog';
+
+function renderDialog() {
+  return render(
+    <SigninDialog variant="signin">
+      <button>Open Signin</button>
+    </SigninDialog>
+  );
+}
+
+beforeEach(() => {
+  mutateMock.mockReset();
+  loginWithGoogleMock.mockReset();
+  pendingState.current = false;
+  mutateCalled = false;
+  storageData.clear();
+  localStorageMock.getItem.mockClear();
+  localStorageMock.setItem.mockClear();
+  localStorageMock.removeItem.mockClear();
+  localStorageMock.clear.mockClear();
+
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    value: localStorageMock,
   });
+});
 
-  beforeEach(() => {
-    (useSignInMutation as any).mockReturnValue({ mutate: mockMutate });
-  });
+afterEach(() => {
+  vi.useRealTimers();
+});
 
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
-
-  it('should open and close the Sign In dialog correctly', async () => {
-    render(
-      <SigninDialog variant="signin">
-        <Button variant={'outline'} className="text-md border-[#AC6AFF]">
-          Sign In
-        </Button>
-      </SigninDialog>
-    );
-
-    const user = userEvent.setup();
-
-    const signInbutton = await screen.findByRole('button', { name: /Sign In/i });
-
-    await user.click(signInbutton);
-
-    expect(screen.getByRole('dialog'));
-
-    const closeButton = await screen.findByRole('button', { name: /Close/i });
-    await user.click(closeButton);
-
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  });
-
-  it('should render Sign Up content when sign up button is clicked', async () => {
-    render(
-      <SigninDialog variant="signup">
-        <Button variant={'outline'} className="text-md border-[#AC6AFF]">
-          Sign up
-        </Button>
-      </SigninDialog>
-    );
-
-    const user = userEvent.setup();
-
-    const signUpbutton = await screen.findByRole('button', { name: /Sign up/i });
-
-    await user.click(signUpbutton);
-
-    expect(screen.getByText('Sign Up for an Account')).toBeInTheDocument();
-    expect(screen.getByText('Create an account to get started')).toBeInTheDocument();
-  });
-
-  it('should render Sign in content when sign in button is clicked', async () => {
-    render(
-      <SigninDialog variant="signin">
-        <Button variant={'outline'} className="text-md border-[#AC6AFF]">
-          Sign In
-        </Button>
-      </SigninDialog>
-    );
-
-    const user = userEvent.setup();
-
-    const signUpbutton = await screen.findByRole('button', { name: /Sign In/i });
-
-    await user.click(signUpbutton);
-
-    expect(screen.getByText('Sign In to Your Account')).toBeInTheDocument();
-    expect(
-      screen.getByText('Please provide the email so we can send the magic link')
-    ).toBeInTheDocument();
-  });
-
-  it('should show validation error when email format is incorrect', async () => {
-    render(
-      <SigninDialog variant="signin">
-        <Button variant={'outline'} className="text-md border-[#AC6AFF]">
-          Sign In
-        </Button>
-      </SigninDialog>
-    );
-
-    const user = userEvent.setup();
-    const signInbutton = await screen.findByRole('button', { name: /Sign In/i });
-
-    user.click(signInbutton);
-
-    const emailInput = await screen.findByLabelText('email');
-    const button = await screen.findByRole('button', { name: /send magic link/i });
-
-    // Check for validation error message
-    await user.type(emailInput, 'invalid-email');
-    await user.click(button);
-
-    expect(screen.getByText('Invalid email')).toBeInTheDocument();
-  });
-
-  it('should show success message after clicking submit', async () => {
-    render(
-      <SigninDialog variant="signin">
-        <Button variant={'outline'} className="text-md border-[#AC6AFF]">
-          Sign In
-        </Button>
-      </SigninDialog>
-    );
-
-    const user = userEvent.setup();
-
-    const signInbutton = await screen.findByRole('button', { name: /Sign In/i });
-
-    user.click(signInbutton);
-
-    const emailInput = await screen.findByLabelText('email');
-    const button = await screen.findByRole('button', { name: /send magic link/i });
-
-    await user.type(emailInput, 'test@gmail.com');
-    await user.click(button);
-
-    expect(mockMutate).toHaveBeenCalled();
-
-    await waitFor(async () => {
-      expect(screen.getByText('Check your email!')).toBeInTheDocument();
-      expect(
-        screen.getByText("We've just sent an email to you at test@gmail.com. Click to verify.")
-      ).toBeInTheDocument();
+describe('SigninDialog (frontend login)', () => {
+  it('opens dialog and submits email -> shows success UI and disables resend initially', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    mutateMock.mockImplementation((_payload, opts) => {
+      mutateCalled = true;
+      opts?.onSuccess?.({});
     });
-  });
 
-  it('should enable resend button after 2 minute of clicking submit', async () => {
-    const user = userEvent.setup({ delay: null });
-
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-
-    render(
-      <SigninDialog variant="signin">
-        <Button variant={'outline'} className="text-md border-[#AC6AFF]">
-          Sign In
-        </Button>
-      </SigninDialog>
-    );
-
-    const signInbutton = await screen.findByRole('button', { name: /Sign In/i });
-
-    user.click(signInbutton);
+    renderDialog();
+    await user.click(screen.getByText('Open Signin'));
 
     const emailInput = await screen.findByLabelText('email');
-    const button = await screen.findByRole('button', { name: /send magic link/i });
+    await user.clear(emailInput);
+    await user.type(emailInput, 'user@example.com');
+    const submitBtn = await screen.findByRole('button', { name: /send magic link/i });
+    expect(submitBtn).not.toBeDisabled();
+    await user.click(submitBtn);
+    await user.click(submitBtn);
+    await act(async () => {
+      await vi.runOnlyPendingTimersAsync();
+    });
 
-    await user.type(emailInput, 'test@gmail.com');
-    await user.click(button);
+    await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mutateCalled).toBe(true));
+    expect(mutateMock).toHaveBeenCalledTimes(1);
+    expect(mutateMock).toHaveBeenCalledWith(
+      { email: 'user@example.com' },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
 
-    expect(mockMutate).toHaveBeenCalled();
-
-    const resendButton = await screen.findByTestId('resend-btn');
-    expect(resendButton).toBeDisabled();
-    expect(resendButton).toHaveTextContent('Resend in 2:00');
+    await screen.findByText(/check your email!/i);
+    const resendBtn = await screen.findByTestId('resend-btn');
+    expect(resendBtn).toBeDisabled();
+    expect(resendBtn).toHaveTextContent(/resend in/i);
 
     act(() => {
-      vi.advanceTimersByTime(120000);
+      vi.advanceTimersByTime(121_000);
     });
-
-    expect(resendButton).not.toBeDisabled();
-    expect(resendButton).toHaveTextContent('Click to resend');
-    vi.useRealTimers();
+    await waitFor(() => expect(resendBtn).not.toBeDisabled());
+    expect(resendBtn).toHaveTextContent(/click to resend/i);
   });
 
-  it('should show loading state while submitting the form', async () => {
-    const mockMutateWithDelay = vi.fn((_, { onSuccess }) => {
-      setTimeout(() => {
-        onSuccess();
-      }, 120000);
-    });
-    (useSignInMutation as any).mockReturnValue({
-      mutate: mockMutateWithDelay,
-      isPending: true,
-    });
-
-    render(
-      <SigninDialog variant="signin">
-        <Button>Sign In</Button>
-      </SigninDialog>
-    );
-
+  it.each([
+    {
+      scenario: 'no email is provided',
+      value: '',
+      expectedMessage: /invalid email/i,
+    },
+    {
+      scenario: 'email format is invalid',
+      value: 'not-an-email',
+      expectedMessage: /invalid email/i,
+    },
+    {
+      scenario: 'email domain is disposable',
+      value: 'user@10minutemail.com',
+      expectedMessage: /disposable email addresses are not allowed/i,
+    },
+  ])('shows validation feedback when $scenario', async ({ value, expectedMessage }) => {
     const user = userEvent.setup();
-    const signInButton = await screen.findByRole('button', { name: /Sign In/i });
-    await user.click(signInButton);
+
+    renderDialog();
+    await user.click(screen.getByText('Open Signin'));
 
     const emailInput = await screen.findByLabelText('email');
-    await user.type(emailInput, 'test@gmail.com');
+    await user.clear(emailInput);
+    if (value) {
+      await user.type(emailInput, value);
+    }
 
-    const submitButton = await screen.findByRole('button', {
-      name: /send magic link|sending\.\.\./i,
+    const submitBtn = await screen.findByRole('button', { name: /send magic link/i });
+    await user.click(submitBtn);
+
+    expect(await screen.findByText(expectedMessage)).toBeInTheDocument();
+    expect(submitBtn).not.toBeDisabled();
+    expect(mutateMock).not.toHaveBeenCalled();
+    expect(localStorageMock.setItem).not.toHaveBeenCalled();
+  });
+
+  it('keeps the form active when the mutation fails', async () => {
+    const user = userEvent.setup();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    mutateMock.mockImplementation(() =>
+      Promise.reject(new Error('Request failed'))
+        .catch(() => undefined)
+        .finally(() => {})
+    );
+
+    try {
+      renderDialog();
+      await user.click(screen.getByText('Open Signin'));
+
+      const emailInput = await screen.findByLabelText('email');
+      await user.clear(emailInput);
+      await user.type(emailInput, 'user@example.com');
+
+      const submitBtn = await screen.findByRole('button', { name: /send magic link/i });
+      await user.click(submitBtn);
+
+      await waitFor(() => expect(mutateMock).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(submitBtn).not.toBeDisabled());
+
+      expect(screen.queryByText(/check your email!/i)).toBeNull();
+      await waitFor(() =>
+        expect(localStorageMock.setItem).toHaveBeenCalledWith('redirect', window.location.pathname)
+      );
+      expect(localStorageMock.setItem).toHaveBeenCalledTimes(1);
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it('prevents resend until cooldown finishes, then allows another attempt', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    mutateMock.mockImplementation((_payload, opts) => {
+      opts?.onSuccess?.({});
+      return Promise.resolve();
     });
-    await user.click(submitButton);
-    expect(screen.getByText('Sending...')).toBeInTheDocument();
-    expect(submitButton).toBeDisabled();
 
-    const spinner = screen
-      .getByRole('button', { name: /sending\.\.\./i })
-      .querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    renderDialog();
+    await user.click(screen.getByText('Open Signin'));
+
+    const emailInput = await screen.findByLabelText('email');
+    await user.clear(emailInput);
+    await user.type(emailInput, 'user@example.com');
+
+    const submitBtn = await screen.findByRole('button', { name: /send magic link/i });
+    await user.click(submitBtn);
+    await act(async () => {
+      await vi.runOnlyPendingTimersAsync();
+    });
+
+    const resendBtn = await screen.findByRole('button', { name: /resend/i });
+    expect(resendBtn).toBeDisabled();
+    expect(mutateMock).toHaveBeenCalledTimes(1);
+
+    await user.click(resendBtn);
+    expect(mutateMock).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(121_000);
+    });
+    await waitFor(() => expect(resendBtn).not.toBeDisabled());
+
+    await user.click(resendBtn);
+    await waitFor(() => expect(mutateMock).toHaveBeenCalledTimes(2));
+
+    expect(mutateMock).toHaveBeenNthCalledWith(
+      2,
+      { email: 'user@example.com' },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+    expect(localStorageMock.setItem).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(resendBtn).toBeDisabled());
+  });
+
+  it('shows loading state while sending', () => {
+    pendingState.current = true;
+
+    renderDialog();
+    fireEvent.click(screen.getByText('Open Signin'));
+
+    const submitBtn = screen.getByRole('button', { name: /sending/i });
+    expect(submitBtn).toBeDisabled();
+    expect(submitBtn).toHaveTextContent(/sending/i);
+  });
+
+  it('triggers Google OAuth login when clicking the Google button', () => {
+    renderDialog();
+    fireEvent.click(screen.getByText('Open Signin'));
+
+    fireEvent.click(screen.getByRole('button', { name: /sign in with google oauth/i }));
+    expect(loginWithGoogleMock).toHaveBeenCalledTimes(1);
+  });
+  it('resets UI when dialog closes', async () => {
+    mutateMock.mockImplementation((_payload, opts) => {
+      opts?.onSuccess?.({});
+    });
+
+    renderDialog();
+    fireEvent.click(screen.getByText('Open Signin'));
+
+    const emailInput = await screen.findByLabelText('email');
+    fireEvent.change(emailInput, {
+      target: { value: 'user@example.com' },
+    });
+    const submitBtn = await screen.findByRole('button', { name: /send magic link/i });
+    fireEvent.click(submitBtn);
+    await screen.findByText(/check your email!/i);
+
+    fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
+
+    fireEvent.click(screen.getByText('Open Signin'));
+    await screen.findByRole('button', { name: /send magic link/i });
+    expect(screen.queryByText(/check your email!/i)).toBeNull();
+  });
+
+  it('does not resend while countdown is active and resumes countdown after manual close and reopen', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    mutateMock.mockImplementation((_payload, opts) => {
+      opts?.onSuccess?.({});
+      return Promise.resolve();
+    });
+
+    renderDialog();
+    await user.click(screen.getByText('Open Signin'));
+
+    const emailInput = await screen.findByLabelText('email');
+    await user.clear(emailInput);
+    await user.type(emailInput, 'user@example.com');
+
+    const submitBtn = await screen.findByRole('button', { name: /send magic link/i });
+    await user.click(submitBtn);
+
+    await act(async () => {
+      await vi.runOnlyPendingTimersAsync();
+    });
+
+    const resendBtn = await screen.findByTestId('resend-btn');
+    expect(resendBtn).toBeDisabled();
+
+    await user.click(resendBtn);
+    expect(mutateMock).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(resendBtn).toBeDisabled();
+
+    fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
+
+    await user.click(screen.getByText('Open Signin'));
+    await screen.findByRole('button', { name: /send magic link/i });
+    expect(screen.queryByText(/check your email!/i)).toBeNull();
   });
 });
