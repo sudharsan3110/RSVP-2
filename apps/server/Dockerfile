@@ -37,6 +37,5 @@ COPY --chown=nodeuser:nodejs --from=builder /repo/apps/server/start.sh ./start.s
 
 
 USER nodeuser
-EXPOSE 8000
 
 CMD ["sh", "start.sh"]
