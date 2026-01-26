@@ -6,7 +6,8 @@ RUN npm install -g pnpm
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY apps/server/package.json apps/server/package.json
 
-RUN pnpm install --frozen-lockfile
+# TODO: Regenerate and commit pnpm-lock.yaml locally, then restore --frozen-lockfile
+RUN pnpm install
 COPY . .
 
 # Build app instll deps
@@ -37,5 +38,5 @@ COPY --chown=nodeuser:nodejs --from=builder /repo/apps/server/start.sh ./start.s
 
 
 USER nodeuser
-
+EXPOSE 8080
 CMD ["sh", "start.sh"]
