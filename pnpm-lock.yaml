@@ -91,6 +91,9 @@ importers:
       node-cron:
         specifier: ^3.0.3
         version: 3.0.3
+      prisma:
+        specifier: 6.5.0
+        version: 6.5.0(typescript@5.9.3)
       winston:
         specifier: ^3.15.0
         version: 3.19.0
@@ -15108,13 +15111,11 @@ snapshots:
       esbuild-register: 3.6.0(esbuild@0.27.2)
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
-  "@prisma/debug@6.5.0":
-    optional: true
+  "@prisma/debug@6.5.0": {}
 
   "@prisma/engines-version@6.5.0-73.173f8d54f8d52e692c7e27e72a88314ec7aeff60":
-    optional: true
+    {}
 
   "@prisma/engines@6.5.0":
     dependencies:
@@ -15122,19 +15123,16 @@ snapshots:
       "@prisma/engines-version": 6.5.0-73.173f8d54f8d52e692c7e27e72a88314ec7aeff60
       "@prisma/fetch-engine": 6.5.0
       "@prisma/get-platform": 6.5.0
-    optional: true
 
   "@prisma/fetch-engine@6.5.0":
     dependencies:
       "@prisma/debug": 6.5.0
       "@prisma/engines-version": 6.5.0-73.173f8d54f8d52e692c7e27e72a88314ec7aeff60
       "@prisma/get-platform": 6.5.0
-    optional: true
 
   "@prisma/get-platform@6.5.0":
     dependencies:
       "@prisma/debug": 6.5.0
-    optional: true
 
   "@radix-ui/colors@1.0.1": {}
 
@@ -21101,7 +21099,6 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   prismjs@1.29.0: {}
 
