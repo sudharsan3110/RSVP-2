@@ -108,6 +108,9 @@ export class UserRepository {
         userName,
       },
     });
+    await prisma.appVersion.create({
+      data: { name: '1.0.0' },
+    });
     return newUser;
   }
 

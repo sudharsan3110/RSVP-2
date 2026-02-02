@@ -10,8 +10,11 @@ export interface IAuthenticatedRequest<
   Role?: string;
 }
 
-export interface IEventIdRequest
-  extends IAuthenticatedRequest<{ eventId?: string }, {}, { eventId?: string }> {}
+export interface IEventIdRequest extends IAuthenticatedRequest<
+  { eventId?: string },
+  {},
+  { eventId?: string }
+> {}
 
 export interface EmailData {
   id: number;
