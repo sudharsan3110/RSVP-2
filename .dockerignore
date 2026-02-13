@@ -24,3 +24,6 @@ dist
 Dockerfile
 .dockerignore
 *.log
+
+apps/help-center
+apps/web
