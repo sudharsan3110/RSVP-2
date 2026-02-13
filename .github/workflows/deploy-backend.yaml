@@ -37,6 +37,7 @@ jobs:
           REPO_NAME=${{ secrets.DOCKER_REPOSITORY_NAME}}
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             "https://hub.docker.com/v2/repositories/${{ secrets.DOCKER_USERNAME }}/${REPO}")
+          echo "STATUS=$STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "Repository doesn't exist. Creating it..."
             curl -X POST \
